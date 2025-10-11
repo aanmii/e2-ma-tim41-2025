@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.maproject.app-mergeDebugResources-39:/values-w360dp-port-v13/values-w360dp-port-v13.xml",
+            "outputFile": "com.example.maproject.app-mergeDebugResources-40:/values-w360dp-port-v13/values-w360dp-port-v13.xml",
             "map": [
                 {
                     "source": "/Users/ana/.gradle/caches/8.11.1/transforms/df5d1c58ebb45af2ebccfbe89a01c8b0/transformed/material-1.10.0/res/values-w360dp-port-v13/values-w360dp-port-v13.xml",

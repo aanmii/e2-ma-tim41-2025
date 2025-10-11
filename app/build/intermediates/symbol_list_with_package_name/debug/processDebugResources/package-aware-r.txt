@@ -1323,6 +1323,16 @@ attr windowNoTitle
 attr yearSelectedStyle
 attr yearStyle
 attr yearTodayStyle
+attr zxing_framing_rect_height
+attr zxing_framing_rect_width
+attr zxing_possible_result_points
+attr zxing_preview_scaling_strategy
+attr zxing_result_view
+attr zxing_scanner_layout
+attr zxing_use_texture_view
+attr zxing_viewfinder_laser
+attr zxing_viewfinder_laser_visibility
+attr zxing_viewfinder_mask
 bool abc_action_bar_embed_tabs
 bool abc_config_actionMenuItemAllCaps
 bool mtrl_btn_textappearance_all_caps
@@ -2098,6 +2108,16 @@ color tooltip_background_dark
 color tooltip_background_light
 color warning
 color xp
+color zxing_custom_possible_result_points
+color zxing_custom_result_view
+color zxing_custom_viewfinder_laser
+color zxing_custom_viewfinder_mask
+color zxing_possible_result_points
+color zxing_result_view
+color zxing_status_text
+color zxing_transparent
+color zxing_viewfinder_laser
+color zxing_viewfinder_mask
 dimen abc_action_bar_content_inset_material
 dimen abc_action_bar_content_inset_with_nav
 dimen abc_action_bar_default_height_material
@@ -3033,6 +3053,11 @@ drawable ic_other_sign_in
 drawable ic_passkey
 drawable ic_password
 drawable ic_search_black_24
+drawable level_1
+drawable level_2
+drawable level_3
+drawable level_4
+drawable level_5
 drawable m3_appbar_background
 drawable m3_avd_hide_password
 drawable m3_avd_show_password
@@ -3177,6 +3202,7 @@ id action_mode_bar_stub
 id action_mode_close_button
 id action_text
 id actions
+id activeDaysTextView
 id activity_chooser_view_content
 id add
 id adjust_height
@@ -3202,6 +3228,9 @@ id avatar2
 id avatar3
 id avatar4
 id avatar5
+id avatarImageView
+id backButton
+id badgesTextView
 id barrier
 id baseline
 id beginOnFirstDraw
@@ -3221,8 +3250,10 @@ id browser_actions_menu_view
 id buttonPanel
 id cache_measures
 id callMeasure
+id cancelButton
 id cancel_button
 id carryVelocity
+id categoryBarChart
 id center
 id centerCrop
 id centerInside
@@ -3231,6 +3262,7 @@ id center_vertical
 id chain
 id chain2
 id chains
+id changePasswordButton
 id checkbox
 id checked
 id chronometer
@@ -3240,8 +3272,10 @@ id clip_horizontal
 id clip_vertical
 id clockwise
 id closest
+id coinsTextView
 id collapseActionView
 id compress
+id confirmNewPasswordEditText
 id confirmPasswordEditText
 id confirm_button
 id constraint
@@ -3304,6 +3338,7 @@ id enterAlwaysCollapsed
 id exitUntilCollapsed
 id expand_activities_button
 id expanded_menu
+id experiencePointsTextView
 id fade
 id fill
 id fill_horizontal
@@ -3359,6 +3394,8 @@ id layout
 id left
 id leftToRight
 id legacy
+id levelIconImageView
+id levelTextView
 id light
 id line1
 id line3
@@ -3367,6 +3404,7 @@ id listMode
 id list_item
 id loginButton
 id logoutButton
+id longestStreakTextView
 id m3_side_sheet
 id main
 id marquee
@@ -3438,6 +3476,7 @@ id navigation_header_container
 id never
 id neverCompleteToEnd
 id neverCompleteToStart
+id newPasswordEditText
 id noScroll
 id noState
 id none
@@ -3447,6 +3486,7 @@ id notification_background
 id notification_main_column
 id notification_main_column_container
 id off
+id oldPasswordEditText
 id on
 id onInterceptTouchReturnSwipe
 id open_search_bar_text_view
@@ -3481,9 +3521,13 @@ id percent
 id pin
 id position
 id postLayout
+id powerPointsTextView
 id pressed
+id profileButton
+id profileScrollView
 id progress_circular
 id progress_horizontal
+id qrCodeImageView
 id radio
 id ratio
 id rectangles
@@ -3535,6 +3579,7 @@ id snap
 id snapMargins
 id south
 id spacer
+id specialMissionsTextView
 id special_effects_controller_view_tag
 id spline
 id split_action_bar
@@ -3571,6 +3616,7 @@ id tag_transition_group
 id tag_unhandled_key_event_manager
 id tag_unhandled_key_listeners
 id tag_window_insets_animation_callback
+id taskStatusPieChart
 id text
 id text2
 id textEnd
@@ -3590,6 +3636,7 @@ id textinput_suffix_text
 id time
 id title
 id titleDividerNoCustom
+id titleTextView
 id title_template
 id toggle
 id top
@@ -3609,7 +3656,9 @@ id unlabeled
 id up
 id useLogo
 id usernameEditText
+id usernameTextView
 id vertical_only
+id viewStatisticsButton
 id view_offset_helper
 id view_transition
 id view_tree_lifecycle_owner
@@ -3629,6 +3678,22 @@ id wrap_content
 id wrap_content_constrained
 id x_left
 id x_right
+id xpLineChart
+id xpProgressBar
+id xpProgressTextView
+id zxing_back_button
+id zxing_barcode_scanner
+id zxing_barcode_surface
+id zxing_camera_closed
+id zxing_camera_error
+id zxing_decode
+id zxing_decode_failed
+id zxing_decode_succeeded
+id zxing_possible_result_points
+id zxing_preview_failed
+id zxing_prewiew_size_ready
+id zxing_status_view
+id zxing_viewfinder_view
 integer abc_config_activityDefaultDur
 integer abc_config_activityShortDur
 integer app_bar_elevation_anim_duration
@@ -3744,10 +3809,12 @@ layout abc_search_dropdown_item_icons_2line
 layout abc_search_view
 layout abc_select_dialog_material
 layout abc_tooltip
+layout activity_change_password
 layout activity_login
 layout activity_main
-layout activity_proba
+layout activity_profile
 layout activity_register
+layout activity_statistics
 layout browser_actions_context_menu_page
 layout browser_actions_context_menu_row
 layout custom_dialog
@@ -3827,10 +3894,13 @@ layout select_dialog_item_material
 layout select_dialog_multichoice_material
 layout select_dialog_singlechoice_material
 layout support_simple_spinner_dropdown_item
+layout zxing_barcode_scanner
+layout zxing_capture
 mipmap ic_launcher
 mipmap ic_launcher_round
 plurals mtrl_badge_content_description
 raw firebase_common_keep
+raw zxing_beep
 string abc_action_bar_home_description
 string abc_action_bar_up_description
 string abc_action_menu_overflow_description
@@ -3864,6 +3934,7 @@ string androidx_credentials_TYPE_PUBLIC_KEY_CREDENTIAL
 string androidx_startup
 string app_logo_desc
 string app_name
+string app_version
 string appbar_scrolling_view_behavior
 string avatar_desc
 string bottom_sheet_behavior
@@ -3897,6 +3968,7 @@ string common_signin_button_text_long
 string confirm_password
 string copy_toast_msg
 string create_account
+string define_zxingandroidembedded
 string email
 string error_a11y_label
 string error_icon_content_description
@@ -3914,6 +3986,15 @@ string google_storage_bucket
 string hide_bottom_view_on_scroll_behavior
 string icon_content_description
 string item_view_role_description
+string library_zxingandroidembedded_author
+string library_zxingandroidembedded_authorWebsite
+string library_zxingandroidembedded_isOpenSource
+string library_zxingandroidembedded_libraryDescription
+string library_zxingandroidembedded_libraryName
+string library_zxingandroidembedded_libraryVersion
+string library_zxingandroidembedded_libraryWebsite
+string library_zxingandroidembedded_licenseId
+string library_zxingandroidembedded_repositoryLink
 string login
 string login_subtitle
 string logout
@@ -4038,6 +4119,10 @@ string status_bar_notification_info_overflow
 string username
 string welcome
 string welcome_back
+string zxing_app_name
+string zxing_button_ok
+string zxing_msg_camera_framework_bug
+string zxing_msg_default_status
 style AlertDialog_AppCompat
 style AlertDialog_AppCompat_Light
 style Animation_AppCompat_Dialog
@@ -5157,6 +5242,7 @@ style Widget_MaterialComponents_Toolbar_PrimarySurface
 style Widget_MaterialComponents_Toolbar_Surface
 style Widget_MaterialComponents_Tooltip
 style Widget_Support_CoordinatorLayout
+style zxing_CaptureTheme
 styleable ActionBar background backgroundSplit backgroundStacked contentInsetEnd contentInsetEndWithActions contentInsetLeft contentInsetRight contentInsetStart contentInsetStartWithNavigation customNavigationLayout displayOptions divider elevation height hideOnContentScroll homeAsUpIndicator homeLayout icon indeterminateProgressStyle itemPadding logo navigationMode popupTheme progressBarPadding progressBarStyle subtitle subtitleTextStyle title titleTextStyle
 styleable ActionBarLayout android_layout_gravity
 styleable ActionMenuItemView android_minWidth
@@ -5312,6 +5398,9 @@ styleable ViewPager2 android_orientation
 styleable ViewStubCompat android_id android_layout android_inflatedId
 styleable ViewTransition android_id SharedValue SharedValueId clearsTag duration ifTagNotSet ifTagSet motionInterpolator motionTarget onStateTransition pathMotionArc setsTag transitionDisable upDuration viewTransitionMode
 styleable include constraintSet
+styleable zxing_camera_preview zxing_framing_rect_height zxing_framing_rect_width zxing_preview_scaling_strategy zxing_use_texture_view
+styleable zxing_finder zxing_possible_result_points zxing_result_view zxing_viewfinder_laser zxing_viewfinder_laser_visibility zxing_viewfinder_mask
+styleable zxing_view zxing_scanner_layout
 xml backup_rules
 xml data_extraction_rules
 xml image_share_filepaths

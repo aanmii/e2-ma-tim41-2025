@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.maproject.app-mergeDebugResources-39:/values-h720dp-v13/values-h720dp-v13.xml",
+            "outputFile": "com.example.maproject.app-mergeDebugResources-40:/values-h720dp-v13/values-h720dp-v13.xml",
             "map": [
                 {
                     "source": "/Users/ana/.gradle/caches/8.11.1/transforms/5696664b49fb4e23a8a43ddd9117e84a/transformed/appcompat-1.6.1/res/values-h720dp-v13/values-h720dp-v13.xml",

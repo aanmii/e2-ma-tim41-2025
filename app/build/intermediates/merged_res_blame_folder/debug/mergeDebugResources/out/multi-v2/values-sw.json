@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.maproject.app-mergeDebugResources-39:/values-sw/values-sw.xml",
+            "outputFile": "com.example.maproject.app-mergeDebugResources-40:/values-sw/values-sw.xml",
             "map": [
                 {
                     "source": "/Users/ana/.gradle/caches/8.11.1/transforms/91a230bb2b9d8a56ca73558014901505/transformed/credentials-1.2.0-rc01/res/values-sw/values-sw.xml",

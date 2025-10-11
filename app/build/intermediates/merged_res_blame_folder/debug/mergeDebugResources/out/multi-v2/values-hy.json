@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.maproject.app-mergeDebugResources-39:/values-hy/values-hy.xml",
+            "outputFile": "com.example.maproject.app-mergeDebugResources-40:/values-hy/values-hy.xml",
             "map": [
                 {
                     "source": "/Users/ana/.gradle/caches/8.11.1/transforms/271c38ed07a2ae12595784e1c0a0448f/transformed/browser-1.4.0/res/values-hy/values-hy.xml",
