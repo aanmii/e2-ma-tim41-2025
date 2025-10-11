@@ -5,283 +5,409 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:scrollbars="vertical"
-    android:overScrollMode="always"
-    android:nestedScrollingEnabled="true"
-    android:background="@color/background">
+    android:background="@drawable/gradient_background">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="24dp"
-        android:paddingBottom="100dp"
-        android:gravity="center_horizontal">
+        android:padding="20dp"
+        android:paddingBottom="100dp">
 
-        <!-- Header -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Moj Profil"
-            android:textSize="28sp"
-            android:textStyle="bold"
-            android:textColor="@color/primary"
-            android:layout_marginBottom="24dp"/>
-
-        <!-- Avatar -->
-        <ImageView
-            android:id="@+id/avatarImageView"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
-            android:src="@drawable/avatar_1"
-            android:contentDescription="Avatar korisnika"
-            android:layout_marginBottom="16dp"/>
-
-        <!-- XP Progress -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="16dp"
-            android:paddingStart="24dp"
-            android:paddingEnd="24dp">
-
-            <ImageView
-                android:id="@+id/levelIconImageView"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/level_1"
-                android:contentDescription="Level icon"/>
-
-            <ProgressBar
-                android:id="@+id/xpProgressBar"
-                style="@android:style/Widget.ProgressBar.Horizontal"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="12dp"
-                android:layout_marginEnd="12dp"
-                android:max="100"
-                android:progress="0"/>
-
-            <TextView
-                android:id="@+id/xpProgressTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0/200"
-                android:textSize="14sp"
-                android:textStyle="bold"/>
-        </LinearLayout>
-
-        <!-- Korisničko ime -->
-        <TextView
-            android:id="@+id/usernameTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Username"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:textColor="@color/textPrimary"
-            android:layout_marginBottom="8dp"/>
-
-        <!-- Titula -->
-        <TextView
-            android:id="@+id/titleTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Početnik"
-            android:textSize="16sp"
-            android:textColor="@color/textSecondary"
-            android:layout_marginBottom="24dp"/>
-
-        <!-- Stats Container -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp">
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="12dp"
+            app:cardBackgroundColor="@color/cardBackground">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="24dp"
+                android:gravity="center_horizontal">
 
-                <!-- Nivo -->
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp">
+
+                    <View
+                        android:layout_width="180dp"
+                        android:layout_height="180dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/avatar_glow"/>
+
+                    <ImageView
+                        android:id="@+id/avatarImageView"
+                        android:layout_width="160dp"
+                        android:layout_height="160dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/avatar_1"
+                        android:contentDescription="User avatar"/>
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/usernameTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="username"
+                    android:textSize="28sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/textPrimary"
+                    android:fontFamily="sans-serif-black"
+                    android:layout_marginBottom="8dp"/>
+
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:background="@drawable/title_badge_bg"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:layout_marginBottom="24dp">
+
+                    <ImageView
+                        android:id="@+id/titleIconImageView"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/title_1"
+                        android:contentDescription="Title icon"/>
 
                     <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Nivo:"
-                        android:textSize="16sp"
-                        android:textStyle="bold"/>
-
-                    <TextView
-                        android:id="@+id/levelTextView"
+                        android:id="@+id/titleTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0"
+                        android:text="Beginner"
                         android:textSize="16sp"
-                        android:textColor="@color/primary"/>
+                        android:textStyle="bold"
+                        android:textColor="@color/accent"/>
                 </LinearLayout>
 
-                <!-- Power Points -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="8dp">
+
+                    <ImageView
+                        android:id="@+id/xpBarImageView"
+                        android:layout_width="0dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="1"
+                        android:contentDescription="XP progress bar"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/xp_1" />
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:id="@+id/xpProgressTextView"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Snaga (PP):"
+                        android:layout_marginStart="12dp"
+                        android:background="@drawable/xp_text_bg"
+                        android:paddingStart="12dp"
+                        android:paddingTop="6dp"
+                        android:paddingEnd="12dp"
+                        android:paddingBottom="6dp"
+                        android:text="0/200"
+                        android:textColor="@color/accent"
                         android:textSize="16sp"
-                        android:textStyle="bold"/>
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/levelTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LEVEL 0"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/primary"
+                    android:fontFamily="sans-serif-medium"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:layout_marginBottom="16dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="8dp"
+                app:cardBackgroundColor="@color/cardBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="77dp"
+                        android:layout_height="64dp"
+                        android:layout_marginBottom="4dp"
+                        android:contentDescription="Power Points Icon"
+                        android:src="@drawable/power_points" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="POWER POINTS"
+                        android:textSize="11sp"
+                        android:textColor="@color/textSecondary"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
 
                     <TextView
                         android:id="@+id/powerPointsTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0"
-                        android:textSize="16sp"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
                         android:textColor="@color/pp"/>
                 </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <!-- Experience Points -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="8dp"
+                app:cardBackgroundColor="@color/cardBackground">
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="65dp"
+                        android:layout_height="61dp"
+                        android:layout_marginBottom="4dp"
+                        android:contentDescription="Experience Points Icon"
+                        android:src="@drawable/experience_points" />
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Iskustvo (XP):"
-                        android:textSize="16sp"
-                        android:textStyle="bold"/>
+                        android:text="EXPERIENCE POINTS"
+                        android:textSize="11sp"
+                        android:textColor="@color/textSecondary"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
 
                     <TextView
                         android:id="@+id/experiencePointsTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0"
-                        android:textSize="16sp"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
                         android:textColor="@color/xp"/>
                 </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
-                <!-- Novčići -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:layout_marginBottom="24dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="8dp"
+                app:cardBackgroundColor="@color/cardBackground">
+
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_height="131dp"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="46dp"
+                        android:layout_height="50dp"
+                        android:layout_marginBottom="4dp"
+                        android:contentDescription="Coins Icon"
+                        android:src="@drawable/coins" />
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Novčići:"
-                        android:textSize="16sp"
-                        android:textStyle="bold"/>
+                        android:layout_marginBottom="4dp"
+                        android:text="COINS"
+                        android:textColor="@color/textSecondary"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/coinsTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0"
-                        android:textSize="16sp"
-                        android:textColor="@color/coins"/>
+                        android:textColor="@color/coins"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <!-- Bedževi -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="8dp"
+                app:cardBackgroundColor="@color/cardBackground">
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="106dp"
+                        android:layout_height="43dp"
+                        android:layout_marginBottom="4dp"
+                        android:src="@drawable/bedge"
+                        android:textSize="32sp" />
 
                     <TextView
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Bedževi:"
-                        android:textSize="16sp"
-                        android:textStyle="bold"/>
+                        android:text="BADGES"
+                        android:textSize="11sp"
+                        android:textColor="@color/textSecondary"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
 
                     <TextView
                         android:id="@+id/badgesTextView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0"
-                        android:textSize="16sp"/>
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/chartPastelPurple"/>
                 </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="@color/cardBackground">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:gravity="center">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📱"
+                        android:textSize="24sp"
+                        android:layout_marginEnd="8dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="My QR"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/textPrimary"/>
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/qrCodeImageView"
+                    android:layout_width="200dp"
+                    android:layout_height="200dp"
+                    android:padding="8dp"
+                    android:background="@drawable/qr_border"
+                    android:contentDescription="QR kod korisnika"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- QR Kod -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Moj QR Kod"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="12dp"/>
-
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp">
-
-            <ImageView
-                android:id="@+id/qrCodeImageView"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
-                android:padding="16dp"
-                android:contentDescription="QR kod korisnika"/>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Dugmad -->
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/viewStatisticsButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Vidi Moju Statistiku"
+            android:layout_height="60dp"
+            android:text="📊See my analytics"
             android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="30dp"
+            android:backgroundTint="@color/accent"
+            android:textColor="@color/textWhite"
+            app:icon="@android:drawable/ic_menu_view"
+            app:iconTint="@color/textWhite"
             android:layout_marginBottom="12dp"/>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/changePasswordButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Promeni lozinku"
+            android:layout_height="60dp"
+            android:text="🔒 Change password"
             android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="30dp"
+            android:backgroundTint="@color/primary"
+            android:textColor="@color/textWhite"
             android:layout_marginBottom="12dp"/>
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/backButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Nazad"
+            android:layout_height="60dp"
+            android:text="← Nazad"
             android:textSize="16sp"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+            android:textStyle="bold"
+            app:cornerRadius="30dp"
+            app:strokeColor="@color/accent"
+            app:strokeWidth="2dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:textColor="@color/accent"/>
 
     </LinearLayout>
 </ScrollView>

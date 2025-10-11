@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -11,6 +12,7 @@ import com.example.maproject.R;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
@@ -30,10 +32,10 @@ import java.util.Map;
 
 public class StatisticsActivity extends AppCompatActivity {
 
-    private TextView activeDaysTextView, longestStreakTextView, specialMissionsTextView;
+    private TextView activeDaysTextView, longestStreakTextView, specialMissionsTextView, avgDifficultyTextView;
     private PieChart taskStatusPieChart;
     private BarChart categoryBarChart;
-    private LineChart xpLineChart;
+    private LineChart xpLineChart, difficultyLineChart;
     private Button backButton;
 
     private FirebaseAuth auth;
@@ -47,20 +49,28 @@ public class StatisticsActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-        currentUserId = auth.getCurrentUser().getUid();
 
-        initViews();
-        loadStatistics();
-        setupBackButton();
+        if (auth.getCurrentUser() != null) {
+            currentUserId = auth.getCurrentUser().getUid();
+
+            initViews();
+            loadStatistics();
+            setupBackButton();
+        } else {
+            Toast.makeText(this, "Greška: Korisnik nije prijavljen.", Toast.LENGTH_LONG).show();
+            finish();
+        }
     }
 
     private void initViews() {
         activeDaysTextView = findViewById(R.id.activeDaysTextView);
         longestStreakTextView = findViewById(R.id.longestStreakTextView);
         specialMissionsTextView = findViewById(R.id.specialMissionsTextView);
+        avgDifficultyTextView = findViewById(R.id.avgDifficultyTextView);
         taskStatusPieChart = findViewById(R.id.taskStatusPieChart);
         categoryBarChart = findViewById(R.id.categoryBarChart);
         xpLineChart = findViewById(R.id.xpLineChart);
+        difficultyLineChart = findViewById(R.id.difficultyLineChart);
         backButton = findViewById(R.id.backButton);
     }
 
@@ -69,54 +79,76 @@ public class StatisticsActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(document -> {
                     if (document.exists()) {
-                        // Učitaj brojke
                         Long activeDays = document.getLong("activeDays");
                         Long longestStreak = document.getLong("longestStreak");
                         Long missionsStarted = document.getLong("specialMissionsStarted");
                         Long missionsCompleted = document.getLong("specialMissionsCompleted");
 
-                        activeDaysTextView.setText("Dana aktivnosti: " + (activeDays != null ? activeDays : 0));
-                        longestStreakTextView.setText("Najduži niz: " + (longestStreak != null ? longestStreak : 0) + " dana");
-                        specialMissionsTextView.setText("Misije: " + (missionsCompleted != null ? missionsCompleted : 0) + "/" + (missionsStarted != null ? missionsStarted : 0));
+                        activeDaysTextView.setText(String.valueOf(activeDays != null ? activeDays : 0));
+                        longestStreakTextView.setText(String.valueOf(longestStreak != null ? longestStreak : 0));
+                        specialMissionsTextView.setText((missionsCompleted != null ? missionsCompleted : 0) + "/" + (missionsStarted != null ? missionsStarted : 0));
+                        avgDifficultyTextView.setText("1.5");
 
-                        // Kreiraj grafikone
                         setupTaskStatusPieChart(document);
                         setupCategoryBarChart(document);
+                        setupDifficultyLineChart();
                         setupXPLineChart();
                     } else {
-                        // Nema podataka - prikaži prazne grafikone
-                        activeDaysTextView.setText("Dana aktivnosti: 0");
-                        longestStreakTextView.setText("Najduži niz: 0 dana");
-                        specialMissionsTextView.setText("Misije: 0/0");
+                        activeDaysTextView.setText("0");
+                        longestStreakTextView.setText("0");
+                        specialMissionsTextView.setText("0/0");
+                        avgDifficultyTextView.setText("0.0");
+                        setupEmptyCharts();
                     }
                 });
     }
 
     private void setupTaskStatusPieChart(com.google.firebase.firestore.DocumentSnapshot document) {
-        Long completed = document.getLong("totalTasksCompleted");
-        Long notDone = document.getLong("totalTasksNotDone");
-        Long cancelled = document.getLong("totalTasksCancelled");
+        Long completed = document != null ? document.getLong("totalTasksCompleted") : 0L;
+        Long notDone = document != null ? document.getLong("totalTasksNotDone") : 0L;
+        Long cancelled = document != null ? document.getLong("totalTasksCancelled") : 0L;
 
         List<PieEntry> entries = new ArrayList<>();
-        entries.add(new PieEntry(completed != null ? completed : 0, "Završeno"));
-        entries.add(new PieEntry(notDone != null ? notDone : 0, "Neurađeno"));
-        entries.add(new PieEntry(cancelled != null ? cancelled : 0, "Otkazano"));
+        if (completed != null && completed > 0) entries.add(new PieEntry(completed, "Završeno"));
+        if (notDone != null && notDone > 0) entries.add(new PieEntry(notDone, "Neurađeno"));
+        if (cancelled != null && cancelled > 0) entries.add(new PieEntry(cancelled, "Otkazano"));
 
-        PieDataSet dataSet = new PieDataSet(entries, "Status zadataka");
-        dataSet.setColors(new int[]{Color.rgb(76, 175, 80), Color.rgb(244, 67, 54), Color.rgb(255, 152, 0)});
-        dataSet.setValueTextSize(14f);
-        dataSet.setValueTextColor(Color.WHITE);
+        if (entries.isEmpty()) {
+            entries.add(new PieEntry(1, "Nema podataka"));
+        }
+
+        PieDataSet dataSet = new PieDataSet(entries, "");
+
+        dataSet.setColors(new int[]{
+                Color.parseColor("#B5EAD7"),
+                Color.parseColor("#FF9AA2"),
+                Color.parseColor("#FFD4A3")
+        });
+
+        dataSet.setValueTextSize(16f);
+        dataSet.setValueTextColor(Color.parseColor("#2C3E50"));
+        dataSet.setSliceSpace(3f);
 
         PieData data = new PieData(dataSet);
         taskStatusPieChart.setData(data);
+        taskStatusPieChart.setHoleRadius(58f);
+        taskStatusPieChart.setTransparentCircleRadius(61f);
+        taskStatusPieChart.setDrawEntryLabels(false);
         taskStatusPieChart.getDescription().setEnabled(false);
-        taskStatusPieChart.setDrawEntryLabels(true);
-        taskStatusPieChart.animateY(1000);
+
+        Legend legend = taskStatusPieChart.getLegend();
+        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+        legend.setDrawInside(false);
+        legend.setTextSize(14f);
+
+        taskStatusPieChart.animateY(1200);
         taskStatusPieChart.invalidate();
     }
 
     private void setupCategoryBarChart(com.google.firebase.firestore.DocumentSnapshot document) {
-        Map<String, Object> tasksPerCategory = (Map<String, Object>) document.get("tasksPerCategory");
+        Map<String, Object> tasksPerCategory = document != null ? (Map<String, Object>) document.get("tasksPerCategory") : null;
 
         List<BarEntry> entries = new ArrayList<>();
         List<String> labels = new ArrayList<>();
@@ -128,53 +160,129 @@ public class StatisticsActivity extends AppCompatActivity {
                 entries.add(new BarEntry(index++, ((Long) entry.getValue()).floatValue()));
             }
         } else {
-            // Dummy data ako nema zadataka
-            labels.add("Nema podataka");
-            entries.add(new BarEntry(0, 0));
+            labels.add("");
+            entries.add(new BarEntry(0, 5));
         }
 
-        BarDataSet dataSet = new BarDataSet(entries, "Zadaci po kategoriji");
+        BarDataSet dataSet = new BarDataSet(entries, "");
+
         dataSet.setColors(new int[]{
-                Color.rgb(255, 107, 107),
-                Color.rgb(78, 205, 196),
-                Color.rgb(255, 217, 61),
-                Color.rgb(149, 225, 211),
-                Color.rgb(168, 230, 207)
+                Color.parseColor("#A8DAFF"),
+                Color.parseColor("#FFB3D9"),
+                Color.parseColor("#D4BAFF"),
+                Color.parseColor("#B3FFD9"),
+                Color.parseColor("#FFD4BA")
         });
-        dataSet.setValueTextSize(12f);
+
+        dataSet.setValueTextSize(14f);
+        dataSet.setValueTextColor(Color.parseColor("#2C3E50"));
 
         BarData data = new BarData(dataSet);
+        data.setBarWidth(0.8f);
+
         categoryBarChart.setData(data);
         categoryBarChart.getDescription().setEnabled(false);
-        categoryBarChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
-        categoryBarChart.animateY(1000);
+        categoryBarChart.setFitBars(true);
+
+        XAxis xAxis = categoryBarChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setGranularity(1f);
+        xAxis.setDrawGridLines(false);
+
+        categoryBarChart.getAxisLeft().setDrawGridLines(false);
+        categoryBarChart.getAxisRight().setEnabled(false);
+        categoryBarChart.getLegend().setEnabled(false);
+        categoryBarChart.animateY(1200);
         categoryBarChart.invalidate();
     }
 
-    private void setupXPLineChart() {
-        // Za sada dummy data - kasnije ćeš učitavati iz baze
+    private void setupDifficultyLineChart() {
         List<Entry> entries = new ArrayList<>();
-        entries.add(new Entry(0, 10));
-        entries.add(new Entry(1, 25));
-        entries.add(new Entry(2, 40));
-        entries.add(new Entry(3, 35));
-        entries.add(new Entry(4, 60));
-        entries.add(new Entry(5, 80));
-        entries.add(new Entry(6, 100));
+        entries.add(new Entry(0, 1.2f));
+        entries.add(new Entry(1, 1.8f));
+        entries.add(new Entry(2, 2.1f));
+        entries.add(new Entry(3, 1.5f));
+        entries.add(new Entry(4, 2.3f));
+        entries.add(new Entry(5, 2.0f));
+        entries.add(new Entry(6, 1.9f));
 
-        LineDataSet dataSet = new LineDataSet(entries, "XP u poslednjih 7 dana");
-        dataSet.setColor(Color.rgb(33, 150, 243));
-        dataSet.setCircleColor(Color.rgb(33, 150, 243));
-        dataSet.setLineWidth(2f);
-        dataSet.setCircleRadius(4f);
-        dataSet.setValueTextSize(10f);
+        LineDataSet dataSet = new LineDataSet(entries, "Prosečna težina");
+
+        dataSet.setColor(Color.parseColor("#D4BAFF"));
+        dataSet.setCircleColor(Color.parseColor("#D4BAFF"));
+        dataSet.setCircleHoleColor(Color.parseColor("#D4BAFF"));
+        dataSet.setLineWidth(3f);
+        dataSet.setCircleRadius(6f);
+        dataSet.setCircleHoleRadius(3f);
+        dataSet.setValueTextSize(12f);
+        dataSet.setValueTextColor(Color.parseColor("#2C3E50"));
+        dataSet.setDrawFilled(true);
+        dataSet.setFillColor(Color.parseColor("#E8BAFF"));
+        dataSet.setFillAlpha(80);
+        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+
+        LineData data = new LineData(dataSet);
+        difficultyLineChart.setData(data);
+        difficultyLineChart.getDescription().setEnabled(false);
+
+        XAxis xAxis = difficultyLineChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setGranularity(1f);
+        xAxis.setDrawGridLines(false);
+
+        difficultyLineChart.getAxisLeft().setDrawGridLines(false);
+        difficultyLineChart.getAxisRight().setEnabled(false);
+        difficultyLineChart.getLegend().setEnabled(false);
+        difficultyLineChart.animateX(1200);
+        difficultyLineChart.invalidate();
+    }
+
+    private void setupXPLineChart() {
+        List<Entry> entries = new ArrayList<>();
+        entries.add(new Entry(0, 15));
+        entries.add(new Entry(1, 30));
+        entries.add(new Entry(2, 45));
+        entries.add(new Entry(3, 40));
+        entries.add(new Entry(4, 65));
+        entries.add(new Entry(5, 85));
+        entries.add(new Entry(6, 110));
+
+        LineDataSet dataSet = new LineDataSet(entries, "XP po danu");
+
+        dataSet.setColor(Color.parseColor("#A8DAFF"));
+        dataSet.setCircleColor(Color.parseColor("#A8DAFF"));
+        dataSet.setCircleHoleColor(Color.parseColor("#A8DAFF"));
+        dataSet.setLineWidth(3f);
+        dataSet.setCircleRadius(6f);
+        dataSet.setCircleHoleRadius(3f);
+        dataSet.setValueTextSize(12f);
+        dataSet.setValueTextColor(Color.parseColor("#2C3E50"));
+        dataSet.setDrawFilled(true);
+        dataSet.setFillColor(Color.parseColor("#A8DAFF"));
+        dataSet.setFillAlpha(80);
+        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
 
         LineData data = new LineData(dataSet);
         xpLineChart.setData(data);
         xpLineChart.getDescription().setEnabled(false);
-        xpLineChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
-        xpLineChart.animateX(1000);
+
+        XAxis xAxis = xpLineChart.getXAxis();
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setGranularity(1f);
+        xAxis.setDrawGridLines(false);
+
+        xpLineChart.getAxisLeft().setDrawGridLines(false);
+        xpLineChart.getAxisRight().setEnabled(false);
+        xpLineChart.getLegend().setEnabled(false);
+        xpLineChart.animateX(1200);
         xpLineChart.invalidate();
+    }
+
+    private void setupEmptyCharts() {
+        setupTaskStatusPieChart(null);
+        setupCategoryBarChart(null);
+        setupDifficultyLineChart();
+        setupXPLineChart();
     }
 
     private void setupBackButton() {

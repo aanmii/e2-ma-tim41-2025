@@ -4,24 +4,31 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UserStatistics {
-    private int activeDays;                    // Broj dana aktivnog korišćenja
-    private int totalTasksCreated;             // Ukupno kreiranih zadataka
-    private int totalTasksCompleted;           // Ukupno završenih zadataka
-    private int totalTasksNotDone;             // Ukupno neurađenih zadataka
-    private int totalTasksCancelled;           // Ukupno otkazanih zadataka
-    private int longestStreak;                 // Najduži niz uspešnih zadataka
-    private int currentStreak;                 // Trenutni niz
-    private int specialMissionsStarted;        // Započete specijalne misije
-    private int specialMissionsCompleted;      // Završene specijalne misije
-    private Map<String, Integer> tasksPerCategory; // Zadaci po kategoriji
-    private long lastActiveDate;               // Poslednji datum aktivnosti
+    private int activeDays;
+    private int totalTasksCreated;
+    private int totalTasksCompleted;
+    private int totalTasksNotDone;
+    private int totalTasksCancelled;
+    private int longestStreak;
+    private int currentStreak;
+    private int specialMissionsStarted;
+    private int specialMissionsCompleted;
+    private Map<String, Integer> tasksPerCategory;
+    private long lastActiveDate;
+    private int totalCompletedTaskDifficultySum;
+    private Map<String, Long> dailyXP;
+    private Map<String, Long> dailyDifficultySum;
+    private Map<String, Long> dailyCompletedCount;
+
 
     public UserStatistics() {
         this.tasksPerCategory = new HashMap<>();
+        this.dailyXP = new HashMap<>();
+        this.dailyDifficultySum = new HashMap<>();
+        this.dailyCompletedCount = new HashMap<>();
         this.lastActiveDate = System.currentTimeMillis();
     }
 
-    // Getteri
     public int getActiveDays() { return activeDays; }
     public int getTotalTasksCreated() { return totalTasksCreated; }
     public int getTotalTasksCompleted() { return totalTasksCompleted; }
@@ -33,8 +40,12 @@ public class UserStatistics {
     public int getSpecialMissionsCompleted() { return specialMissionsCompleted; }
     public Map<String, Integer> getTasksPerCategory() { return tasksPerCategory; }
     public long getLastActiveDate() { return lastActiveDate; }
+    public int getTotalCompletedTaskDifficultySum() { return totalCompletedTaskDifficultySum; }
+    public Map<String, Long> getDailyXP() { return dailyXP; }
+    public Map<String, Long> getDailyDifficultySum() { return dailyDifficultySum; }
+    public Map<String, Long> getDailyCompletedCount() { return dailyCompletedCount; }
 
-    // Setteri
+
     public void setActiveDays(int activeDays) { this.activeDays = activeDays; }
     public void setTotalTasksCreated(int totalTasksCreated) { this.totalTasksCreated = totalTasksCreated; }
     public void setTotalTasksCompleted(int totalTasksCompleted) { this.totalTasksCompleted = totalTasksCompleted; }
@@ -46,8 +57,11 @@ public class UserStatistics {
     public void setSpecialMissionsCompleted(int specialMissionsCompleted) { this.specialMissionsCompleted = specialMissionsCompleted; }
     public void setTasksPerCategory(Map<String, Integer> tasksPerCategory) { this.tasksPerCategory = tasksPerCategory; }
     public void setLastActiveDate(long lastActiveDate) { this.lastActiveDate = lastActiveDate; }
+    public void setTotalCompletedTaskDifficultySum(int totalCompletedTaskDifficultySum) { this.totalCompletedTaskDifficultySum = totalCompletedTaskDifficultySum; }
+    public void setDailyXP(Map<String, Long> dailyXP) { this.dailyXP = dailyXP; }
+    public void setDailyDifficultySum(Map<String, Long> dailyDifficultySum) { this.dailyDifficultySum = dailyDifficultySum; }
+    public void setDailyCompletedCount(Map<String, Long> dailyCompletedCount) { this.dailyCompletedCount = dailyCompletedCount; }
 
-    // Konverzija u Map za Firestore
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("activeDays", activeDays);
@@ -61,6 +75,10 @@ public class UserStatistics {
         map.put("specialMissionsCompleted", specialMissionsCompleted);
         map.put("tasksPerCategory", tasksPerCategory);
         map.put("lastActiveDate", lastActiveDate);
+        map.put("totalCompletedTaskDifficultySum", totalCompletedTaskDifficultySum);
+        map.put("dailyXP", dailyXP);
+        map.put("dailyDifficultySum", dailyDifficultySum);
+        map.put("dailyCompletedCount", dailyCompletedCount);
         return map;
     }
 }

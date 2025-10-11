@@ -1,83 +1,47 @@
 [
     {
-        "merged": "com.example.maproject.app-debug-42:/drawable_level_4.png.flat",
-        "source": "com.example.maproject.app-main-44:/drawable/level_4.png"
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_qr_border.xml.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/qr_border.xml"
     },
     {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_avatar_3o.png.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_3o.png"
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_title_2.png.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/title_2.png"
     },
     {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/layout_activity_change_password.xml.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/layout/activity_change_password.xml"
-    },
-    {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_avatar_2.png.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_2.png"
-    },
-    {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_avatar_5.xml.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_5.xml"
-    },
-    {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/xml_data_extraction_rules.xml.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/xml/data_extraction_rules.xml"
-    },
-    {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-anydpi_ic_launcher_round.xml.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-anydpi/ic_launcher_round.xml"
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_modern_card.xml.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/modern_card.xml"
     },
     {
         "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-hdpi_ic_launcher_round.webp.flat",
         "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-hdpi/ic_launcher_round.webp"
     },
     {
-        "merged": "com.example.maproject.app-debug-42:/drawable_level_2.png.flat",
-        "source": "com.example.maproject.app-main-44:/drawable/level_2.png"
-    },
-    {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_avatar_3.xml.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_3.xml"
-    },
-    {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-xxhdpi_ic_launcher.webp.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-xxhdpi/ic_launcher.webp"
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_title_badge_bg.xml.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/title_badge_bg.xml"
     },
     {
         "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/layout_activity_login.xml.flat",
         "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/layout/activity_login.xml"
     },
     {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_avatar_5.png.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_5.png"
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_title_6.png.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/title_6.png"
     },
     {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-mdpi_ic_launcher.webp.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-mdpi/ic_launcher.webp"
-    },
-    {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_avatar_1o.png.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_1o.png"
+        "merged": "com.example.maproject.app-debug-42:/layout_activity_profile.xml.flat",
+        "source": "com.example.maproject.app-main-44:/layout/activity_profile.xml"
     },
     {
         "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/layout_activity_main.xml.flat",
         "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/layout/activity_main.xml"
     },
     {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_avatar_2.xml.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_2.xml"
-    },
-    {
         "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_avatar_3.png.flat",
         "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_3.png"
     },
     {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-xhdpi_ic_launcher_round.webp.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-xhdpi/ic_launcher_round.webp"
-    },
-    {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_ic_launcher_background.xml.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/ic_launcher_background.xml"
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_xp_2.png.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/xp_2.png"
     },
     {
         "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_ic_launcher_foreground.xml.flat",
@@ -88,80 +52,64 @@
         "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/xml/backup_rules.xml"
     },
     {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_avatar_5o.png.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_5o.png"
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_title_1.png.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/title_1.png"
     },
     {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-hdpi_ic_launcher.webp.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-hdpi/ic_launcher.webp"
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_experience_points.png.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/experience_points.png"
     },
     {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-xhdpi_ic_launcher.webp.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-xhdpi/ic_launcher.webp"
-    },
-    {
-        "merged": "com.example.maproject.app-debug-42:/drawable_level_5.png.flat",
-        "source": "com.example.maproject.app-main-44:/drawable/level_5.png"
-    },
-    {
-        "merged": "com.example.maproject.app-debug-42:/drawable_level_3.png.flat",
-        "source": "com.example.maproject.app-main-44:/drawable/level_3.png"
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_xp_text_bg.xml.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/xp_text_bg.xml"
     },
     {
         "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-xxxhdpi_ic_launcher.webp.flat",
         "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-xxxhdpi/ic_launcher.webp"
     },
     {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-xxxhdpi/ic_launcher_round.webp"
-    },
-    {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_avatar_2o.png.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_2o.png"
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_xp_5.png.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/xp_5.png"
     },
     {
         "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-anydpi_ic_launcher.xml.flat",
         "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-anydpi/ic_launcher.xml"
     },
     {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-xxhdpi/ic_launcher_round.webp"
-    },
-    {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_level_1.xml.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/level_1.xml"
-    },
-    {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-mdpi_ic_launcher_round.webp.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-mdpi/ic_launcher_round.webp"
-    },
-    {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_avatar_4.xml.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_4.xml"
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_gradient_background.xml.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/gradient_background.xml"
     },
     {
         "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_avatar_1.png.flat",
         "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_1.png"
     },
     {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_power_points.png.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/power_points.png"
+    },
+    {
         "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/layout_activity_register.xml.flat",
         "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/layout/activity_register.xml"
     },
     {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_avatar_4o.png.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_4o.png"
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_title_5.png.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/title_5.png"
     },
     {
         "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/layout_activity_statistics.xml.flat",
         "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/layout/activity_statistics.xml"
     },
     {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_level_1.png.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/level_1.png"
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_xp_1.png.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/xp_1.png"
     },
     {
         "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/layout_activity_profile.xml.flat",
         "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/layout/activity_profile.xml"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_coins.png.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/coins.png"
     },
     {
         "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_app_logo.xml.flat",
@@ -172,7 +120,83 @@
         "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_4.png"
     },
     {
-        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_avatar_1.xml.flat",
-        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_1.xml"
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/layout_activity_change_password.xml.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/layout/activity_change_password.xml"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_avatar_2.png.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_2.png"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/xml_data_extraction_rules.xml.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/xml/data_extraction_rules.xml"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-anydpi_ic_launcher_round.xml.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-anydpi/ic_launcher_round.xml"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_bedge.png.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/bedge.png"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-xxhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_xp_4.png.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/xp_4.png"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_avatar_5.png.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_5.png"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-mdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_title_4.png.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/title_4.png"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-xhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_ic_launcher_background.xml.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/ic_launcher_background.xml"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-hdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-xhdpi/ic_launcher.webp"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-xxxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_title_3.png.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/title_3.png"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-xxhdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/mipmap-mdpi/ic_launcher_round.webp"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_xp_3.png.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/xp_3.png"
+    },
+    {
+        "merged": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-debug-42:/drawable_avatar_glow.xml.flat",
+        "source": "/Users/ana/.gradle/daemon/8.11.1/com.example.maproject.app-main-44:/drawable/avatar_glow.xml"
     }
 ]

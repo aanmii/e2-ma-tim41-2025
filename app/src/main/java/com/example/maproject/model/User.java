@@ -12,31 +12,31 @@ public class User {
     private String avatar;
     private int level;
     private String title;
-    private int powerPoints; // PP
-    private int experiencePoints; // XP
+    private int powerPoints;
+    private long currentLevelXP; // NOVO: XP sakupljen od poslednjeg nivoa
+    private long totalExperiencePoints; // IZMENJENO: Ukupan XP
     private int coins;
     private int badges;
-    private List<String> equipment; // Lista opreme
-    private List<String> activeEquipment; // Trenutno aktivna oprema
+    private List<String> equipment;
+    private List<String> activeEquipment;
     private boolean isEmailVerified;
     private long registrationTimestamp;
 
-    // Prazan konstruktor za Firebase
     public User() {
         this.equipment = new ArrayList<>();
         this.activeEquipment = new ArrayList<>();
     }
 
-    // Konstruktor za registraciju
     public User(String userId, String email, String username, String avatar) {
         this.userId = userId;
         this.email = email;
         this.username = username;
         this.avatar = avatar;
-        this.level = 0;
-        this.title = "Početnik"; // Početna titula
+        this.level = 1; // Počinje od Nivoa 1
+        this.title = "Početnik";
         this.powerPoints = 0;
-        this.experiencePoints = 0;
+        this.currentLevelXP = 0;
+        this.totalExperiencePoints = 0;
         this.coins = 0;
         this.badges = 0;
         this.equipment = new ArrayList<>();
@@ -45,7 +45,6 @@ public class User {
         this.registrationTimestamp = System.currentTimeMillis();
     }
 
-    // Getteri
     public String getUserId() { return userId; }
     public String getEmail() { return email; }
     public String getUsername() { return username; }
@@ -53,7 +52,8 @@ public class User {
     public int getLevel() { return level; }
     public String getTitle() { return title; }
     public int getPowerPoints() { return powerPoints; }
-    public int getExperiencePoints() { return experiencePoints; }
+    public long getCurrentLevelXP() { return currentLevelXP; }
+    public long getTotalExperiencePoints() { return totalExperiencePoints; }
     public int getCoins() { return coins; }
     public int getBadges() { return badges; }
     public List<String> getEquipment() { return equipment; }
@@ -61,7 +61,6 @@ public class User {
     public boolean isEmailVerified() { return isEmailVerified; }
     public long getRegistrationTimestamp() { return registrationTimestamp; }
 
-    // Setteri
     public void setUserId(String userId) { this.userId = userId; }
     public void setEmail(String email) { this.email = email; }
     public void setUsername(String username) { this.username = username; }
@@ -69,7 +68,8 @@ public class User {
     public void setLevel(int level) { this.level = level; }
     public void setTitle(String title) { this.title = title; }
     public void setPowerPoints(int powerPoints) { this.powerPoints = powerPoints; }
-    public void setExperiencePoints(int experiencePoints) { this.experiencePoints = experiencePoints; }
+    public void setCurrentLevelXP(long currentLevelXP) { this.currentLevelXP = currentLevelXP; }
+    public void setTotalExperiencePoints(long totalExperiencePoints) { this.totalExperiencePoints = totalExperiencePoints; }
     public void setCoins(int coins) { this.coins = coins; }
     public void setBadges(int badges) { this.badges = badges; }
     public void setEquipment(List<String> equipment) { this.equipment = equipment; }
@@ -77,7 +77,6 @@ public class User {
     public void setEmailVerified(boolean emailVerified) { isEmailVerified = emailVerified; }
     public void setRegistrationTimestamp(long registrationTimestamp) { this.registrationTimestamp = registrationTimestamp; }
 
-    // Konverzija u Map za Firestore
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
@@ -87,7 +86,8 @@ public class User {
         map.put("level", level);
         map.put("title", title);
         map.put("powerPoints", powerPoints);
-        map.put("experiencePoints", experiencePoints);
+        map.put("currentLevelXP", currentLevelXP);
+        map.put("totalExperiencePoints", totalExperiencePoints);
         map.put("coins", coins);
         map.put("badges", badges);
         map.put("equipment", equipment);
