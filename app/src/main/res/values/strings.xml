@@ -1,3 +1,26 @@
 <resources>
-    <string name="app_name">MAProject</string>
+    <string name="app_name">MA Project</string>
+
+    <!-- Login -->
+    <string name="app_logo_desc">App Logo</string>
+    <string name="welcome_back">Dobrodošli nazad!</string>
+    <string name="login_subtitle">Prijavite se na svoj nalog</string>
+    <string name="email">Email</string>
+    <string name="password">Lozinka</string>
+    <string name="confirm_password">Potvrdi lozinku</string>
+    <string name="login">Prijavi se</string>
+    <string name="create_account">Kreiraj nalog</string>
+
+    <!-- Register -->
+    <string name="registration">Registracija</string>
+    <string name="username">Korisničko ime</string>
+    <string name="select_avatar">Izaberi Avatar</string>
+    <string name="register">Registruj se</string>
+    <string name="already_have_account">Već imam nalog</string>
+    <string name="avatar_desc">Avatar %1$d</string>
+
+    <!-- Main -->
+    <string name="welcome">Dobrodošli!</string>
+    <string name="main_screen_subtitle">Glavni ekran aplikacije</string>
+    <string name="logout">Odjavi se</string>
 </resources>
