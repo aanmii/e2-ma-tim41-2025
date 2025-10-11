@@ -13,3 +13,15 @@
 .externalNativeBuild
 .cxx
 local.properties
+# built application files
+*.apk
+*.aab
+
+# Keystore/security files (Unless you have a secure way to share them, keep them out of Git)
+*.jks
+*.keystore
+
+# Logs and user-generated files
+*.log
+/lint-results.html
+/lint-results.xml

@@ -1,14 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <string name="app_name">MAProject</string>
+    <color name="accent">#03DAC5</color>
+    <color name="background">#FFFFFF</color>
+    <color name="backgroundDark">#121212</color>
+    <color name="coins">#FFB300</color>
+    <color name="error">#F44336</color>
+    <color name="hp">#E53935</color>
+    <color name="info">#2196F3</color>
+    <color name="pp">#1E88E5</color>
+    <color name="primary">#6200EE</color>
+    <color name="primaryDark">#3700B3</color>
+    <color name="success">#4CAF50</color>
+    <color name="textPrimary">#000000</color>
+    <color name="textSecondary">#757575</color>
+    <color name="textWhite">#FFFFFF</color>
+    <color name="warning">#FF9800</color>
+    <color name="xp">#43A047</color>
+    <string name="already_have_account">Već imam nalog</string>
+    <string name="app_logo_desc">App Logo</string>
+    <string name="app_name">MA Project</string>
+    <string name="avatar_desc">Avatar %1$d</string>
+    <string name="confirm_password">Potvrdi lozinku</string>
+    <string name="create_account">Kreiraj nalog</string>
+    <string name="email">Email</string>
     <string name="gcm_defaultSenderId" translatable="false">999298259439</string>
     <string name="google_api_key" translatable="false">AIzaSyAIT7YNk8EHpUT0ru5IR1TZHyne-nDutrU</string>
     <string name="google_app_id" translatable="false">1:999298259439:android:9bede417836496a6c6be1a</string>
     <string name="google_crash_reporting_api_key" translatable="false">AIzaSyAIT7YNk8EHpUT0ru5IR1TZHyne-nDutrU</string>
     <string name="google_storage_bucket" translatable="false">maproject-f8fb7.firebasestorage.app</string>
+    <string name="login">Prijavi se</string>
+    <string name="login_subtitle">Prijavite se na svoj nalog</string>
+    <string name="logout">Odjavi se</string>
+    <string name="main_screen_subtitle">Glavni ekran aplikacije</string>
+    <string name="password">Lozinka</string>
     <string name="project_id" translatable="false">maproject-f8fb7</string>
+    <string name="register">Registruj se</string>
+    <string name="registration">Registracija</string>
+    <string name="select_avatar">Izaberi Avatar</string>
+    <string name="username">Korisničko ime</string>
+    <string name="welcome">Dobrodošli!</string>
+    <string name="welcome_back">Dobrodošli nazad!</string>
     <style name="Base.Theme.MAProject" parent="Theme.Material3.DayNight.NoActionBar">
         
         

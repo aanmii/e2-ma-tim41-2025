@@ -4,18 +4,7 @@
             "outputFile": "com.example.maproject.app-mergeDebugResources-39:/values-v23/values-v23.xml",
             "map": [
                 {
-                    "source": "/Users/ana/.gradle/caches/8.11.1/transforms/bd48620beccb83d0774dd8c90f2a0748/transformed/appcompat-1.6.1/res/values-v23/values-v23.xml",
-                    "from": {
-                        "startLines": "2,3,4,5,6,20,34,35,36,39,43,44,45,46",
-                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4",
-                        "startOffsets": "55,190,325,400,487,1225,1975,2094,2221,2443,2667,2782,2889,3002",
-                        "endLines": "2,3,4,5,19,33,34,35,38,42,43,44,45,49",
-                        "endColumns": "134,134,74,86,12,12,118,126,12,12,114,106,112,12",
-                        "endOffsets": "185,320,395,482,1220,1970,2089,2216,2438,2662,2777,2884,2997,3227"
-                    }
-                },
-                {
-                    "source": "/Users/ana/.gradle/caches/8.11.1/transforms/14b0381258c9f5988ea64c07ac8b59e4/transformed/cardview-1.0.0/res/values-v23/values-v23.xml",
+                    "source": "/Users/ana/.gradle/caches/8.11.1/transforms/2cf5a3c400217a3205f105a69c6ac2bb/transformed/cardview-1.0.0/res/values-v23/values-v23.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
@@ -34,7 +23,18 @@
                     }
                 },
                 {
-                    "source": "/Users/ana/.gradle/caches/8.11.1/transforms/1d2c6950d41dd241e5c04cda77236711/transformed/material-1.10.0/res/values-v23/values-v23.xml",
+                    "source": "/Users/ana/.gradle/caches/8.11.1/transforms/5696664b49fb4e23a8a43ddd9117e84a/transformed/appcompat-1.6.1/res/values-v23/values-v23.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,20,34,35,36,39,43,44,45,46",
+                        "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,190,325,400,487,1225,1975,2094,2221,2443,2667,2782,2889,3002",
+                        "endLines": "2,3,4,5,19,33,34,35,38,42,43,44,45,49",
+                        "endColumns": "134,134,74,86,12,12,118,126,12,12,114,106,112,12",
+                        "endOffsets": "185,320,395,482,1220,1970,2089,2216,2438,2662,2777,2884,2997,3227"
+                    }
+                },
+                {
+                    "source": "/Users/ana/.gradle/caches/8.11.1/transforms/df5d1c58ebb45af2ebccfbe89a01c8b0/transformed/material-1.10.0/res/values-v23/values-v23.xml",
                     "from": {
                         "startLines": "2,5,9,13,16,21,25,28,31,34,39,42,46",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4",
