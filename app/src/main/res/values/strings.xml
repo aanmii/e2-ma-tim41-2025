@@ -3,24 +3,24 @@
 
     <!-- Login -->
     <string name="app_logo_desc">App Logo</string>
-    <string name="welcome_back">Dobrodošli nazad!</string>
-    <string name="login_subtitle">Prijavite se na svoj nalog</string>
+    <string name="welcome_back">Welcome back!</string>
+    <string name="login_subtitle">Login into your account</string>
     <string name="email">Email</string>
-    <string name="password">Lozinka</string>
-    <string name="confirm_password">Potvrdi lozinku</string>
-    <string name="login">Prijavi se</string>
-    <string name="create_account">Kreiraj nalog</string>
+    <string name="password">Password</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="login">Login</string>
+    <string name="create_account">Create account</string>
 
     <!-- Register -->
-    <string name="registration">Registracija</string>
-    <string name="username">Korisničko ime</string>
-    <string name="select_avatar">Izaberi Avatar</string>
-    <string name="register">Registruj se</string>
-    <string name="already_have_account">Već imam nalog</string>
+    <string name="registration">Register</string>
+    <string name="username">Username</string>
+    <string name="select_avatar">Choose your avatar!</string>
+    <string name="register">Register</string>
+    <string name="already_have_account">I already have account</string>
     <string name="avatar_desc">Avatar %1$d</string>
 
     <!-- Main -->
-    <string name="welcome">Dobrodošli!</string>
-    <string name="main_screen_subtitle">Glavni ekran aplikacije</string>
-    <string name="logout">Odjavi se</string>
+    <string name="welcome">Welcome!</string>
+    <string name="main_screen_subtitle">Main app window</string>
+    <string name="logout">Logout</string>
 </resources>

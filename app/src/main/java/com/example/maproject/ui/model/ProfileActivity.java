@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.maproject.R;
+import com.example.maproject.service.LevelingService;
 import com.example.maproject.ui.auth.ChangePasswordActivity;
 import com.example.maproject.ui.statistics.StatisticsActivity;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,13 +24,19 @@ import com.google.zxing.qrcode.QRCodeWriter;
 public class ProfileActivity extends AppCompatActivity {
 
     private ImageView avatarImageView, qrCodeImageView;
+    private ImageView titleIconImageView;
+    private ImageView xpBarImageView;
+
     private TextView usernameTextView, levelTextView, titleTextView;
     private TextView powerPointsTextView, experiencePointsTextView, coinsTextView, badgesTextView;
+    private TextView xpProgressTextView;
+
     private Button changePasswordButton, backButton;
 
     private FirebaseAuth auth;
     private FirebaseFirestore db;
     private String currentUserId;
+    private LevelingService levelingService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +45,14 @@ public class ProfileActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-        currentUserId = auth.getCurrentUser().getUid();
+        levelingService = new LevelingService();
+
+        if (auth.getCurrentUser() != null) {
+            currentUserId = auth.getCurrentUser().getUid();
+        } else {
+            finish();
+            return;
+        }
 
         initViews();
         loadUserProfile();
@@ -63,6 +77,10 @@ public class ProfileActivity extends AppCompatActivity {
         badgesTextView = findViewById(R.id.badgesTextView);
         changePasswordButton = findViewById(R.id.changePasswordButton);
         backButton = findViewById(R.id.backButton);
+
+        xpBarImageView = findViewById(R.id.xpBarImageView);
+        xpProgressTextView = findViewById(R.id.xpProgressTextView);
+        titleIconImageView = findViewById(R.id.titleIconImageView);
     }
 
     private void loadUserProfile() {
@@ -70,26 +88,104 @@ public class ProfileActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(document -> {
                     if (document.exists()) {
-                        // Avatar
                         String avatar = document.getString("avatar");
                         setAvatar(avatar);
 
-                        // Tekstualni podaci
                         usernameTextView.setText(document.getString("username"));
-                        levelTextView.setText("Nivo: " + document.getLong("level"));
-                        titleTextView.setText(document.getString("title"));
-                        powerPointsTextView.setText("PP: " + document.getLong("powerPoints"));
-                        experiencePointsTextView.setText("XP: " + document.getLong("experiencePoints"));
-                        coinsTextView.setText("Novčići: " + document.getLong("coins"));
-                        badgesTextView.setText("Bedževi: " + document.getLong("badges"));
 
-                        // Generiši QR kod
+                        String title = document.getString("title");
+                        titleTextView.setText(title != null ? title : "Početnik");
+
+                        // Koristi Object čitanje za robustnost numeričkih tipova
+                        Object levelObj = document.get("level");
+                        int currentLevel = (levelObj instanceof Number) ? ((Number) levelObj).intValue() : 0;
+                        levelTextView.setText("⭐ LEVEL " + currentLevel);
+
+                        setTitleIcon(currentLevel);
+
+                        Object powerPointsObj = document.get("powerPoints");
+                        long powerPoints = (powerPointsObj instanceof Number) ? ((Number) powerPointsObj).longValue() : 0L;
+                        powerPointsTextView.setText(String.valueOf(powerPoints));
+
+                        Object totalXpObj = document.get("totalExperiencePoints");
+                        long totalXp = (totalXpObj instanceof Number) ? ((Number) totalXpObj).longValue() : 0L;
+                        experiencePointsTextView.setText(String.valueOf(totalXp));
+
+                        Object coinsObj = document.get("coins");
+                        long coins = (coinsObj instanceof Number) ? ((Number) coinsObj).longValue() : 0L;
+                        coinsTextView.setText(String.valueOf(coins));
+
+                        Object badgesObj = document.get("badges");
+                        long badges = (badgesObj instanceof Number) ? ((Number) badgesObj).longValue() : 0L;
+                        badgesTextView.setText(String.valueOf(badges));
+
+                        // OVO JE KRITIČNO POLJE ZA CURRENT XP
+                        Object currentLevelXpObj = document.get("currentLevelXP");
+                        long currentXP = (currentLevelXpObj instanceof Number) ? ((Number) currentLevelXpObj).longValue() : 0L;
+
+                        long requiredXp = levelingService.getRequiredXPForLevelUp(currentLevel + 1);
+
+                        if (requiredXp == 0) requiredXp = 200;
+
+                        updateLevelAndXPView(currentLevel, currentXP, requiredXp);
+
                         generateQRCode(currentUserId);
                     }
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Greška pri učitavanju profila", Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private void updateLevelAndXPView(int currentLevel, long currentXP, long requiredXPForNextLevel) {
+        levelTextView.setText("⭐ LEVEL " + currentLevel);
+        // OVO SETUJE TEKST (npr. 44/3300)
+        xpProgressTextView.setText(currentXP + "/" + requiredXPForNextLevel);
+
+        double percentage = requiredXPForNextLevel > 0 ? (double) currentXP / requiredXPForNextLevel : 0.0;
+
+        if (percentage >= 1.0) {
+            percentage = 1.0;
+        }
+
+        int xpImageIndex;
+
+        // LOGIKA ZA 5 SLIKA (1-5), praga 25%
+        if (percentage <= 0.01) {
+            xpImageIndex = 1;
+        } else if (percentage <= 0.25) {
+            xpImageIndex = 2;
+        } else if (percentage <= 0.50) {
+            xpImageIndex = 3;
+        } else if (percentage <= 0.75) {
+            xpImageIndex = 4;
+        } else {
+            xpImageIndex = 5;
+        }
+
+        String xpIconName = "xp_" + xpImageIndex;
+        int xpIconResId = getResources().getIdentifier(xpIconName, "drawable", getPackageName());
+
+        if (xpIconResId != 0) {
+            xpBarImageView.setImageResource(xpIconResId);
+        } else {
+            xpBarImageView.setImageResource(R.drawable.xp_1);
+        }
+
+        setTitleIcon(currentLevel);
+    }
+
+    private void setTitleIcon(int level) {
+        ImageView titleIcon = findViewById(R.id.titleIconImageView);
+        int iconResource;
+
+        if (level <= 1) iconResource = R.drawable.title_1;
+        else if (level <= 2) iconResource = R.drawable.title_2;
+        else if (level <= 3) iconResource = R.drawable.title_3;
+        else if (level <= 4) iconResource = R.drawable.title_4;
+        else iconResource = R.drawable.title_5;
+
+        titleIcon.setImageResource(iconResource);
     }
 
     private void setAvatar(String avatarName) {
