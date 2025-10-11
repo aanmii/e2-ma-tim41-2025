@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.maproject.app-mergeDebugResources-39:/values-zh-rCN/values-zh-rCN.xml",
+            "outputFile": "com.example.maproject.app-mergeDebugResources-40:/values-zh-rCN/values-zh-rCN.xml",
             "map": [
                 {
                     "source": "/Users/ana/.gradle/caches/8.11.1/transforms/e0dadfeee4caa8f41acc3f8757966fa5/transformed/play-services-basement-18.4.0/res/values-zh-rCN/values.xml",
@@ -122,6 +122,23 @@
                         "startOffsets": "3684,3785,3914,4029,4131,4236,4352,4454,4645,4753,4854,4984,5099,5203,5311,5367,5424",
                         "endColumns": "100,128,114,101,104,115,101,91,107,100,129,114,103,107,55,56,73",
                         "endOffsets": "3780,3909,4024,4126,4231,4347,4449,4541,4748,4849,4979,5094,5198,5306,5362,5419,5493"
+                    }
+                },
+                {
+                    "source": "/Users/ana/.gradle/caches/8.11.1/transforms/692f1a210fe9f0c6f18918c3bde47c86/transformed/zxing-android-embedded-4.3.0/res/values-zh-rCN/values-zh-rCN.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,104,151,238",
+                        "endColumns": "48,46,86,68",
+                        "endOffsets": "99,146,233,302"
+                    },
+                    "to": {
+                        "startLines": "127,128,129,130",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "10189,10238,10285,10372",
+                        "endColumns": "48,46,86,68",
+                        "endOffsets": "10233,10280,10367,10436"
                     }
                 }
             ]

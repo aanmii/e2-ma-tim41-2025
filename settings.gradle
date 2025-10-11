@@ -9,13 +9,18 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
+        // ✅ dodaj JitPack ovde
+        maven { url 'https://jitpack.io' }
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
+        // ✅ i ovde obavezno
+        maven { url 'https://jitpack.io' }
     }
 }
 

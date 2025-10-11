@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.maproject.app-mergeDebugResources-39:/values-v23/values-v23.xml",
+            "outputFile": "com.example.maproject.app-mergeDebugResources-40:/values-v23/values-v23.xml",
             "map": [
                 {
                     "source": "/Users/ana/.gradle/caches/8.11.1/transforms/2cf5a3c400217a3205f105a69c6ac2bb/transformed/cardview-1.0.0/res/values-v23/values-v23.xml",

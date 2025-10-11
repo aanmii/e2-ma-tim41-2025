@@ -16,6 +16,7 @@ import com.example.maproject.viewmodel.AuthViewModel;
 import com.example.maproject.viewmodel.ViewModelFactory;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.example.maproject.ui.model.ProfileActivity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -52,7 +53,14 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Uspešno ste se odjavili", Toast.LENGTH_SHORT).show();
             navigateToLogin();
         });
+
+        Button profileButton = findViewById(R.id.profileButton);
+        profileButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+            startActivity(intent);
+        });
     }
+
 
     private void navigateToLogin() {
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
@@ -60,4 +68,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+
+
 }

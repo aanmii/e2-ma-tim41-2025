@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.maproject.app-mergeDebugResources-39:/values-ca/values-ca.xml",
+            "outputFile": "com.example.maproject.app-mergeDebugResources-40:/values-ca/values-ca.xml",
             "map": [
                 {
                     "source": "/Users/ana/.gradle/caches/8.11.1/transforms/c163da3d4d0098c4f627eae966b3d832/transformed/core-1.9.0/res/values-ca/values-ca.xml",
@@ -88,6 +88,23 @@
                         "startOffsets": "4041,4146,4298,4425,4534,4684,4811,4934,5177,5348,5457,5616,5747,5911,6069,6134,6202",
                         "endColumns": "104,151,126,108,149,126,122,107,170,108,158,130,163,157,64,67,86",
                         "endOffsets": "4141,4293,4420,4529,4679,4806,4929,5037,5343,5452,5611,5742,5906,6064,6129,6197,6284"
+                    }
+                },
+                {
+                    "source": "/Users/ana/.gradle/caches/8.11.1/transforms/692f1a210fe9f0c6f18918c3bde47c86/transformed/zxing-android-embedded-4.3.0/res/values-ca/values-ca.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,114,167,323",
+                        "endColumns": "58,52,155,112",
+                        "endOffsets": "109,162,318,431"
+                    },
+                    "to": {
+                        "startLines": "127,128,129,130",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "11861,11920,11973,12129",
+                        "endColumns": "58,52,155,112",
+                        "endOffsets": "11915,11968,12124,12237"
                     }
                 },
                 {

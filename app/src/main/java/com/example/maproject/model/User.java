@@ -1,6 +1,8 @@
 package com.example.maproject.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class User {
@@ -14,11 +16,15 @@ public class User {
     private int experiencePoints; // XP
     private int coins;
     private int badges;
+    private List<String> equipment; // Lista opreme
+    private List<String> activeEquipment; // Trenutno aktivna oprema
     private boolean isEmailVerified;
     private long registrationTimestamp;
 
     // Prazan konstruktor za Firebase
     public User() {
+        this.equipment = new ArrayList<>();
+        this.activeEquipment = new ArrayList<>();
     }
 
     // Konstruktor za registraciju
@@ -27,12 +33,14 @@ public class User {
         this.email = email;
         this.username = username;
         this.avatar = avatar;
-        this.level = 0; // Počinje od 0, prvi nivo se dostiže sa 200 XP
+        this.level = 0;
         this.title = "Početnik"; // Početna titula
         this.powerPoints = 0;
         this.experiencePoints = 0;
         this.coins = 0;
         this.badges = 0;
+        this.equipment = new ArrayList<>();
+        this.activeEquipment = new ArrayList<>();
         this.isEmailVerified = false;
         this.registrationTimestamp = System.currentTimeMillis();
     }
@@ -48,6 +56,8 @@ public class User {
     public int getExperiencePoints() { return experiencePoints; }
     public int getCoins() { return coins; }
     public int getBadges() { return badges; }
+    public List<String> getEquipment() { return equipment; }
+    public List<String> getActiveEquipment() { return activeEquipment; }
     public boolean isEmailVerified() { return isEmailVerified; }
     public long getRegistrationTimestamp() { return registrationTimestamp; }
 
@@ -62,6 +72,8 @@ public class User {
     public void setExperiencePoints(int experiencePoints) { this.experiencePoints = experiencePoints; }
     public void setCoins(int coins) { this.coins = coins; }
     public void setBadges(int badges) { this.badges = badges; }
+    public void setEquipment(List<String> equipment) { this.equipment = equipment; }
+    public void setActiveEquipment(List<String> activeEquipment) { this.activeEquipment = activeEquipment; }
     public void setEmailVerified(boolean emailVerified) { isEmailVerified = emailVerified; }
     public void setRegistrationTimestamp(long registrationTimestamp) { this.registrationTimestamp = registrationTimestamp; }
 
@@ -78,6 +90,8 @@ public class User {
         map.put("experiencePoints", experiencePoints);
         map.put("coins", coins);
         map.put("badges", badges);
+        map.put("equipment", equipment);
+        map.put("activeEquipment", activeEquipment);
         map.put("isEmailVerified", isEmailVerified);
         map.put("registrationTimestamp", registrationTimestamp);
         return map;

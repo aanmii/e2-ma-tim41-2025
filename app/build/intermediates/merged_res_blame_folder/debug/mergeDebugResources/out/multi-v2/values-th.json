@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.maproject.app-mergeDebugResources-39:/values-th/values-th.xml",
+            "outputFile": "com.example.maproject.app-mergeDebugResources-40:/values-th/values-th.xml",
             "map": [
                 {
                     "source": "/Users/ana/.gradle/caches/8.11.1/transforms/df5d1c58ebb45af2ebccfbe89a01c8b0/transformed/material-1.10.0/res/values-th/values-th.xml",
@@ -122,6 +122,23 @@
                         "startOffsets": "11158",
                         "endColumns": "100",
                         "endOffsets": "11254"
+                    }
+                },
+                {
+                    "source": "/Users/ana/.gradle/caches/8.11.1/transforms/692f1a210fe9f0c6f18918c3bde47c86/transformed/zxing-android-embedded-4.3.0/res/values-th/values-th.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,114,163,281",
+                        "endColumns": "58,48,117,107",
+                        "endOffsets": "109,158,276,384"
+                    },
+                    "to": {
+                        "startLines": "127,128,129,130",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "11259,11318,11367,11485",
+                        "endColumns": "58,48,117,107",
+                        "endOffsets": "11313,11362,11480,11588"
                     }
                 }
             ]

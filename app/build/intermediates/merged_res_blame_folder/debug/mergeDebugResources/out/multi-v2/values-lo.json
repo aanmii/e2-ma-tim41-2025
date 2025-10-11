@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.maproject.app-mergeDebugResources-39:/values-lo/values-lo.xml",
+            "outputFile": "com.example.maproject.app-mergeDebugResources-40:/values-lo/values-lo.xml",
             "map": [
                 {
                     "source": "/Users/ana/.gradle/caches/8.11.1/transforms/88006a645bd25cba15b0a87574a9c749/transformed/play-services-base-18.0.1/res/values-lo/values.xml",

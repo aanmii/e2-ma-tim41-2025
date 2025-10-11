@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.maproject.app-mergeDebugResources-39:/values-ko/values-ko.xml",
+            "outputFile": "com.example.maproject.app-mergeDebugResources-40:/values-ko/values-ko.xml",
             "map": [
                 {
                     "source": "/Users/ana/.gradle/caches/8.11.1/transforms/df5d1c58ebb45af2ebccfbe89a01c8b0/transformed/material-1.10.0/res/values-ko/values-ko.xml",
@@ -54,6 +54,23 @@
                         "startOffsets": "5659,5888,5981,6084",
                         "endColumns": "85,92,102,93",
                         "endOffsets": "5740,5976,6079,6173"
+                    }
+                },
+                {
+                    "source": "/Users/ana/.gradle/caches/8.11.1/transforms/692f1a210fe9f0c6f18918c3bde47c86/transformed/zxing-android-embedded-4.3.0/res/values-ko/values-ko.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,106,153,260",
+                        "endColumns": "50,46,106,71",
+                        "endOffsets": "101,148,255,327"
+                    },
+                    "to": {
+                        "startLines": "127,128,129,130",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "10436,10487,10534,10641",
+                        "endColumns": "50,46,106,71",
+                        "endOffsets": "10482,10529,10636,10708"
                     }
                 },
                 {

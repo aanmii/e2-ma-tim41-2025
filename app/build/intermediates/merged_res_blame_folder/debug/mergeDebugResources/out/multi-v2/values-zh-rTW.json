@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.maproject.app-mergeDebugResources-39:/values-zh-rTW/values-zh-rTW.xml",
+            "outputFile": "com.example.maproject.app-mergeDebugResources-40:/values-zh-rTW/values-zh-rTW.xml",
             "map": [
                 {
                     "source": "/Users/ana/.gradle/caches/8.11.1/transforms/df5d1c58ebb45af2ebccfbe89a01c8b0/transformed/material-1.10.0/res/values-zh-rTW/values-zh-rTW.xml",
@@ -71,6 +71,23 @@
                         "startOffsets": "3694,3795,3923,4038,4140,4247,4363,4463,4661,4771,4872,5001,5116,5218,5326,5382,5439",
                         "endColumns": "100,127,114,101,106,115,99,94,109,100,128,114,101,107,55,56,73",
                         "endOffsets": "3790,3918,4033,4135,4242,4358,4458,4553,4766,4867,4996,5111,5213,5321,5377,5434,5508"
+                    }
+                },
+                {
+                    "source": "/Users/ana/.gradle/caches/8.11.1/transforms/692f1a210fe9f0c6f18918c3bde47c86/transformed/zxing-android-embedded-4.3.0/res/values-zh-rTW/values-zh-rTW.xml",
+                    "from": {
+                        "startLines": "2,3,4,5",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "55,104,151,244",
+                        "endColumns": "48,46,92,69",
+                        "endOffsets": "99,146,239,309"
+                    },
+                    "to": {
+                        "startLines": "127,128,129,130",
+                        "startColumns": "4,4,4,4",
+                        "startOffsets": "10211,10260,10307,10400",
+                        "endColumns": "48,46,92,69",
+                        "endOffsets": "10255,10302,10395,10465"
                     }
                 },
                 {
