@@ -43,39 +43,39 @@ public class ChangePasswordActivity extends AppCompatActivity {
 
         // Validacija
         if (oldPassword.isEmpty() || newPassword.isEmpty() || confirmNewPassword.isEmpty()) {
-            Toast.makeText(this, "Sva polja moraju biti popunjena", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "All fields must be filled in", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (newPassword.length() < 6) {
-            Toast.makeText(this, "Nova lozinka mora imati najmanje 6 karaktera", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Password must be at least 6 characters long", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (!newPassword.equals(confirmNewPassword)) {
-            Toast.makeText(this, "Nove lozinke se ne poklapaju", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "New passwords dont match", Toast.LENGTH_SHORT).show();
             return;
         }
 
         FirebaseUser user = auth.getCurrentUser();
         if (user != null && user.getEmail() != null) {
-            // Re-authenticate korisnika sa starom lozinkom
+
             AuthCredential credential = EmailAuthProvider.getCredential(user.getEmail(), oldPassword);
 
             user.reauthenticate(credential)
                     .addOnSuccessListener(aVoid -> {
-                        // Promeni lozinku
+
                         user.updatePassword(newPassword)
                                 .addOnSuccessListener(aVoid1 -> {
-                                    Toast.makeText(this, "Lozinka uspešno promenjena!", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(this, "Password successfully changed!", Toast.LENGTH_SHORT).show();
                                     finish();
                                 })
                                 .addOnFailureListener(e -> {
-                                    Toast.makeText(this, "Greška pri promeni lozinke: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                    Toast.makeText(this, "Error while changing password: " + e.getMessage(), Toast.LENGTH_LONG).show();
                                 });
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(this, "Stara lozinka nije tačna", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Current password is not correct", Toast.LENGTH_SHORT).show();
                     });
         }
     }

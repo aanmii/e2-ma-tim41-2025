@@ -13,8 +13,8 @@ public class User {
     private int level;
     private String title;
     private int powerPoints;
-    private long currentLevelXP; // NOVO: XP sakupljen od poslednjeg nivoa
-    private long totalExperiencePoints; // IZMENJENO: Ukupan XP
+    private long currentLevelXP;
+    private long totalExperiencePoints;
     private int coins;
     private int badges;
     private List<String> equipment;
@@ -32,8 +32,8 @@ public class User {
         this.email = email;
         this.username = username;
         this.avatar = avatar;
-        this.level = 1; // Počinje od Nivoa 1
-        this.title = "Početnik";
+        this.level = 1;
+        this.title = "Beginner";
         this.powerPoints = 0;
         this.currentLevelXP = 0;
         this.totalExperiencePoints = 0;

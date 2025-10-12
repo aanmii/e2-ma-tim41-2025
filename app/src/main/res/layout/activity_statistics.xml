@@ -30,19 +30,12 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Moja Statistika"
+                android:text="My analytics"
                 android:textSize="32sp"
                 android:textStyle="bold"
                 android:textColor="@color/textPrimary"
                 android:fontFamily="sans-serif-medium"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tvoj napredak u brojkama"
-                android:textSize="14sp"
-                android:textColor="@color/textSecondary"
-                android:layout_marginTop="4dp"/>
         </LinearLayout>
 
         <!-- Quick Stats Grid -->
@@ -90,7 +83,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Dana aktivnosti"
+                        android:text="Days active in a row"
                         android:textSize="12sp"
                         android:textColor="@color/textSecondary"
                         android:textAlignment="center"/>
@@ -134,7 +127,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Najduži niz"
+                        android:text="Longest streak"
                         android:textSize="12sp"
                         android:textColor="@color/textSecondary"
                         android:textAlignment="center"/>
@@ -187,7 +180,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Specijalne misije"
+                        android:text="Special missions completed"
                         android:textSize="12sp"
                         android:textColor="@color/textSecondary"
                         android:textAlignment="center"/>
@@ -231,7 +224,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Prosečna težina"
+                        android:text="Average difficulty"
                         android:textSize="12sp"
                         android:textColor="@color/textSecondary"
                         android:textAlignment="center"/>
@@ -272,7 +265,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Status Zadataka"
+                        android:text="Task status"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:textColor="@color/textPrimary"/>
@@ -318,7 +311,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Zadaci po Kategoriji"
+                        android:text="Tasks by category"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:textColor="@color/textPrimary"/>
@@ -364,7 +357,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Prosečna Težina (7 dana)"
+                        android:text="Average difficulty in the last 7 days"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:textColor="@color/textPrimary"/>
@@ -410,7 +403,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="XP Napredak (7 dana)"
+                        android:text="XP progress in the last 7 days"
                         android:textSize="20sp"
                         android:textStyle="bold"
                         android:textColor="@color/textPrimary"/>
@@ -428,7 +421,7 @@
             android:id="@+id/backButton"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:text="← Nazad"
+            android:text="← Go back"
             android:textSize="16sp"
             android:textStyle="bold"
             app:cornerRadius="30dp"

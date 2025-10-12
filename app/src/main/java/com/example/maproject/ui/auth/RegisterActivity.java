@@ -30,12 +30,12 @@ public class RegisterActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
-        // Inicijalizuj ViewModel
+
         UserRepository userRepository = new UserRepository();
         ViewModelFactory factory = new ViewModelFactory(userRepository);
         authViewModel = new ViewModelProvider(this, factory).get(AuthViewModel.class);
 
-        // Pronađi View elemente
+
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         confirmPasswordEditText = findViewById(R.id.confirmPasswordEditText);
@@ -43,7 +43,6 @@ public class RegisterActivity extends AppCompatActivity {
         registerButton = findViewById(R.id.registerButton);
         goToLoginButton = findViewById(R.id.goToLoginButton);
 
-        // Avatar selekcija
         avatar1 = findViewById(R.id.avatar1);
         avatar2 = findViewById(R.id.avatar2);
         avatar3 = findViewById(R.id.avatar3);
@@ -52,7 +51,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         setupAvatarSelection();
 
-        // Registracija dugme
+
         registerButton.setOnClickListener(v -> {
             String email = emailEditText.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
@@ -60,19 +59,19 @@ public class RegisterActivity extends AppCompatActivity {
             String username = usernameEditText.getText().toString().trim();
 
             if (selectedAvatar.isEmpty()) {
-                Toast.makeText(this, "Izaberite avatar.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Choose an avatar.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             authViewModel.registerUser(email, password, confirmPassword, username, selectedAvatar);
         });
 
-        // Observuj status registracije
+
         authViewModel.registrationStatus.observe(this, status -> {
             Toast.makeText(this, status, Toast.LENGTH_LONG).show();
 
-            if (status.contains("Registracija uspešna")) {
-                // Vrati se na Login ekran nakon 2 sekunde
+            if (status.contains("Registration succesful")) {
+
                 emailEditText.postDelayed(() -> {
                     Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -82,7 +81,7 @@ public class RegisterActivity extends AppCompatActivity {
             }
         });
 
-        // Dugme za prelazak na Login
+
         goToLoginButton.setOnClickListener(v -> {
             Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
             startActivity(intent);
@@ -92,15 +91,15 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void setupAvatarSelection() {
         View.OnClickListener avatarClickListener = v -> {
-            // Resetuj sve avatare
+
             resetAvatarSelection();
 
-            // Označi selektovani avatar
+
             v.setAlpha(1.0f);
             v.setScaleX(1.2f);
             v.setScaleY(1.2f);
 
-            // Sačuvaj izbor
+
             int id = v.getId();
             if (id == R.id.avatar1) {
                 selectedAvatar = "avatar_1";

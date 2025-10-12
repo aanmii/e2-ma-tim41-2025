@@ -23,14 +23,14 @@ public class UserRepository {
     }
 
     public void registerUser(String email, String password, String username, String avatar, MutableLiveData<String> registrationStatus) {
-        // Prvo proveri da li korisničko ime već postoji
+
         checkUsernameAvailability(username, isAvailable -> {
             if (!isAvailable) {
-                registrationStatus.postValue("Korisničko ime je već zauzeto. Izaberite drugo.");
+                registrationStatus.postValue("Username is unavailable.");
                 return;
             }
 
-            // Kreiraj Firebase Auth nalog
+
             auth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
@@ -41,7 +41,7 @@ public class UserRepository {
                             }
                         } else {
                             String error = Objects.requireNonNull(task.getException()).getMessage();
-                            registrationStatus.postValue("Registracija neuspešna: " + error);
+                            registrationStatus.postValue("Registration failed: " + error);
                             Log.e(TAG, "Registration failed: " + error);
                         }
                     });
@@ -65,10 +65,10 @@ public class UserRepository {
         firebaseUser.sendEmailVerification()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        registrationStatus.postValue("Registracija uspešna! Poslali smo vam verifikacioni email. Proverite inbox i aktivirajte nalog u roku od 24h.");
+                        registrationStatus.postValue("Registration succesful! Check your inbox to verify your email in the next 24h.");
                         Log.d(TAG, "Verification email sent.");
                     } else {
-                        registrationStatus.postValue("Greška pri slanju verifikacionog emaila.");
+                        registrationStatus.postValue("Failed to send verification mail.");
                         Log.e(TAG, "Failed to send verification email.", task.getException());
                     }
                 });
@@ -82,7 +82,7 @@ public class UserRepository {
                     Log.d(TAG, "User profile saved to Firestore.");
                 })
                 .addOnFailureListener(e -> {
-                    registrationStatus.postValue("Greška pri čuvanju profila u bazi.");
+                    registrationStatus.postValue("Error saving profile to Firestore.");
                     Log.e(TAG, "Error saving profile to Firestore", e);
                 });
     }
@@ -100,14 +100,14 @@ public class UserRepository {
                                     Log.d(TAG, "Login successful.");
                                 } else {
                                     auth.signOut();
-                                    loginStatus.postValue("Nalog nije aktiviran. Proverite email za aktivacioni link.");
+                                    loginStatus.postValue("Email not verified. Check your spam inbox.");
                                     Log.w(TAG, "Email not verified.");
                                 }
                             });
                         }
                     } else {
                         String error = Objects.requireNonNull(task.getException()).getMessage();
-                        loginStatus.postValue("Prijava neuspešna: " + error);
+                        loginStatus.postValue("Login failed: " + error);
                         Log.e(TAG, "Login failed: " + error);
                     }
                 });

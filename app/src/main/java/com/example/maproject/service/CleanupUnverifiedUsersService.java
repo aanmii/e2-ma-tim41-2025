@@ -5,10 +5,6 @@ import android.util.Log;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
-/**
- * Servis za čišćenje neverifikovanih naloga nakon 24h
- * Ovo bi trebalo pokrenuti periodično (npr. putem WorkManager-a)
- */
 public class CleanupUnverifiedUsersService {
 
     private static final String TAG = "CleanupService";
@@ -25,7 +21,7 @@ public class CleanupUnverifiedUsersService {
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        // Obriši korisnika iz Firestore
+
                         document.getReference().delete()
                                 .addOnSuccessListener(aVoid -> {
                                     Log.d(TAG, "Deleted unverified user: " + document.getId());
@@ -34,9 +30,7 @@ public class CleanupUnverifiedUsersService {
                                     Log.e(TAG, "Failed to delete user: " + document.getId(), e);
                                 });
 
-                        // Napomena: Firebase Auth korisnika ne možeš obrisati odavde
-                        // To bi trebalo uraditi kroz Firebase Cloud Functions
-                        // Ili korisnik mora ponovo da se registruje
+                        // todo: delete user - check this later
                     }
                 })
                 .addOnFailureListener(e -> {

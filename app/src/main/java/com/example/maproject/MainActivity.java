@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
-            welcomeTextView.setText("Dobrodošli, " + currentUser.getEmail() + "!");
+            welcomeTextView.setText("Welcome, " + currentUser.getEmail() + "!");
         } else {
             navigateToLogin();
             return;
@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
         logoutButton.setOnClickListener(v -> {
             authViewModel.logout();
             sharedPreferences.edit().putBoolean("isLoggedIn", false).apply();
-            Toast.makeText(this, "Uspešno ste se odjavili", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Successful logout", Toast.LENGTH_SHORT).show();
             navigateToLogin();
         });
 
