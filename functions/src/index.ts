@@ -1,32 +1,63 @@
-import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
+import {onDocumentCreated} from "firebase-functions/v2/firestore";
 
+// Inicijalizacija Firebase Admin SDK-a
 admin.initializeApp();
 
-export const sendNotification = functions.firestore
-  .document("notifications/{notificationId}")
-  .onCreate(async (snapshot, context) => {
-    const data = snapshot.data();
-    if (!data) return;
+/**
+ * Aktivira se kada se novi dokument kreira u 'invitations' kolekciji.
+ * Šalje Push notifikaciju primaocu pozivnice.
+ */
+export const sendAllianceInviteNotification = onDocumentCreated(
+  "invitations/{invitationId}",
+  async (event) => {
+    const invitationData = event.data?.data();
+    if (!invitationData) {
+      console.log("No invitation data found.");
+      return;
+    }
 
-    const receiverId = data.receiverId;
+    const receiverId = invitationData.receiverId;
+    const allianceName = invitationData.allianceName;
+    const senderUsername = invitationData.senderUsername;
+    const invitationId = event.params.invitationId;
 
-    // Dohvati FCM token korisnika
-    const userDoc = await admin.firestore().collection("users").doc(receiverId).get();
+    if (!receiverId) {
+      console.log("Receiver ID not specified.");
+      return;
+    }
+
+    // 1. Dohvatanje FCM tokena primaoca
+    const userDoc = await admin.firestore()
+      .collection("users")
+      .doc(receiverId)
+      .get();
     const fcmToken = userDoc.data()?.fcmToken;
-    if (!fcmToken) return;
 
+    if (!fcmToken) {
+      console.log(`FCM token not found for user: ${receiverId}`);
+      return;
+    }
+
+    // 2. Kreiranje poruke za FCM
     const message = {
       token: fcmToken,
       notification: {
-        title: "Novi poziv u savez",
-        body: data.content
+        title: "⚔️ Poziv u Savez",
+        body: `${senderUsername} te poziva u savez "${allianceName}".`,
       },
       data: {
-        type: data.type,
-        referenceId: data.referenceId
-      }
+        type: "ALLIANCE_INVITE",
+        referenceId: invitationId, // ID pozivnice
+      },
     };
 
-    await admin.messaging().send(message);
-  });
+    // 3. Slanje notifikacije
+    try {
+      await admin.messaging().send(message);
+      console.log(`Alliance invitation notification sent to: ${receiverId}`);
+    } catch (error) {
+      console.error("Error sending alliance invitation notification:", error);
+    }
+  }
+);

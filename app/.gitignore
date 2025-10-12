@@ -1,1 +1,23 @@
+# Build folderi
 /build
+/app/build
+/.gradle
+/local.properties
+
+# Firebase keys
+google-services.json
+*/google-services.json
+
+# Android Studio fajlovi
+/.idea
+.DS_Store
+.gradle/
+*.iml
+
+# Debug keystore
+*.keystore
+
+# Ostalo (cache, logovi itd.)
+/captures
+/.externalNativeBuild
+/.cxx

@@ -61,9 +61,7 @@ public class CreateAllianceActivity extends AppCompatActivity {
 
     private void loadCurrentUsername() {
         db.collection("users").document(currentUserId).get()
-                .addOnSuccessListener(doc -> {
-                    currentUsername = doc.getString("username");
-                });
+                .addOnSuccessListener(doc -> currentUsername = doc.getString("username"));
     }
 
     private void initViews() {
@@ -81,18 +79,13 @@ public class CreateAllianceActivity extends AppCompatActivity {
 
     private void loadFriends() {
         MutableLiveData<List<User>> friendsLiveData = new MutableLiveData<>();
-        friendsLiveData.observe(this, friends -> {
-            selectFriendsAdapter.updateFriends(friends);
-        });
+        friendsLiveData.observe(this, friends -> selectFriendsAdapter.updateFriends(friends));
         friendsRepository.loadFriends(currentUserId, friendsLiveData);
     }
 
     private void onFriendSelected(User friend, boolean isSelected) {
-        if (isSelected) {
-            selectedFriends.add(friend);
-        } else {
-            selectedFriends.remove(friend);
-        }
+        if (isSelected) selectedFriends.add(friend);
+        else selectedFriends.remove(friend);
     }
 
     private void setupButtons() {
@@ -115,17 +108,19 @@ public class CreateAllianceActivity extends AppCompatActivity {
 
         Alliance alliance = new Alliance(name, currentUserId, currentUsername);
 
-        MutableLiveData<String> createLiveData = new MutableLiveData<>();
-        createLiveData.observe(this, allianceId -> {
-            if (allianceId != null) {
-                sendInvitations(allianceId, name);
+        // Koristimo callback umesto MutableLiveData
+        allianceRepository.createAlliance(alliance, success -> {
+            if (success) {
+                // Prosleđujemo allianceId iz samog objekta
+                sendInvitations(alliance.getAllianceId(), alliance.getName());
             } else {
-                Toast.makeText(this, "Greška pri kreiranju saveza", Toast.LENGTH_SHORT).show();
+                runOnUiThread(() ->
+                        Toast.makeText(CreateAllianceActivity.this, "Greška pri kreiranju saveza", Toast.LENGTH_SHORT).show()
+                );
             }
         });
-
-        allianceRepository.createAlliance(alliance, createLiveData);
     }
+
 
     private void sendInvitations(String allianceId, String allianceName) {
         int totalInvitations = selectedFriends.size();
@@ -136,8 +131,7 @@ public class CreateAllianceActivity extends AppCompatActivity {
                     allianceId, allianceName, currentUserId, currentUsername, friend.getUserId()
             );
 
-            MutableLiveData<Boolean> inviteLiveData = new MutableLiveData<>();
-            inviteLiveData.observe(this, success -> {
+            allianceRepository.sendInvitation(invitation, success -> {
                 sentCount[0]++;
                 if (success) {
                     // SLANJE SISTEMSKE NOTIFIKACIJE
@@ -151,12 +145,13 @@ public class CreateAllianceActivity extends AppCompatActivity {
                 }
 
                 if (sentCount[0] == totalInvitations) {
-                    Toast.makeText(this, "Savez kreiran i pozivnice poslate!", Toast.LENGTH_LONG).show();
+                    runOnUiThread(() ->
+                            Toast.makeText(CreateAllianceActivity.this, "Savez kreiran i pozivnice poslate!", Toast.LENGTH_LONG).show()
+                    );
                     finish();
                 }
             });
-
-            allianceRepository.sendInvitation(invitation, inviteLiveData);
         }
     }
+
 }
