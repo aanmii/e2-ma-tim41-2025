@@ -25,3 +25,28 @@ local.properties
 *.log
 /lint-results.html
 /lint-results.xml
+
+# Build folderi
+
+/app/build
+/.gradle
+
+# Firebase keys
+google-services.json
+*/google-services.json
+
+/.idea
+
+.gradle/
+
+/.externalNativeBuild
+/.cxx
+
+# Gradle
+
+build/
+**/build/
+
+Thumbs.db
+
+
