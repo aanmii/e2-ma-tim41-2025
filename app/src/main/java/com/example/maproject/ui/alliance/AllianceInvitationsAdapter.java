@@ -12,24 +12,25 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.maproject.R;
 import com.example.maproject.model.AllianceInvitation;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AllianceInvitationsAdapter extends RecyclerView.Adapter<AllianceInvitationsAdapter.InvitationViewHolder> {
 
-    private List<AllianceInvitation> invitations;
-    private final OnInvitationActionListener listener;
-
-    public interface OnInvitationActionListener {
-        void onAction(AllianceInvitation invitation, String action); // "ACCEPT" or "REJECT"
+    public interface InvitationActionListener {
+        void onAction(AllianceInvitation invitation);
     }
 
-    public AllianceInvitationsAdapter(List<AllianceInvitation> invitations, OnInvitationActionListener listener) {
-        this.invitations = invitations;
+    private List<AllianceInvitation> invitations;
+    private final InvitationActionListener listener;
+
+    public AllianceInvitationsAdapter(InvitationActionListener listener) {
+        this.invitations = new ArrayList<>();
         this.listener = listener;
     }
 
     public void updateInvitations(List<AllianceInvitation> newInvitations) {
-        this.invitations = newInvitations;
+        invitations = newInvitations;
         notifyDataSetChanged();
     }
 
@@ -44,7 +45,11 @@ public class AllianceInvitationsAdapter extends RecyclerView.Adapter<AllianceInv
     @Override
     public void onBindViewHolder(@NonNull InvitationViewHolder holder, int position) {
         AllianceInvitation invitation = invitations.get(position);
-        holder.bind(invitation, listener);
+        holder.senderTextView.setText(invitation.getSenderUsername());
+        holder.allianceTextView.setText(invitation.getAllianceName());
+
+        holder.acceptButton.setOnClickListener(v -> listener.onAction(invitation));
+        holder.rejectButton.setOnClickListener(v -> listener.onAction(invitation));
     }
 
     @Override
@@ -53,30 +58,15 @@ public class AllianceInvitationsAdapter extends RecyclerView.Adapter<AllianceInv
     }
 
     static class InvitationViewHolder extends RecyclerView.ViewHolder {
-        TextView allianceNameTextView;
-        TextView senderTextView;
-        Button acceptButton;
-        Button rejectButton;
+        TextView senderTextView, allianceTextView;
+        Button acceptButton, rejectButton;
 
         public InvitationViewHolder(@NonNull View itemView) {
             super(itemView);
-            allianceNameTextView = itemView.findViewById(R.id.allianceNameTextView);
             senderTextView = itemView.findViewById(R.id.senderTextView);
+            allianceTextView = itemView.findViewById(R.id.allianceNameTextView);
             acceptButton = itemView.findViewById(R.id.acceptButton);
             rejectButton = itemView.findViewById(R.id.rejectButton);
-        }
-
-        public void bind(AllianceInvitation invitation, OnInvitationActionListener listener) {
-            allianceNameTextView.setText(invitation.getAllianceName());
-            senderTextView.setText("Poslao/la: " + invitation.getSenderUsername());
-
-            // Postavljanje listenera za akciju (Prihvati/Odbij)
-            acceptButton.setOnClickListener(v -> listener.onAction(invitation, "ACCEPT"));
-            rejectButton.setOnClickListener(v -> listener.onAction(invitation, "REJECT"));
-
-            // Važno: Obezbediti da notifikacija ne može da se skloni dok se ne prihvati ili odbije
-            // To se postiže logikom u Repository-ju i Activity-ju, a ne ovde u Adapteru.
-            // Međutim, moramo osigurati da se pozivnica skloni nakon akcije.
         }
     }
 }

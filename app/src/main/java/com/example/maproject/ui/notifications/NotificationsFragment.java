@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,10 +16,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.maproject.R;
-import com.example.maproject.data.AllianceRepository;
 import com.example.maproject.data.NotificationRepository;
 import com.example.maproject.model.Notification;
-import com.example.maproject.ui.alliance.AllianceActivity; // Pretpostavljamo da imate AllianceActivity
+import com.example.maproject.ui.alliance.AllianceActivity;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
@@ -34,17 +32,10 @@ public class NotificationsFragment extends Fragment implements NotificationsAdap
 
     private NotificationsAdapter adapter;
     private NotificationRepository notificationRepository;
-    private AllianceRepository allianceRepository; // Treba nam za obradu pozivnica
-
     private String currentUserId;
 
-    public NotificationsFragment() {
-        // Obavezni prazan konstruktor
-    }
-
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_notifications, container, false);
     }
 
@@ -52,25 +43,20 @@ public class NotificationsFragment extends Fragment implements NotificationsAdap
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) return;
         currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
         notificationRepository = new NotificationRepository();
-        allianceRepository = new AllianceRepository();
 
-        initViews(view);
-        setupRecyclerView();
-        loadNotifications();
-    }
-
-    private void initViews(View view) {
         recyclerView = view.findViewById(R.id.notificationsRecyclerView);
         progressBar = view.findViewById(R.id.notificationsProgressBar);
         noNotificationsTextView = view.findViewById(R.id.noNotificationsTextView);
-    }
 
-    private void setupRecyclerView() {
         adapter = new NotificationsAdapter(new ArrayList<>(), this);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(adapter);
+
+        loadNotifications();
     }
 
     private void loadNotifications() {
@@ -88,46 +74,24 @@ public class NotificationsFragment extends Fragment implements NotificationsAdap
                 noNotificationsTextView.setVisibility(View.VISIBLE);
             }
         });
+
         notificationRepository.loadNotifications(currentUserId, notificationsLiveData);
     }
 
-
     @Override
     public void onNotificationClick(Notification notification) {
-        // Prvo označi notifikaciju kao pročitanu
-        if (!notification.isRead()) {
-            notificationRepository.markAsRead(notification.getNotificationId());
-        }
+        if (!notification.isRead()) notificationRepository.markAsRead(notification.getNotificationId());
 
         switch (notification.getType()) {
             case "ALLIANCE_INVITE":
-                // Preusmeri korisnika na ekran za Pozivnice (gde može da prihvati/odbije)
-                handleAllianceInvite(notification);
+                // Otvori pozivnice ekran
                 break;
-
             case "ALLIANCE_ACCEPTED":
             case "CHAT_MESSAGE":
-                // Preusmeri korisnika u Alliance/Chat aktivnost
-                handleAllianceMessage(notification);
+                Intent intent = new Intent(getActivity(), AllianceActivity.class);
+                intent.putExtra("ALLIANCE_ID", notification.getReferenceId());
+                startActivity(intent);
                 break;
-
-            // Ovde dodaj ostale tipove notifikacija (npr. MISSION_COMPLETED)
         }
-    }
-
-    private void handleAllianceInvite(Notification notification) {
-        // Pozivnica se odnosi na AllianceInvitation ID, preusmeriti na Invites/Alliance screen.
-        // Pretpostavljamo da imate aktivnost koja prikazuje sve pozivnice (InvitationsActivity)
-        Toast.makeText(getContext(), "Pregled pozivnica: " + notification.getContent(), Toast.LENGTH_SHORT).show();
-        // Intent intent = new Intent(getActivity(), InvitationsActivity.class);
-        // startActivity(intent);
-    }
-
-    private void handleAllianceMessage(Notification notification) {
-        // Preusmeri direktno u Alliance/Chat aktivnost
-        Intent intent = new Intent(getActivity(), AllianceActivity.class);
-        // Prosleđujemo Alliance ID da bi AllianceActivity znao koji chat da otvori.
-        intent.putExtra("ALLIANCE_ID", notification.getReferenceId());
-        startActivity(intent);
     }
 }

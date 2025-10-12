@@ -53,6 +53,18 @@
         <activity
             android:name=".ui.friends.FriendsActivity"
             android:exported="false"/>
+
+        <activity android:name=".ui.alliance.CreateAllianceActivity" />
+
+        <service
+            android:name=".service.MyFirebaseMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+
     </application>
 
 </manifest>

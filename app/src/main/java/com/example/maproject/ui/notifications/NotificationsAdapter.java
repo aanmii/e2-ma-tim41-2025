@@ -14,7 +14,6 @@ import com.example.maproject.model.Notification;
 import com.google.android.material.card.MaterialCardView;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -22,9 +21,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
 
     private List<Notification> notifications;
     private final OnNotificationClickListener listener;
-    // Format za prikaz vremena notifikacije
     private final SimpleDateFormat timeFormat = new SimpleDateFormat("dd.MM. HH:mm", Locale.getDefault());
-
 
     public interface OnNotificationClickListener {
         void onNotificationClick(Notification notification);
@@ -35,9 +32,6 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         this.listener = listener;
     }
 
-    /**
-     * Ažurira listu notifikacija i osvežava prikaz.
-     */
     public void updateNotifications(List<Notification> newNotifications) {
         this.notifications = newNotifications;
         notifyDataSetChanged();
@@ -62,14 +56,10 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         return notifications.size();
     }
 
-    /**
-     * ViewHolder za pojedinačnu stavku notifikacije.
-     */
     static class NotificationViewHolder extends RecyclerView.ViewHolder {
         MaterialCardView notificationCard;
         ImageView iconImageView;
-        TextView contentTextView;
-        TextView timeTextView;
+        TextView contentTextView, timeTextView;
         View readIndicator;
 
         public NotificationViewHolder(@NonNull View itemView) {
@@ -83,38 +73,27 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
 
         public void bind(Notification notification, OnNotificationClickListener listener, SimpleDateFormat timeFormat) {
             contentTextView.setText(notification.getContent());
-
-            // Prikaz vremena (pretpostavljamo da je timestamp long)
             timeTextView.setText(timeFormat.format(notification.getTimestamp()));
 
-            // Postavljanje ikone na osnovu tipa notifikacije
             int iconRes = getIconResForType(notification.getType());
             iconImageView.setImageResource(iconRes);
 
-            // Indikator nepročitane poruke (mala crvena tačka)
             readIndicator.setVisibility(notification.isRead() ? View.GONE : View.VISIBLE);
 
-            // Opciono: Postavljanje drugačije boje pozadine za nepročitane
             int bgColor = itemView.getContext().getResources().getColor(
                     notification.isRead() ? R.color.cardBackground : R.color.unreadNotificationBackground
             );
             notificationCard.setCardBackgroundColor(bgColor);
 
-            // Rukovanje klikom
             itemView.setOnClickListener(v -> listener.onNotificationClick(notification));
         }
 
-
         private int getIconResForType(String type) {
             switch (type) {
-                case "ALLIANCE_INVITE":
-                    return R.drawable.ic_alliance_invite;
-                case "ALLIANCE_ACCEPTED":
-                    return R.drawable.ic_alliance_accept;
-                case "CHAT_MESSAGE":
-                    return R.drawable.ic_chat_message;
-                default:
-                    return R.drawable.ic_notification; // Podrazumevana ikona
+                case "ALLIANCE_INVITE": return R.drawable.ic_alliance_invite;
+                case "ALLIANCE_ACCEPTED": return R.drawable.ic_alliance_accept;
+                case "CHAT_MESSAGE": return R.drawable.ic_chat_message;
+                default: return R.drawable.ic_notification;
             }
         }
     }
