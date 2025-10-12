@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.maproject.data.UserRepository;
 import com.example.maproject.ui.auth.LoginActivity;
+import com.example.maproject.ui.friends.FriendsActivity;
 import com.example.maproject.viewmodel.AuthViewModel;
 import com.example.maproject.viewmodel.ViewModelFactory;
 import com.google.firebase.auth.FirebaseAuth;
@@ -57,6 +58,12 @@ public class MainActivity extends AppCompatActivity {
         Button profileButton = findViewById(R.id.profileButton);
         profileButton.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+            startActivity(intent);
+        });
+
+        Button friendsButton = findViewById(R.id.friendsButton);
+        friendsButton.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, FriendsActivity.class);
             startActivity(intent);
         });
     }

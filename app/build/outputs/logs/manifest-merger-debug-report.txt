@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:2:1-55:12
-INJECTED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:2:1-55:12
-INJECTED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:2:1-55:12
-INJECTED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:2:1-55:12
+ADDED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:2:1-58:12
+INJECTED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:2:1-58:12
+INJECTED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:2:1-58:12
+INJECTED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:2:1-58:12
 MERGED from [androidx.databinding:viewbinding:8.10.1] /Users/ana/.gradle/caches/8.11.1/transforms/806c882a2d6dae1b26baf83083e3d497/transformed/viewbinding-8.10.1/AndroidManifest.xml:2:1-7:12
 MERGED from [com.google.android.material:material:1.10.0] /Users/ana/.gradle/caches/8.11.1/transforms/df5d1c58ebb45af2ebccfbe89a01c8b0/transformed/material-1.10.0/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /Users/ana/.gradle/caches/8.11.1/transforms/327bdc247f52595e9ff9f798e6258dfa/transformed/constraintlayout-2.1.4/AndroidManifest.xml:2:1-11:12
@@ -107,8 +107,8 @@ MERGED from [io.grpc:grpc-android:1.62.2] /Users/ana/.gradle/caches/8.11.1/trans
 	android:name
 		ADDED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:6:22-76
 application
-ADDED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:8:5-53:19
-INJECTED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:8:5-53:19
+ADDED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:8:5-56:19
+INJECTED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:8:5-56:19
 MERGED from [com.google.android.material:material:1.10.0] /Users/ana/.gradle/caches/8.11.1/transforms/df5d1c58ebb45af2ebccfbe89a01c8b0/transformed/material-1.10.0/AndroidManifest.xml:22:5-20
 MERGED from [com.google.android.material:material:1.10.0] /Users/ana/.gradle/caches/8.11.1/transforms/df5d1c58ebb45af2ebccfbe89a01c8b0/transformed/material-1.10.0/AndroidManifest.xml:22:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /Users/ana/.gradle/caches/8.11.1/transforms/327bdc247f52595e9ff9f798e6258dfa/transformed/constraintlayout-2.1.4/AndroidManifest.xml:9:5-20
@@ -227,6 +227,12 @@ ADDED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManife
 		ADDED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:51:13-37
 	android:name
 		ADDED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:50:13-59
+activity#com.example.maproject.ui.friends.FriendsActivity
+ADDED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:53:9-55:39
+	android:exported
+		ADDED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:55:13-37
+	android:name
+		ADDED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml:54:13-55
 uses-sdk
 INJECTED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /Users/ana/AndroidStudioProjects/MAProject/app/src/main/AndroidManifest.xml

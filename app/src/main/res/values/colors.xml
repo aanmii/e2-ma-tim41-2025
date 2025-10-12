@@ -36,4 +36,6 @@
     <color name="error">#FF9AA2</color>
     <color name="warning">#FFD4A3</color>
     <color name="info">#A8DAFF</color>
+
+    <color name="unreadNotificationBackground">#E8F5E9</color>
 </resources>

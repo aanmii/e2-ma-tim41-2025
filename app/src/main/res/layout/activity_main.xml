@@ -37,4 +37,12 @@
         android:text="Logout"
         android:padding="16dp"/>
 
+    <Button
+        android:id="@+id/friendsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="👥 Friends"
+        android:padding="16dp"
+        android:layout_marginBottom="16dp"/>
+
 </LinearLayout>
