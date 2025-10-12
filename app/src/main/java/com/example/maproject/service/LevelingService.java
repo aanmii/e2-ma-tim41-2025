@@ -12,11 +12,11 @@ public class LevelingService {
     private static final Map<Integer, String> TITLES = new HashMap<>();
 
     static {
-        TITLES.put(1, "Početnik");
-        TITLES.put(2, "Iskusni Avanturista");
-        TITLES.put(3, "Majstor Navika");
-        TITLES.put(4, "Šampion Volje");
-        TITLES.put(5, "Apsolutni Heroj");
+        TITLES.put(1, "Sparkle");
+        TITLES.put(2, "Rising Star");
+        TITLES.put(3, "Brilliant Mind");
+        TITLES.put(4, "Master Creator");
+        TITLES.put(5, "Ultimate Visionary");
     }
 
     private long roundUpToNextHundred(double value) {
@@ -55,7 +55,7 @@ public class LevelingService {
     }
 
     public String getTitleForLevel(int level) {
-        return TITLES.getOrDefault(level, "Neustrašivi");
+        return TITLES.getOrDefault(level, "Sparkle");
     }
 
     public long getBaseTaskXP() {

@@ -11,7 +11,6 @@ public class Task {
     private String categoryId;
     private String categoryName;
 
-    // Težina (difficulty)
     public enum Difficulty {
         VERY_EASY(1),    // 1 XP
         EASY(3),         // 3 XP
@@ -23,7 +22,6 @@ public class Task {
         public int getXp() { return xp; }
     }
 
-    // Bitnost (importance)
     public enum Importance {
         NORMAL(1),           // 1 XP
         IMPORTANT(3),        // 3 XP
@@ -35,7 +33,6 @@ public class Task {
         public int getXp() { return xp; }
     }
 
-    // Status zadatka
     public enum Status {
         ACTIVE,
         COMPLETED,
@@ -52,7 +49,7 @@ public class Task {
     private long completedTime;
     private long createdTime;
 
-    // Prazan konstruktor za Firebase
+
     public Task() {
     }
 
@@ -69,7 +66,6 @@ public class Task {
         this.createdTime = System.currentTimeMillis();
     }
 
-    // Getteri
     public String getTaskId() { return taskId; }
     public String getUserId() { return userId; }
     public String getTitle() { return title; }
@@ -84,7 +80,6 @@ public class Task {
     public long getCompletedTime() { return completedTime; }
     public long getCreatedTime() { return createdTime; }
 
-    // Setteri
     public void setTaskId(String taskId) { this.taskId = taskId; }
     public void setUserId(String userId) { this.userId = userId; }
     public void setTitle(String title) { this.title = title; }
@@ -99,12 +94,11 @@ public class Task {
     public void setCompletedTime(long completedTime) { this.completedTime = completedTime; }
     public void setCreatedTime(long createdTime) { this.createdTime = createdTime; }
 
-    // Izračunaj ukupan XP zadatka
+
     public int getTotalXP() {
         return difficulty.getXp() + importance.getXp();
     }
 
-    // Konverzija u Map za Firestore
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("taskId", taskId);

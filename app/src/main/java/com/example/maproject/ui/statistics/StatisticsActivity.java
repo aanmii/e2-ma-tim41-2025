@@ -57,7 +57,7 @@ public class StatisticsActivity extends AppCompatActivity {
             loadStatistics();
             setupBackButton();
         } else {
-            Toast.makeText(this, "Greška: Korisnik nije prijavljen.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Error: user is not logged in.", Toast.LENGTH_LONG).show();
             finish();
         }
     }
@@ -109,12 +109,12 @@ public class StatisticsActivity extends AppCompatActivity {
         Long cancelled = document != null ? document.getLong("totalTasksCancelled") : 0L;
 
         List<PieEntry> entries = new ArrayList<>();
-        if (completed != null && completed > 0) entries.add(new PieEntry(completed, "Završeno"));
-        if (notDone != null && notDone > 0) entries.add(new PieEntry(notDone, "Neurađeno"));
-        if (cancelled != null && cancelled > 0) entries.add(new PieEntry(cancelled, "Otkazano"));
+        if (completed != null && completed > 0) entries.add(new PieEntry(completed, "Completed"));
+        if (notDone != null && notDone > 0) entries.add(new PieEntry(notDone, "Not done"));
+        if (cancelled != null && cancelled > 0) entries.add(new PieEntry(cancelled, "Cancelled"));
 
         if (entries.isEmpty()) {
-            entries.add(new PieEntry(1, "Nema podataka"));
+            entries.add(new PieEntry(1, "No data"));
         }
 
         PieDataSet dataSet = new PieDataSet(entries, "");
@@ -206,7 +206,7 @@ public class StatisticsActivity extends AppCompatActivity {
         entries.add(new Entry(5, 2.0f));
         entries.add(new Entry(6, 1.9f));
 
-        LineDataSet dataSet = new LineDataSet(entries, "Prosečna težina");
+        LineDataSet dataSet = new LineDataSet(entries, "Average difficulty");
 
         dataSet.setColor(Color.parseColor("#D4BAFF"));
         dataSet.setCircleColor(Color.parseColor("#D4BAFF"));
@@ -247,7 +247,7 @@ public class StatisticsActivity extends AppCompatActivity {
         entries.add(new Entry(5, 85));
         entries.add(new Entry(6, 110));
 
-        LineDataSet dataSet = new LineDataSet(entries, "XP po danu");
+        LineDataSet dataSet = new LineDataSet(entries, "XP per day");
 
         dataSet.setColor(Color.parseColor("#A8DAFF"));
         dataSet.setCircleColor(Color.parseColor("#A8DAFF"));

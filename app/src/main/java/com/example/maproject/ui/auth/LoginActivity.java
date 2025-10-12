@@ -28,11 +28,11 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Proveri da li je korisnik već ulogovan
+
         sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
         boolean isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false);
 
-        // Dodatna provera sa Firebase
+
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (isLoggedIn && currentUser != null && currentUser.isEmailVerified()) {
             navigateToMain();
@@ -41,37 +41,34 @@ public class LoginActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_login);
 
-        // Inicijalizuj ViewModel
         UserRepository userRepository = new UserRepository();
         ViewModelFactory factory = new ViewModelFactory(userRepository);
         authViewModel = new ViewModelProvider(this, factory).get(AuthViewModel.class);
 
-        // Pronađi View elemente
         emailEditText = findViewById(R.id.emailEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         loginButton = findViewById(R.id.loginButton);
         goToRegisterButton = findViewById(R.id.goToRegisterButton);
 
-        // Login dugme
         loginButton.setOnClickListener(v -> {
             String email = emailEditText.getText().toString().trim();
             String password = passwordEditText.getText().toString().trim();
             authViewModel.loginUser(email, password);
         });
 
-        // Observuj login status
+
         authViewModel.loginStatus.observe(this, status -> {
             if (status.equals("LOGIN_SUCCESS")) {
-                // Sačuvaj login status
+
                 sharedPreferences.edit().putBoolean("isLoggedIn", true).apply();
-                Toast.makeText(this, "Uspešna prijava!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Successful login!", Toast.LENGTH_SHORT).show();
                 navigateToMain();
             } else {
                 Toast.makeText(this, status, Toast.LENGTH_LONG).show();
             }
         });
 
-        // Dugme za prelazak na Registraciju
+
         goToRegisterButton.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
             startActivity(intent);

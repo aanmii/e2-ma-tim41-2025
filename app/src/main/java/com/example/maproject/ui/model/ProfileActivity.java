@@ -96,10 +96,10 @@ public class ProfileActivity extends AppCompatActivity {
                         String title = document.getString("title");
                         titleTextView.setText(title != null ? title : "Početnik");
 
-                        // Koristi Object čitanje za robustnost numeričkih tipova
+
                         Object levelObj = document.get("level");
                         int currentLevel = (levelObj instanceof Number) ? ((Number) levelObj).intValue() : 0;
-                        levelTextView.setText("⭐ LEVEL " + currentLevel);
+                        levelTextView.setText("LEVEL " + currentLevel);
 
                         setTitleIcon(currentLevel);
 
@@ -119,7 +119,7 @@ public class ProfileActivity extends AppCompatActivity {
                         long badges = (badgesObj instanceof Number) ? ((Number) badgesObj).longValue() : 0L;
                         badgesTextView.setText(String.valueOf(badges));
 
-                        // OVO JE KRITIČNO POLJE ZA CURRENT XP
+
                         Object currentLevelXpObj = document.get("currentLevelXP");
                         long currentXP = (currentLevelXpObj instanceof Number) ? ((Number) currentLevelXpObj).longValue() : 0L;
 
@@ -138,8 +138,8 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void updateLevelAndXPView(int currentLevel, long currentXP, long requiredXPForNextLevel) {
-        levelTextView.setText("⭐ LEVEL " + currentLevel);
-        // OVO SETUJE TEKST (npr. 44/3300)
+        levelTextView.setText("LEVEL " + currentLevel);
+
         xpProgressTextView.setText(currentXP + "/" + requiredXPForNextLevel);
 
         double percentage = requiredXPForNextLevel > 0 ? (double) currentXP / requiredXPForNextLevel : 0.0;
@@ -150,7 +150,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         int xpImageIndex;
 
-        // LOGIKA ZA 5 SLIKA (1-5), praga 25%
+
         if (percentage <= 0.01) {
             xpImageIndex = 1;
         } else if (percentage <= 0.25) {
