@@ -23,6 +23,7 @@
     <color name="textPrimary">#2C3E50</color>
     <color name="textSecondary">#7F8C9B</color>
     <color name="textWhite">#FFFFFF</color>
+    <color name="unreadNotificationBackground">#E8F5E9</color>
     <color name="warning">#FFD4A3</color>
     <color name="xp">#B5EAD7</color>
     <string name="already_have_account">I already have account</string>
