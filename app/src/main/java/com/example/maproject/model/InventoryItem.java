@@ -6,6 +6,8 @@ public class InventoryItem {
     private String type; // potion, clothing, weapon
     private int quantity;
     private int remainingBattles; // za odeću / jednokratne napitke
+    private boolean active; // da li je oprema aktivna
+
 
     public InventoryItem() {}
 
@@ -28,4 +30,8 @@ public class InventoryItem {
     public void setType(String type) { this.type = type; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
     public void setRemainingBattles(int remainingBattles) { this.remainingBattles = remainingBattles; }
+
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
+
 }

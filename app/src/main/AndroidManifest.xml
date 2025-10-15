@@ -66,6 +66,9 @@
         <activity
             android:name=".ui.shop.ShopActivity"
             android:exported="false" /> <!-- Firebase Messaging Service -->
+        <activity
+            android:name=".ui.model.InventoryActivity"
+            android:exported="false" /> <!-- Firebase Messaging Service -->
         <service
             android:name=".service.MyFirebaseMessagingService"
             android:exported="false">
