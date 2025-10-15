@@ -15,6 +15,7 @@
         android:padding="16dp"
         android:gravity="center_vertical">
 
+        <!-- Slika proizvoda -->
         <ImageView
             android:id="@+id/item_image"
             android:layout_width="64dp"
@@ -22,6 +23,7 @@
             android:contentDescription="@string/app_name"
             android:layout_marginEnd="16dp" />
 
+        <!-- Naslov i opis -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -43,8 +45,34 @@
                 android:layout_height="wrap_content"
                 android:text="Opis proizvoda"
                 android:textColor="@color/textSecondary" />
+
+            <!-- Cena sa ikonkom novčića -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="4dp">
+
+                <ImageView
+                    android:id="@+id/coin_icon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/coins"
+                    android:contentDescription="Coin icon" />
+
+                <TextView
+                    android:id="@+id/item_price"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0"
+                    android:textSize="14sp"
+                    android:textColor="@color/textPrimary"
+                    android:layout_marginStart="4dp"/>
+            </LinearLayout>
         </LinearLayout>
 
+        <!-- Dugme za kupovinu -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/buy_button"
             android:layout_width="wrap_content"
@@ -54,6 +82,7 @@
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
             app:strokeColor="@color/primary"
             app:strokeWidth="2dp"
-            android:textColor="@color/primary" />
+            android:textColor="@color/primary"
+            android:layout_marginStart="8dp"/>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -4,6 +4,7 @@ import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.maproject.model.InventoryItem;
 import com.example.maproject.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -113,9 +114,84 @@ public class UserRepository {
                 });
     }
 
-    public FirebaseUser getCurrentUser() {
-        return auth.getCurrentUser();
+    public void buyItem(String userId, InventoryItem item, MutableLiveData<String> status) {
+        db.collection("users").document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists()) {
+                        status.postValue("Korisnik ne postoji!");
+                        return;
+                    }
+
+                    User user = documentSnapshot.toObject(User.class);
+                    if (user == null) {
+                        status.postValue("Greška pri učitavanju korisnika.");
+                        return;
+                    }
+
+                    // Provera da li korisnik ima dovoljno novčića
+                    int cost = calculateItemCost(item);
+                    if (user.getCoins() < cost) {
+                        status.postValue("Nemate dovoljno novčića!");
+                        return;
+                    }
+
+                    // Oduzmi novčiće
+                    user.setCoins(user.getCoins() - cost);
+
+                    // Dodaj item
+                    user.addItemToEquipment(item);
+
+                    // Sačuvaj nazad u Firestore
+                    db.collection("users").document(userId).set(user.toMap())
+                            .addOnSuccessListener(aVoid -> status.postValue("Kupljeno: " + item.getName()))
+                            .addOnFailureListener(e -> status.postValue("Greška prilikom kupovine."));
+                })
+                .addOnFailureListener(e -> status.postValue("Greška pri učitavanju korisnika."));
     }
+
+    private int calculateItemCost(InventoryItem item) {
+        // TODO: implementiraj logiku za cene na osnovu tipa i opisa
+        // Primer hardkodiranih cena:
+        switch (item.getItemId()) {
+            case "potion1": return 50;
+            case "potion2": return 70;
+            case "potion3": return 200;
+            case "potion4": return 1000;
+            case "gloves": return 60;
+            case "boots": return 80;
+            case "shield": return 60;
+            case "sword": return 0; // oružje samo od boss-a
+            case "bow": return 0;
+            default: return 100;
+        }
+    }
+
+
+
+
+    public void getUser(String userId, OnUserLoadedListener listener) {
+        db.collection("users").document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists()) {
+                        listener.onUserLoaded(null);
+                        return;
+                    }
+
+                    User user = documentSnapshot.toObject(User.class);
+                    listener.onUserLoaded(user);
+                })
+                .addOnFailureListener(e -> {
+                    listener.onUserLoaded(null);
+                });
+    }
+
+    // Callback interface
+    public interface OnUserLoadedListener {
+        void onUserLoaded(User user);
+    }
+
 
     public void logout() {
         auth.signOut();

@@ -17,8 +17,8 @@ public class User {
     private long totalExperiencePoints;
     private int coins;
     private int badges;
-    private List<String> equipment;
-    private List<String> activeEquipment;
+    private List<InventoryItem> equipment;        // Sva kupljena oprema
+    private List<InventoryItem> activeEquipment;  // Trenutno aktivna odeća/napitci
     private boolean isEmailVerified;
     private long registrationTimestamp;
 
@@ -45,6 +45,7 @@ public class User {
         this.registrationTimestamp = System.currentTimeMillis();
     }
 
+    // --- Getteri i setteri ---
     public String getUserId() { return userId; }
     public String getEmail() { return email; }
     public String getUsername() { return username; }
@@ -56,8 +57,8 @@ public class User {
     public long getTotalExperiencePoints() { return totalExperiencePoints; }
     public int getCoins() { return coins; }
     public int getBadges() { return badges; }
-    public List<String> getEquipment() { return equipment; }
-    public List<String> getActiveEquipment() { return activeEquipment; }
+    public List<InventoryItem> getEquipment() { return equipment; }
+    public List<InventoryItem> getActiveEquipment() { return activeEquipment; }
     public boolean isEmailVerified() { return isEmailVerified; }
     public long getRegistrationTimestamp() { return registrationTimestamp; }
 
@@ -72,11 +73,25 @@ public class User {
     public void setTotalExperiencePoints(long totalExperiencePoints) { this.totalExperiencePoints = totalExperiencePoints; }
     public void setCoins(int coins) { this.coins = coins; }
     public void setBadges(int badges) { this.badges = badges; }
-    public void setEquipment(List<String> equipment) { this.equipment = equipment; }
-    public void setActiveEquipment(List<String> activeEquipment) { this.activeEquipment = activeEquipment; }
+    public void setEquipment(List<InventoryItem> equipment) { this.equipment = equipment; }
+    public void setActiveEquipment(List<InventoryItem> activeEquipment) { this.activeEquipment = activeEquipment; }
     public void setEmailVerified(boolean emailVerified) { isEmailVerified = emailVerified; }
     public void setRegistrationTimestamp(long registrationTimestamp) { this.registrationTimestamp = registrationTimestamp; }
 
+    // --- Dodavanje opreme ---
+    public void addItemToEquipment(InventoryItem item) {
+        for (InventoryItem existing : equipment) {
+            if (existing.getItemId().equals(item.getItemId())) {
+                existing.setQuantity(existing.getQuantity() + item.getQuantity());
+                // Ako je odeća sa trajanjem
+                existing.setRemainingBattles(existing.getRemainingBattles() + item.getRemainingBattles());
+                return;
+            }
+        }
+        equipment.add(item);
+    }
+
+    // --- Map za Firestore ---
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
