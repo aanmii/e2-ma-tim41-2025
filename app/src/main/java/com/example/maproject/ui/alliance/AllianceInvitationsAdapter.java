@@ -24,14 +24,21 @@ public class AllianceInvitationsAdapter extends RecyclerView.Adapter<AllianceInv
 
     private List<AllianceInvitation> invitations;
     private final InvitationActionListener listener;
+    private boolean userHasAlliance;
 
     public AllianceInvitationsAdapter(InvitationActionListener listener) {
         this.invitations = new ArrayList<>();
         this.listener = listener;
+        this.userHasAlliance = false;
     }
 
     public void updateInvitations(List<AllianceInvitation> newInvitations) {
         invitations = newInvitations;
+        notifyDataSetChanged();
+    }
+
+    public void setUserHasAlliance(boolean hasAlliance) {
+        this.userHasAlliance = hasAlliance;
         notifyDataSetChanged();
     }
 
