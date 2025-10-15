@@ -2,6 +2,7 @@ package com.example.maproject;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -12,14 +13,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.maproject.data.AllianceRepository;
 import com.example.maproject.data.NotificationRepository;
 import com.example.maproject.data.UserRepository;
 import com.example.maproject.model.AllianceInvitation;
-import com.example.maproject.model.Notification;
+import com.example.maproject.service.NotificationListenerService;
 import com.example.maproject.ui.alliance.AllianceActivity;
 import com.example.maproject.ui.auth.LoginActivity;
 import com.example.maproject.ui.friends.FriendsActivity;
@@ -33,9 +33,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.messaging.FirebaseMessaging;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -53,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
 
     private String currentUserId;
     private String currentUsername;
+
+    private ListenerRegistration invitationListener;
+    private ListenerRegistration notificationListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
+        setIntent(intent);
         handleNotificationIntent(intent);
     }
 
@@ -101,14 +105,30 @@ public class MainActivity extends AppCompatActivity {
             welcomeTextView.setText("Dobrodošli! 👋");
 
             loadUserData();
-
             initializeFCMToken();
-
             listenForAllianceInvitations();
-
             setupNotificationsBadge();
+
+            // Pokreni servis za sistemske notifikacije SAMO na Android 8.0+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startNotificationListenerService();
+            }
         } else {
             navigateToLogin();
+        }
+    }
+
+    private void startNotificationListenerService() {
+        try {
+            Intent serviceIntent = new Intent(this, NotificationListenerService.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(serviceIntent);
+            } else {
+                startService(serviceIntent);
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Error starting notification service", e);
+            // Ne prekidaj app ako servis ne uspe da se pokrene
         }
     }
 
@@ -146,29 +166,45 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupNotificationsBadge() {
-        MutableLiveData<List<Notification>> notificationsLiveData = new MutableLiveData<>();
+        if (notificationListener != null) {
+            notificationListener.remove();
+        }
 
-        notificationsLiveData.observe(this, notifications -> {
-            int unreadCount = 0;
-            if (notifications != null) {
-                for (Notification n : notifications) {
-                    if (!n.isRead()) unreadCount++;
-                }
-            }
+        notificationListener = db.collection("notifications")
+                .whereEqualTo("receiverId", currentUserId)
+                .whereEqualTo("isRead", false)
+                .addSnapshotListener((querySnapshot, error) -> {
+                    if (error != null) {
+                        Log.e(TAG, "Error listening for notifications", error);
+                        return;
+                    }
 
-            if (unreadCount > 0) {
-                notificationBadgeTextView.setText(String.valueOf(unreadCount));
-                notificationBadgeTextView.setVisibility(android.view.View.VISIBLE);
-            } else {
-                notificationBadgeTextView.setVisibility(android.view.View.GONE);
-            }
-        });
+                    if (querySnapshot != null) {
+                        int unreadCount = querySnapshot.size();
 
-        notificationRepository.loadNotifications(currentUserId, notificationsLiveData);
+                        Log.d(TAG, "Unread notifications count: " + unreadCount);
+
+                        for (QueryDocumentSnapshot doc : querySnapshot) {
+                            Log.d(TAG, "Notification: " + doc.getId() + " - " +
+                                    doc.getString("content") + " (read: " + doc.getBoolean("isRead") + ")");
+                        }
+
+                        if (unreadCount > 0) {
+                            notificationBadgeTextView.setText(String.valueOf(unreadCount));
+                            notificationBadgeTextView.setVisibility(View.VISIBLE);
+                        } else {
+                            notificationBadgeTextView.setVisibility(View.GONE);
+                        }
+                    }
+                });
     }
 
     private void listenForAllianceInvitations() {
-        db.collection("invitations")
+        if (invitationListener != null) {
+            invitationListener.remove();
+        }
+
+        invitationListener = db.collection("invitations")
                 .whereEqualTo("receiverId", currentUserId)
                 .whereEqualTo("status", "PENDING")
                 .addSnapshotListener((value, error) -> {
@@ -181,6 +217,7 @@ public class MainActivity extends AppCompatActivity {
                         for (DocumentChange dc : value.getDocumentChanges()) {
                             if (dc.getType() == DocumentChange.Type.ADDED) {
                                 AllianceInvitation invitation = dc.getDocument().toObject(AllianceInvitation.class);
+                                invitation.setInvitationId(dc.getDocument().getId());
                                 showInvitationDialog(invitation);
                             }
                         }
@@ -200,6 +237,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void acceptInvitation(AllianceInvitation invitation) {
+        if (invitation.getInvitationId() == null || invitation.getInvitationId().isEmpty()) {
+            Toast.makeText(this, "Greška: Neispravan poziv", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         allianceRepository.respondToInvitation(invitation, currentUserId, currentUsername, success -> {
             runOnUiThread(() -> {
                 if (success) {
@@ -217,6 +259,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void declineInvitation(AllianceInvitation invitation) {
+        if (invitation.getInvitationId() == null || invitation.getInvitationId().isEmpty()) {
+            Toast.makeText(this, "Greška: Neispravan poziv", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         db.collection("invitations").document(invitation.getInvitationId())
                 .update("status", "REJECTED")
                 .addOnSuccessListener(aVoid -> {
@@ -251,6 +298,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupButtons() {
         logoutButton.setOnClickListener(v -> {
+            // Zaustavi servis za notifikacije
+            stopService(new Intent(this, NotificationListenerService.class));
+
             authViewModel.logout();
             sharedPreferences.edit().putBoolean("isLoggedIn", false).apply();
             Toast.makeText(this, "Uspešno ste se odjavili", Toast.LENGTH_SHORT).show();
@@ -273,17 +323,34 @@ public class MainActivity extends AppCompatActivity {
         });
 
         allianceButton.setOnClickListener(v -> {
-            MutableLiveData<com.example.maproject.model.Alliance> allianceLiveData = new MutableLiveData<>();
-            allianceLiveData.observe(this, alliance -> {
-                if (alliance != null) {
-                    Intent intent = new Intent(this, AllianceActivity.class);
-                    intent.putExtra("ALLIANCE_ID", alliance.getAllianceId());
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(this, "Nisi član nijednog saveza", Toast.LENGTH_SHORT).show();
-                }
-            });
-            allianceRepository.loadUserAlliance(currentUserId, allianceLiveData);
+            if (currentUserId == null) {
+                Toast.makeText(this, "Greška: Korisnički ID nije dostupan.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            db.collection("users").document(currentUserId)
+                    .get()
+                    .addOnSuccessListener(userDoc -> {
+                        if (userDoc.exists()) {
+                            String allianceId = userDoc.getString("currentAllianceId");
+
+                            if (allianceId != null && !allianceId.isEmpty()) {
+                                Log.d(TAG, "Korisnik je clan saveza: " + allianceId);
+                                Intent intent = new Intent(this, AllianceActivity.class);
+                                intent.putExtra("ALLIANCE_ID", allianceId);
+                                startActivity(intent);
+                            } else {
+                                Log.d(TAG, "Korisnik nije clan nijednog saveza.");
+                                Toast.makeText(this, "Nisi član nijednog saveza", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Toast.makeText(this, "Greška: Podaci o korisniku nisu pronađeni.", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.e(TAG, "Greška pri proveri statusa saveza", e);
+                        Toast.makeText(this, "Greška pri učitavanju saveza", Toast.LENGTH_SHORT).show();
+                    });
         });
     }
 
@@ -299,6 +366,17 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if (currentUserId != null) {
             setupNotificationsBadge();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (invitationListener != null) {
+            invitationListener.remove();
+        }
+        if (notificationListener != null) {
+            notificationListener.remove();
         }
     }
 }

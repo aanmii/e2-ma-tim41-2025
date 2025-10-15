@@ -16,7 +16,6 @@ import com.example.maproject.data.FriendsRepository;
 import com.example.maproject.data.NotificationRepository;
 import com.example.maproject.model.Alliance;
 import com.example.maproject.model.AllianceInvitation;
-import com.example.maproject.model.Notification;
 import com.example.maproject.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -108,10 +107,8 @@ public class CreateAllianceActivity extends AppCompatActivity {
 
         Alliance alliance = new Alliance(name, currentUserId, currentUsername);
 
-        // Koristimo callback umesto MutableLiveData
         allianceRepository.createAlliance(alliance, success -> {
             if (success) {
-                // Prosleđujemo allianceId iz samog objekta
                 sendInvitations(alliance.getAllianceId(), alliance.getName());
             } else {
                 runOnUiThread(() ->
@@ -120,7 +117,6 @@ public class CreateAllianceActivity extends AppCompatActivity {
             }
         });
     }
-
 
     private void sendInvitations(String allianceId, String allianceName) {
         int totalInvitations = selectedFriends.size();
@@ -134,24 +130,30 @@ public class CreateAllianceActivity extends AppCompatActivity {
             allianceRepository.sendInvitation(invitation, success -> {
                 sentCount[0]++;
                 if (success) {
-                    // SLANJE SISTEMSKE NOTIFIKACIJE
-                    Notification notification = new Notification(
+                    // VAŽNO: Moramo da sačekamo da se pozivnica kreira da bismo dobili njen ID
+                    // Pozivnica se već kreirana u Firestore, sada šaljemo notifikaciju
+
+                    // Kreiraj notifikaciju sa allianceId kao referenceId
+                    notificationRepository.createNotification(
                             friend.getUserId(),
                             "ALLIANCE_INVITE",
-                            currentUsername + " te je pozvao/la u savez " + allianceName + ".",
-                            invitation.getInvitationId()
+                            currentUsername + " te je pozvao/la u savez " + allianceName,
+                            allianceId,  // Koristimo allianceId umesto invitationId
+                            notifSuccess -> {
+                                if (!notifSuccess) {
+                                    android.util.Log.e("CreateAlliance", "Failed to send notification to " + friend.getUsername());
+                                }
+                            }
                     );
-                    notificationRepository.sendNotification(notification);
                 }
 
                 if (sentCount[0] == totalInvitations) {
-                    runOnUiThread(() ->
-                            Toast.makeText(CreateAllianceActivity.this, "Savez kreiran i pozivnice poslate!", Toast.LENGTH_LONG).show()
-                    );
-                    finish();
+                    runOnUiThread(() -> {
+                        Toast.makeText(CreateAllianceActivity.this, "Savez kreiran i pozivnice poslate!", Toast.LENGTH_LONG).show();
+                        finish();
+                    });
                 }
             });
         }
     }
-
 }

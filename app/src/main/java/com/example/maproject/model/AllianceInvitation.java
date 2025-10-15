@@ -1,5 +1,8 @@
 package com.example.maproject.model;
 
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.Timestamp; // Dodat import za Firebase Timestamp
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,7 +13,7 @@ public class AllianceInvitation {
     private String senderId;
     private String senderUsername;
     private String receiverId;
-    private long sentAt;
+    private Timestamp sentAt; // Izmenjeno iz 'long' u Firebase 'Timestamp'
     private String status; // "PENDING", "ACCEPTED", "REJECTED"
 
     public AllianceInvitation() {
@@ -22,7 +25,8 @@ public class AllianceInvitation {
         this.senderId = senderId;
         this.senderUsername = senderUsername;
         this.receiverId = receiverId;
-        this.sentAt = System.currentTimeMillis();
+        // Uklonjeno je postavljanje 'sentAt' ovde.
+        // Vreme će biti postavljeno od strane servera korišćenjem FieldValue.serverTimestamp() u toMap().
         this.status = "PENDING";
     }
 
@@ -33,7 +37,8 @@ public class AllianceInvitation {
     public String getSenderId() { return senderId; }
     public String getSenderUsername() { return senderUsername; }
     public String getReceiverId() { return receiverId; }
-    public long getSentAt() { return sentAt; }
+    // Vraća Firebase Timestamp
+    public Timestamp getSentAt() { return sentAt; }
     public String getStatus() { return status; }
 
     // Setteri
@@ -43,18 +48,22 @@ public class AllianceInvitation {
     public void setSenderId(String senderId) { this.senderId = senderId; }
     public void setSenderUsername(String senderUsername) { this.senderUsername = senderUsername; }
     public void setReceiverId(String receiverId) { this.receiverId = receiverId; }
-    public void setSentAt(long sentAt) { this.sentAt = sentAt; }
+    // Prihvata Firebase Timestamp
+    public void setSentAt(Timestamp sentAt) { this.sentAt = sentAt; }
     public void setStatus(String status) { this.status = status; }
 
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
+        // Iznenađujuće, Firestore ne zahteva 'invitationId' u map-i ako koristite setId() i set(data)
+        // ali ostavljamo za potpunost:
         map.put("invitationId", invitationId);
         map.put("allianceId", allianceId);
         map.put("allianceName", allianceName);
         map.put("senderId", senderId);
         map.put("senderUsername", senderUsername);
         map.put("receiverId", receiverId);
-        map.put("sentAt", sentAt);
+        // KRITIČNA POPRAVKA: Koristite serverTimestamp za novo vreme slanja
+        map.put("sentAt", FieldValue.serverTimestamp());
         map.put("status", status);
         return map;
     }

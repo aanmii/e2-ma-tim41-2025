@@ -1,5 +1,6 @@
 package com.example.maproject.ui.alliance;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +17,7 @@ import com.example.maproject.data.AllianceRepository;
 import com.example.maproject.model.Alliance;
 import com.example.maproject.model.AllianceInvitation;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,7 @@ import java.util.Map;
 public class AllianceActivity extends AppCompatActivity {
 
     private AllianceRepository allianceRepository;
+    private FirebaseFirestore db;
     private String currentUserId;
     private String currentUsername;
 
@@ -42,6 +45,7 @@ public class AllianceActivity extends AppCompatActivity {
 
         currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         allianceRepository = new AllianceRepository();
+        db = FirebaseFirestore.getInstance();
 
         initViews();
         loadCurrentUsername();
@@ -72,7 +76,17 @@ public class AllianceActivity extends AppCompatActivity {
 
     private void setupInvitationsRecyclerView() {
         invitationsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        invitationsAdapter = new AllianceInvitationsAdapter(invitation -> handleInvitationAction(invitation));
+        invitationsAdapter = new AllianceInvitationsAdapter(new AllianceInvitationsAdapter.InvitationActionListener() {
+            @Override
+            public void onAccept(AllianceInvitation invitation) {
+                handleAcceptInvitation(invitation);
+            }
+
+            @Override
+            public void onReject(AllianceInvitation invitation) {
+                handleRejectInvitation(invitation);
+            }
+        });
         invitationsRecyclerView.setAdapter(invitationsAdapter);
     }
 
@@ -138,32 +152,66 @@ public class AllianceActivity extends AppCompatActivity {
         chatButton.setOnClickListener(v -> openChat(alliance.getAllianceId(), alliance.getName()));
     }
 
-    private void handleInvitationAction(AllianceInvitation invitation) {
+    private void handleAcceptInvitation(AllianceInvitation invitation) {
         allianceRepository.respondToInvitation(invitation, currentUserId, currentUsername, success -> {
-            if (success) {
-                Toast.makeText(this, "Uspešno prihvaćen poziv u savez " + invitation.getAllianceName(), Toast.LENGTH_SHORT).show();
-                observeAllianceAndInvitations(); // refresh UI
-            } else {
-                Toast.makeText(this, "Nije moguće: Misija u starom savezu je aktivna!", Toast.LENGTH_LONG).show();
-            }
+            runOnUiThread(() -> {
+                if (success) {
+                    Toast.makeText(this, "Uspešno prihvaćen poziv u savez " + invitation.getAllianceName(), Toast.LENGTH_SHORT).show();
+                    observeAllianceAndInvitations();
+                } else {
+                    Toast.makeText(this, "Nije moguće: Misija u starom savezu je aktivna!", Toast.LENGTH_LONG).show();
+                }
+            });
         });
+    }
+
+    private void handleRejectInvitation(AllianceInvitation invitation) {
+        if (invitation.getInvitationId() == null || invitation.getInvitationId().isEmpty()) {
+            Toast.makeText(this, "Greška: Neispravan poziv", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("invitations").document(invitation.getInvitationId())
+                .update("status", "REJECTED")
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Poziv odbijen", Toast.LENGTH_SHORT).show();
+                    observeInvitations();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Greška pri odbijanju poziva", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void deleteAlliance(String allianceId) {
         allianceRepository.deleteAlliance(allianceId, success -> {
-            if (success) Toast.makeText(this, "Savez ukinut", Toast.LENGTH_SHORT).show();
-            else Toast.makeText(this, "Ne može se ukinuti: misija aktivna", Toast.LENGTH_SHORT).show();
+            runOnUiThread(() -> {
+                if (success) {
+                    Toast.makeText(this, "Savez ukinut", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    Toast.makeText(this, "Ne može se ukinuti: misija aktivna", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
     }
 
     private void leaveAlliance(String allianceId) {
         allianceRepository.leaveAlliance(allianceId, currentUserId, success -> {
-            if (success) Toast.makeText(this, "Napustio/la si savez", Toast.LENGTH_SHORT).show();
-            else Toast.makeText(this, "Ne može se napustiti: misija aktivna", Toast.LENGTH_SHORT).show();
+            runOnUiThread(() -> {
+                if (success) {
+                    Toast.makeText(this, "Napustio/la si savez", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    Toast.makeText(this, "Ne može se napustiti: misija aktivna", Toast.LENGTH_SHORT).show();
+                }
+            });
         });
     }
 
     private void openChat(String allianceId, String allianceName) {
-        Toast.makeText(this, "Otvaram chat za savez: " + allianceName, Toast.LENGTH_SHORT).show();
+        Intent intent = new Intent(this, AllianceChatActivity.class);
+        intent.putExtra("ALLIANCE_ID", allianceId);
+        intent.putExtra("ALLIANCE_NAME", allianceName);
+        startActivity(intent);
     }
 }
