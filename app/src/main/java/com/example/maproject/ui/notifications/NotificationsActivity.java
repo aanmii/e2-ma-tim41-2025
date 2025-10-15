@@ -4,8 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.MutableLiveData;
@@ -26,6 +28,7 @@ public class NotificationsActivity extends AppCompatActivity implements Notifica
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
     private TextView noNotificationsTextView;
+    private LinearLayout noNotificationsContainer; // Kontejner za prazno stanje
     private Button backButton;
 
     private NotificationsAdapter adapter;
@@ -48,12 +51,17 @@ public class NotificationsActivity extends AppCompatActivity implements Notifica
         initViews();
         setupRecyclerView();
         setupButtons();
-        loadNotifications();
+        // Pozivamo observer samo jednom
+        setupNotificationObserver();
+        // Vizuelni feedback pre nego što podaci stignu
+        showLoadingState();
     }
 
     private void initViews() {
         recyclerView = findViewById(R.id.notificationsRecyclerView);
         progressBar = findViewById(R.id.notificationsProgressBar);
+        // Inicijalizacija kontejnera i teksta
+        noNotificationsContainer = findViewById(R.id.noNotificationsContainer);
         noNotificationsTextView = findViewById(R.id.noNotificationsTextView);
         backButton = findViewById(R.id.backButton);
     }
@@ -68,22 +76,34 @@ public class NotificationsActivity extends AppCompatActivity implements Notifica
         backButton.setOnClickListener(v -> finish());
     }
 
-    private void loadNotifications() {
+    private void showLoadingState() {
         progressBar.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.GONE);
+        noNotificationsContainer.setVisibility(View.GONE);
+    }
 
+    private void setupNotificationObserver() {
+        // Kreiramo LiveData samo ovde
         MutableLiveData<List<Notification>> notificationsLiveData = new MutableLiveData<>();
+
+        // Postavljamo LiveData Observer
         notificationsLiveData.observe(this, notifications -> {
             progressBar.setVisibility(View.GONE);
+
             if (notifications != null && !notifications.isEmpty()) {
+                // Prikaz liste
                 adapter.updateNotifications(notifications);
-                noNotificationsTextView.setVisibility(View.GONE);
+                noNotificationsContainer.setVisibility(View.GONE);
                 recyclerView.setVisibility(View.VISIBLE);
             } else {
+                // Prikaz praznog stanja
                 recyclerView.setVisibility(View.GONE);
-                noNotificationsTextView.setVisibility(View.VISIBLE);
+                noNotificationsTextView.setText("Nema novih notifikacija");
+                noNotificationsContainer.setVisibility(View.VISIBLE);
             }
         });
 
+        // Prosleđujemo instancu LiveData repozitorijumu
         notificationRepository.loadNotifications(currentUserId, notificationsLiveData);
     }
 
@@ -97,13 +117,25 @@ public class NotificationsActivity extends AppCompatActivity implements Notifica
         // Otvori odgovarajući ekran
         switch (notification.getType()) {
             case "ALLIANCE_INVITE":
-                // Ostani na notifikacijama - ovde korisnik može prihvatiti/odbiti
+                // Možda je potrebno prikazati dijalog za pozivnicu ovde, ali za sada ostajemo na ekranu.
+                Toast.makeText(this, "Kliknuli ste na pozivnicu. Očekuje se implementacija dijaloga.", Toast.LENGTH_SHORT).show();
                 break;
             case "ALLIANCE_ACCEPTED":
             case "CHAT_MESSAGE":
-                Intent intent = new Intent(this, AllianceActivity.class);
-                intent.putExtra("ALLIANCE_ID", notification.getReferenceId());
-                startActivity(intent);
+                // 💥 KRITIČNA POPRAVKA: Koristi se nova, ispravna metoda getReferenceId()
+                String allianceId = notification.getReferenceId();
+
+                // KRITIČNA PROVERA: Da li ID zaista postoji
+                if (allianceId != null && !allianceId.isEmpty()) {
+                    Intent intent = new Intent(this, AllianceActivity.class);
+                    intent.putExtra("ALLIANCE_ID", allianceId);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(this, "Greška: Nevalidan ID saveza.", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            default:
+                Toast.makeText(this, "Nepoznat tip notifikacije.", Toast.LENGTH_SHORT).show();
                 break;
         }
     }

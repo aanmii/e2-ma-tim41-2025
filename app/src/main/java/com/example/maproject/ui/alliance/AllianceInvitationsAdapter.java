@@ -18,7 +18,8 @@ import java.util.List;
 public class AllianceInvitationsAdapter extends RecyclerView.Adapter<AllianceInvitationsAdapter.InvitationViewHolder> {
 
     public interface InvitationActionListener {
-        void onAction(AllianceInvitation invitation);
+        void onAccept(AllianceInvitation invitation);
+        void onReject(AllianceInvitation invitation);
     }
 
     private List<AllianceInvitation> invitations;
@@ -48,8 +49,8 @@ public class AllianceInvitationsAdapter extends RecyclerView.Adapter<AllianceInv
         holder.senderTextView.setText(invitation.getSenderUsername());
         holder.allianceTextView.setText(invitation.getAllianceName());
 
-        holder.acceptButton.setOnClickListener(v -> listener.onAction(invitation));
-        holder.rejectButton.setOnClickListener(v -> listener.onAction(invitation));
+        holder.acceptButton.setOnClickListener(v -> listener.onAccept(invitation));
+        holder.rejectButton.setOnClickListener(v -> listener.onReject(invitation));
     }
 
     @Override

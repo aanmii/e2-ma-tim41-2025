@@ -1,6 +1,7 @@
 package com.example.maproject.ui.alliance;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
@@ -13,8 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.maproject.R;
 import com.example.maproject.data.ChatRepository;
+import com.example.maproject.data.NotificationRepository;
 import com.example.maproject.model.ChatMessage;
-import com.example.maproject.ui.alliance.ChatAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -23,6 +24,8 @@ import java.util.List;
 
 public class AllianceChatActivity extends AppCompatActivity {
 
+    private static final String TAG = "AllianceChatActivity";
+
     private RecyclerView chatRecyclerView;
     private EditText messageEditText;
     private ImageButton sendMessageButton;
@@ -30,10 +33,12 @@ public class AllianceChatActivity extends AppCompatActivity {
 
     private ChatAdapter chatAdapter;
     private ChatRepository chatRepository;
+    private NotificationRepository notificationRepository;
     private String allianceId;
     private String allianceName;
     private String currentUserId;
     private String currentUsername;
+    private List<String> allianceMemberIds;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,10 +49,13 @@ public class AllianceChatActivity extends AppCompatActivity {
         allianceName = getIntent().getStringExtra("ALLIANCE_NAME");
         currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         chatRepository = new ChatRepository();
+        notificationRepository = new NotificationRepository();
+        allianceMemberIds = new ArrayList<>();
 
         initViews();
         setupToolbar();
         loadCurrentUsername();
+        loadAllianceMembers();
         setupChat();
         setupSendButton();
     }
@@ -83,6 +91,23 @@ public class AllianceChatActivity extends AppCompatActivity {
                 });
     }
 
+    private void loadAllianceMembers() {
+        if (allianceId == null) return;
+
+        FirebaseFirestore.getInstance().collection("alliances").document(allianceId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        List<String> memberIds = (List<String>) doc.get("memberIds");
+                        if (memberIds != null) {
+                            allianceMemberIds = memberIds;
+                            Log.d(TAG, "Alliance members loaded: " + memberIds.size());
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> Log.e(TAG, "Error loading alliance members", e));
+    }
+
     private void setupChat() {
         if (allianceId == null || currentUserId == null) {
             Toast.makeText(this, "Greška: Nedostaju podaci za chat.", Toast.LENGTH_SHORT).show();
@@ -96,10 +121,8 @@ public class AllianceChatActivity extends AppCompatActivity {
         chatRecyclerView.setLayoutManager(layoutManager);
         chatRecyclerView.setAdapter(chatAdapter);
 
-        // KREIRAJEMO LiveData OBJEKAT
         MutableLiveData<List<ChatMessage>> messagesLiveData = new MutableLiveData<>();
 
-        // POSMATRAMO PROMENE U LiveData OBJEKTU
         messagesLiveData.observe(this, messages -> {
             if (messages != null) {
                 chatAdapter.updateMessages(messages);
@@ -109,7 +132,6 @@ public class AllianceChatActivity extends AppCompatActivity {
             }
         });
 
-        // PROSLEĐUJEMO LiveData OBJEKAT REPOZITORIJUMU
         chatRepository.loadMessages(allianceId, messagesLiveData);
     }
 
@@ -132,20 +154,55 @@ public class AllianceChatActivity extends AppCompatActivity {
 
         ChatMessage message = new ChatMessage(currentUserId, currentUsername, messageContent);
 
-        // KREIRAMO LiveData OBJEKAT ZA REZULTAT SLANJA
         MutableLiveData<Boolean> resultLiveData = new MutableLiveData<>();
 
-        // POSMATRAMO REZULTAT
         resultLiveData.observe(this, success -> {
             if (success) {
                 messageEditText.setText("");
+
+                // Pošalji notifikacije svim članovima osim sebi
+                sendNotificationsToMembers(messageContent);
             } else {
                 Toast.makeText(this, "Greška pri slanju poruke.", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // PROSLEĐUJEMO LiveData OBJEKAT REPOZITORIJUMU
         chatRepository.sendMessage(allianceId, message, resultLiveData);
+    }
+
+    private void sendNotificationsToMembers(String messageContent) {
+        if (allianceMemberIds.isEmpty()) {
+            Log.w(TAG, "No members to send notifications to");
+            return;
+        }
+
+        String notificationContent = currentUsername + " je poslao/la poruku u " + allianceName;
+
+        // Skrati poruku ako je predugačka
+        if (messageContent.length() > 50) {
+            notificationContent = currentUsername + ": " + messageContent.substring(0, 47) + "...";
+        } else {
+            notificationContent = currentUsername + ": " + messageContent;
+        }
+
+        for (String memberId : allianceMemberIds) {
+            // Ne šalji notifikaciju sebi
+            if (!memberId.equals(currentUserId)) {
+                notificationRepository.createNotification(
+                        memberId,
+                        "CHAT_MESSAGE",
+                        notificationContent,
+                        allianceId,
+                        success -> {
+                            if (success) {
+                                Log.d(TAG, "Notification sent to member: " + memberId);
+                            } else {
+                                Log.e(TAG, "Failed to send notification to member: " + memberId);
+                            }
+                        }
+                );
+            }
+        }
     }
 
     @Override

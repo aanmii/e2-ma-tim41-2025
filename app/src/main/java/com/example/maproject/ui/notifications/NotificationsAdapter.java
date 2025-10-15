@@ -14,6 +14,7 @@ import com.example.maproject.model.Notification;
 import com.google.android.material.card.MaterialCardView;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -30,11 +31,19 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
     public NotificationsAdapter(List<Notification> notifications, OnNotificationClickListener listener) {
         this.notifications = notifications;
         this.listener = listener;
+        setHasStableIds(true);
     }
 
     public void updateNotifications(List<Notification> newNotifications) {
         this.notifications = newNotifications;
         notifyDataSetChanged();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        // Ensure notificationId is not null before calling hashCode()
+        String id = notifications.get(position).getNotificationId();
+        return id != null ? id.hashCode() : RecyclerView.NO_ID;
     }
 
     @NonNull
@@ -73,16 +82,36 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
 
         public void bind(Notification notification, OnNotificationClickListener listener, SimpleDateFormat timeFormat) {
             contentTextView.setText(notification.getContent());
-            timeTextView.setText(timeFormat.format(notification.getTimestamp()));
+
+            // FIX: Convert the Firebase Timestamp object to a Java Date object for SimpleDateFormat.
+            // notification.getTimestamp() now returns com.google.firebase.Timestamp.
+            Date displayDate = notification.getTimestamp() != null
+                    ? notification.getTimestamp().toDate()
+                    : null;
+
+            if (displayDate != null) {
+                timeTextView.setText(timeFormat.format(displayDate));
+            } else {
+                timeTextView.setText("");
+            }
 
             int iconRes = getIconResForType(notification.getType());
             iconImageView.setImageResource(iconRes);
 
             readIndicator.setVisibility(notification.isRead() ? View.GONE : View.VISIBLE);
 
-            int bgColor = itemView.getContext().getResources().getColor(
-                    notification.isRead() ? R.color.cardBackground : R.color.unreadNotificationBackground
-            );
+            int colorResId = notification.isRead() ? R.color.cardBackground : R.color.unreadNotificationBackground;
+            int bgColor;
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                bgColor = itemView.getContext().getResources().getColor(
+                        colorResId,
+                        itemView.getContext().getTheme()
+                );
+            } else {
+                bgColor = itemView.getContext().getResources().getColor(colorResId);
+            }
+
             notificationCard.setCardBackgroundColor(bgColor);
 
             itemView.setOnClickListener(v -> listener.onNotificationClick(notification));
