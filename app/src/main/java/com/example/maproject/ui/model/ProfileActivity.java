@@ -14,6 +14,7 @@ import com.example.maproject.R;
 import com.example.maproject.service.LevelingService;
 import com.example.maproject.ui.auth.ChangePasswordActivity;
 import com.example.maproject.ui.statistics.StatisticsActivity;
+import com.example.maproject.ui.model.InventoryActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.zxing.BarcodeFormat;
@@ -215,6 +216,7 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
+
     private void setupButtons() {
         changePasswordButton.setOnClickListener(v -> {
             Intent intent = new Intent(ProfileActivity.this, ChangePasswordActivity.class);
@@ -222,5 +224,13 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
         backButton.setOnClickListener(v -> finish());
+
+        Button viewInventoryButton = findViewById(R.id.viewInventoryButton);
+        viewInventoryButton.setOnClickListener(v -> {
+            startActivity(new Intent(ProfileActivity.this, InventoryActivity.class));
+        });
+
     }
+
+
 }

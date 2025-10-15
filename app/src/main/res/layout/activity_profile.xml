@@ -385,6 +385,19 @@
             android:layout_marginBottom="12dp"/>
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/viewInventoryButton"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="🎒 My Equipment"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="30dp"
+            android:backgroundTint="@color/primary"
+            android:textColor="@color/textWhite"
+            android:layout_marginBottom="12dp"/>
+
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/changePasswordButton"
             android:layout_width="match_parent"
             android:layout_height="60dp"
