@@ -141,12 +141,12 @@
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
-        <!-- Second Row -->
+        <!-- Second Row (Notifications, Alliance, and NEW Shop) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:weightSum="2"
+            android:weightSum="3"
             android:layout_marginBottom="24dp">
 
             <!-- Notifications -->
@@ -185,7 +185,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Notifikacije"
-                            android:textSize="16sp"
+                            android:textSize="14sp"
                             android:textStyle="bold"
                             android:textColor="@color/textPrimary"/>
                     </LinearLayout>
@@ -213,7 +213,8 @@
                 android:layout_width="0dp"
                 android:layout_height="120dp"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginEnd="4dp"
                 app:cardCornerRadius="20dp"
                 app:cardElevation="6dp"
                 app:cardBackgroundColor="@color/cardBackground"
@@ -240,7 +241,45 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Savez"
-                        android:textSize="16sp"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/textPrimary"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- SHOP (NEW) -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="120dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="6dp"
+                app:cardBackgroundColor="@color/cardBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground">
+
+                <LinearLayout
+                    android:id="@+id/shopButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="💰"
+                        android:textSize="36sp"
+                        android:layout_marginBottom="8dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Prodavnica"
+                        android:textSize="14sp"
                         android:textStyle="bold"
                         android:textColor="@color/textPrimary"/>
                 </LinearLayout>

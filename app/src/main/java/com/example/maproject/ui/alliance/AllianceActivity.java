@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.MutableLiveData;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -109,11 +110,24 @@ public class AllianceActivity extends AppCompatActivity {
             if (invitations != null && !invitations.isEmpty()) {
                 invitationsLayout.setVisibility(View.VISIBLE);
                 invitationsAdapter.updateInvitations(invitations);
+
+                // Proveri da li korisnik ima savez
+                checkIfUserHasAlliance();
             } else {
                 invitationsLayout.setVisibility(View.GONE);
             }
         });
         allianceRepository.loadInvitations(currentUserId, invitationsLiveData);
+    }
+
+    private void checkIfUserHasAlliance() {
+        db.collection("users").document(currentUserId)
+                .get()
+                .addOnSuccessListener(userDoc -> {
+                    String allianceId = userDoc.getString("currentAllianceId");
+                    boolean hasAlliance = (allianceId != null && !allianceId.isEmpty());
+                    invitationsAdapter.setUserHasAlliance(hasAlliance);
+                });
     }
 
     private void displayAllianceView(Alliance alliance) {
@@ -153,13 +167,85 @@ public class AllianceActivity extends AppCompatActivity {
     }
 
     private void handleAcceptInvitation(AllianceInvitation invitation) {
+        // Prvo proveri da li korisnik već ima savez
+        db.collection("users").document(currentUserId)
+                .get()
+                .addOnSuccessListener(userDoc -> {
+                    String currentAllianceId = userDoc.getString("currentAllianceId");
+
+                    if (currentAllianceId != null && !currentAllianceId.isEmpty()) {
+                        // Korisnik je već u savezu, proveri da li je misija aktivna
+                        checkCurrentAllianceStatus(currentAllianceId, invitation);
+                    } else {
+                        // Korisnik nije u savezu, prihvati odmah
+                        acceptInvitationDirectly(invitation);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Greška pri proveri statusa saveza", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void checkCurrentAllianceStatus(String currentAllianceId, AllianceInvitation newInvitation) {
+        db.collection("alliances").document(currentAllianceId)
+                .get()
+                .addOnSuccessListener(allianceDoc -> {
+                    if (allianceDoc.exists()) {
+                        String currentAllianceName = allianceDoc.getString("name");
+                        Boolean isMissionActive = allianceDoc.getBoolean("missionActive");
+
+                        if (Boolean.TRUE.equals(isMissionActive)) {
+                            // Misija je aktivna, ne može napustiti
+                            showMissionActiveDialog(currentAllianceName);
+                        } else {
+                            // Misija nije aktivna, ponudi opcije
+                            showSwitchAllianceDialog(currentAllianceName, newInvitation);
+                        }
+                    } else {
+                        // Trenutni savez ne postoji, prihvati novi
+                        acceptInvitationDirectly(newInvitation);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Greška pri proveri misije", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void showMissionActiveDialog(String currentAllianceName) {
+        new AlertDialog.Builder(this)
+                .setTitle("⚠️ Aktivna Misija")
+                .setMessage("Trenutno si u savezu \"" + currentAllianceName +
+                        "\" koji ima aktivnu misiju.\n\nNe možeš napustiti savez dok je misija u toku!")
+                .setPositiveButton("U redu", null)
+                .show();
+    }
+
+    private void showSwitchAllianceDialog(String currentAllianceName, AllianceInvitation newInvitation) {
+        new AlertDialog.Builder(this)
+                .setTitle("⚔️ Već si u Savezu")
+                .setMessage("Trenutno si član saveza \"" + currentAllianceName + "\".\n\n" +
+                        newInvitation.getSenderUsername() + " te poziva u savez \"" +
+                        newInvitation.getAllianceName() + "\".\n\n" +
+                        "Šta želiš da uradiš?")
+                .setCancelable(false)
+                .setPositiveButton("Napusti trenutni i prihvati novi", (dialog, which) -> {
+                    acceptInvitationDirectly(newInvitation);
+                })
+                .setNegativeButton("Ostani u trenutnom savezu", (dialog, which) -> {
+                    handleRejectInvitation(newInvitation);
+                })
+                .setNeutralButton("Otkaži", null)
+                .show();
+    }
+
+    private void acceptInvitationDirectly(AllianceInvitation invitation) {
         allianceRepository.respondToInvitation(invitation, currentUserId, currentUsername, success -> {
             runOnUiThread(() -> {
                 if (success) {
                     Toast.makeText(this, "Uspešno prihvaćen poziv u savez " + invitation.getAllianceName(), Toast.LENGTH_SHORT).show();
                     observeAllianceAndInvitations();
                 } else {
-                    Toast.makeText(this, "Nije moguće: Misija u starom savezu je aktivna!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Greška pri prihvatanju poziva", Toast.LENGTH_LONG).show();
                 }
             });
         });
