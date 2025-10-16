@@ -59,19 +59,20 @@ public class LoginActivity extends AppCompatActivity {
             authViewModel.loginUser(email, password);
         });
 
-
         authViewModel.loginStatus.observe(this, status -> {
             if (status.equals("LOGIN_SUCCESS")) {
-
+                Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
+                SharedPreferences sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
                 sharedPreferences.edit().putBoolean("isLoggedIn", true).apply();
-                saveFCMToken();
-                Toast.makeText(this, "Successful login!", Toast.LENGTH_SHORT).show();
-                navigateToMain();
+
+                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                finish();
             } else {
                 Toast.makeText(this, status, Toast.LENGTH_LONG).show();
             }
         });
-
 
         goToRegisterButton.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
@@ -100,4 +101,6 @@ public class LoginActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+
+
 }

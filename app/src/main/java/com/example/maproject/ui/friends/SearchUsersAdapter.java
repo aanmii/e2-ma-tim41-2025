@@ -19,13 +19,14 @@ import java.util.List;
 public class SearchUsersAdapter extends RecyclerView.Adapter<SearchUsersAdapter.UserViewHolder> {
 
     private List<User> users;
-    private OnAddFriendClickListener listener;
+    private OnUserActionListener listener;
 
-    public interface OnAddFriendClickListener {
+    public interface OnUserActionListener {
         void onAddFriend(User user);
+        void onViewProfile(User user); // nova metoda
     }
 
-    public SearchUsersAdapter(List<User> users, OnAddFriendClickListener listener) {
+    public SearchUsersAdapter(List<User> users, OnUserActionListener listener) {
         this.users = users != null ? users : new ArrayList<>();
         this.listener = listener;
     }
@@ -65,10 +66,10 @@ public class SearchUsersAdapter extends RecyclerView.Adapter<SearchUsersAdapter.
             super(itemView);
             avatarImageView = itemView.findViewById(R.id.userAvatarImageView);
             usernameTextView = itemView.findViewById(R.id.userUsernameTextView);
-            addButton = itemView.findViewById(R.id.addButton); // dugme u layout-u
+            addButton = itemView.findViewById(R.id.addButton);
         }
 
-        public void bind(User user, OnAddFriendClickListener listener) {
+        public void bind(User user, OnUserActionListener listener) {
             usernameTextView.setText(user.getUsername() != null ? user.getUsername() : "Unknown");
 
             if (user.getAvatar() != null) {
@@ -77,9 +78,18 @@ public class SearchUsersAdapter extends RecyclerView.Adapter<SearchUsersAdapter.
                 if (avatarResId != 0) avatarImageView.setImageResource(avatarResId);
             }
 
+            // Klik na dugme za dodavanje prijatelja
             if (addButton != null && listener != null) {
                 addButton.setOnClickListener(v -> listener.onAddFriend(user));
             }
+
+            // Klik na ceo item otvara profil
+            itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onViewProfile(user);
+                }
+            });
         }
     }
 }
+

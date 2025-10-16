@@ -10,13 +10,13 @@ public class LevelUpProcessor {
     private final LevelingService levelingService = new LevelingService();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+    /** Dodeljuje XP zadatkom i proverava prelazak nivoa */
     public void awardXPAndCheckLevel(User user, Task task) {
         long xpGained = calculateXPGained(user.getLevel(), task);
-
-        user.setCurrentLevelXP(user.getCurrentLevelXP() + xpGained);
         user.setTotalExperiencePoints(user.getTotalExperiencePoints() + xpGained);
+        user.setCurrentLevelXP(levelingService.getCurrentLevelXP(user.getTotalExperiencePoints(), user.getLevel()));
 
-        while (user.getCurrentLevelXP() >= levelingService.getRequiredXPForLevelUp(user.getLevel() + 1)) {
+        while (user.getCurrentLevelXP() >= levelingService.getXPForNextLevel(user.getLevel())) {
             levelUpUser(user);
         }
 
@@ -24,33 +24,29 @@ public class LevelUpProcessor {
     }
 
     private long calculateXPGained(int userLevel, Task task) {
-        long difficultyOrdinal = task.getDifficulty().ordinal();
-        long importanceOrdinal = task.getImportance().ordinal();
-
-        long difficultyBaseXP = difficultyOrdinal * 10;
-        long importanceBaseXP = importanceOrdinal * 5;
-
-        long scaledDifficultyXP = levelingService.calculateXPForDifficulty(userLevel, difficultyBaseXP);
-        long scaledImportanceXP = levelingService.calculateXPForImportance(userLevel, importanceBaseXP);
-
-        return levelingService.getBaseTaskXP() +
-                scaledDifficultyXP +
-                scaledImportanceXP;
+        long baseDifficultyXP = task.getDifficulty().ordinal() * 10L;
+        long baseImportanceXP = task.getImportance().ordinal() * 5L;
+        return levelingService.getBaseTaskXP() + baseDifficultyXP + baseImportanceXP;
     }
 
     private void levelUpUser(User user) {
-        int newLevel = user.getLevel() + 1;
-        long requiredXP = levelingService.getRequiredXPForLevelUp(newLevel);
+        int currentLevel = user.getLevel();
+        int newLevel = currentLevel + 1;
 
+        long requiredXP = levelingService.getXPForNextLevel(currentLevel);
         user.setCurrentLevelXP(user.getCurrentLevelXP() - requiredXP);
+
         user.setLevel(newLevel);
 
-        int ppReward = levelingService.getPPRewardForLevel(newLevel);
+        int ppReward = levelingService.calculatePPFromLevel(newLevel) - levelingService.calculatePPFromLevel(currentLevel);
         user.setPowerPoints(user.getPowerPoints() + ppReward);
+
         user.setTitle(levelingService.getTitleForLevel(newLevel));
     }
 
     private void updateUserInDatabase(User user) {
-        db.collection("users").document(user.getUserId()).set(user.toMap(), SetOptions.merge());
+        db.collection("users")
+                .document(user.getUserId())
+                .set(user.toMap(), SetOptions.merge());
     }
 }
