@@ -68,15 +68,21 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.FriendVi
         public void bind(User friend, OnFriendClickListener listener) {
             usernameTextView.setText(friend.getUsername() != null ? friend.getUsername() : "Unknown");
 
+            // Avatar prikaz
             if (friend.getAvatar() != null) {
                 int avatarResId = itemView.getContext().getResources()
                         .getIdentifier(friend.getAvatar(), "drawable",
                                 itemView.getContext().getPackageName());
                 if (avatarResId != 0) {
                     avatarImageView.setImageResource(avatarResId);
+                } else {
+                    avatarImageView.setImageResource(R.drawable.avatar_1);
                 }
+            } else {
+                avatarImageView.setImageResource(R.drawable.avatar_1);
             }
 
+            // Klik listener
             itemView.setOnClickListener(v -> {
                 if (listener != null) listener.onFriendClick(friend);
             });

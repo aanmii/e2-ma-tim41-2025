@@ -1,79 +1,98 @@
 package com.example.maproject.service;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class LevelingService {
 
-    private static final int BASE_XP_LEVEL_1 = 200;
-    private static final int BASE_PP_LEVEL_2 = 40;
-    private static final long BASE_XP_PER_TASK = 20;
+    private static final long BASE_XP_LEVEL_1 = 200; // XP za prvi nivo
+    private static final int BASE_PP_LEVEL_2 = 40;   // PP nakon prvog nivoa
 
-    private static final Map<Integer, String> TITLES = new HashMap<>();
+    private static final long[] CUMULATIVE_XP_TABLE = new long[100];
+    private static final int[] PP_TABLE = new int[100];
+
+    private static final String[] TITLES = {
+            "Sparkle",       // Level 1
+            "Rising Star",   // Level 2
+            "Brilliant Mind",// Level 3
+            "Master Creator",// Level 4
+            "Ultimate Visionary" // Level 5+
+    };
 
     static {
-        TITLES.put(1, "Sparkle");
-        TITLES.put(2, "Rising Star");
-        TITLES.put(3, "Brilliant Mind");
-        TITLES.put(4, "Master Creator");
-        TITLES.put(5, "Ultimate Visionary");
+        initializeTables();
     }
 
-    private long roundUpToNextHundred(double value) {
-        if (value <= 0) return BASE_XP_LEVEL_1;
+    private static void initializeTables() {
+        CUMULATIVE_XP_TABLE[0] = 0;
+        PP_TABLE[0] = 0;
+
+        // Level 1
+        CUMULATIVE_XP_TABLE[1] = BASE_XP_LEVEL_1;
+        PP_TABLE[1] = 0;
+
+        long prevXP = BASE_XP_LEVEL_1;
+        int prevPP = BASE_PP_LEVEL_2;
+
+        for (int level = 2; level < 100; level++) {
+            prevXP = roundUpToNextHundred(prevXP * 2 + prevXP / 2);
+            CUMULATIVE_XP_TABLE[level] = CUMULATIVE_XP_TABLE[level - 1] + prevXP;
+
+            prevPP = (int) Math.round(prevPP + 0.75 * prevPP);
+            PP_TABLE[level] = PP_TABLE[level - 1] + prevPP;
+        }
+    }
+
+    private static long roundUpToNextHundred(double value) {
         return (long) Math.ceil(value / 100.0) * 100L;
     }
 
-    private int roundToNearestWhole(double value) {
-        return (int) Math.round(value);
-    }
-
-    public long getRequiredXPForLevelUp(int nextLevel) {
-        if (nextLevel <= 1) return BASE_XP_LEVEL_1;
-
-        long xpNeededForLevel = BASE_XP_LEVEL_1;
-
-        for (int i = 2; i <= nextLevel; i++) {
-            double nextXP = xpNeededForLevel * 2.0 + xpNeededForLevel / 2.0;
-            xpNeededForLevel = roundUpToNextHundred(nextXP);
+    /** Vraća level na osnovu total XP */
+    public int calculateLevelFromXP(long totalXP) {
+        for (int level = 1; level < CUMULATIVE_XP_TABLE.length; level++) {
+            if (totalXP < CUMULATIVE_XP_TABLE[level]) return level;
         }
-
-        return xpNeededForLevel;
+        return CUMULATIVE_XP_TABLE.length - 1;
     }
 
-    public int getPPRewardForLevel(int nextLevel) {
-        if (nextLevel <= 1) return 0;
-        if (nextLevel == 2) return BASE_PP_LEVEL_2;
-
-        int previousPP = BASE_PP_LEVEL_2;
-
-        for (int i = 3; i <= nextLevel; i++) {
-            double nextPP = previousPP + 0.75 * previousPP;
-            previousPP = roundToNearestWhole(nextPP);
-        }
-        return previousPP;
+    /** PP za dati level */
+    public int calculatePPFromLevel(int level) {
+        if (level < 0 || level >= PP_TABLE.length) return PP_TABLE[PP_TABLE.length - 1];
+        return PP_TABLE[level];
     }
 
+    /** XP unutar trenutnog levela */
+    public long getCurrentLevelXP(long totalXP, int currentLevel) {
+        if (currentLevel <= 0) return totalXP;
+        return totalXP - getCumulativeXPForLevel(currentLevel - 1);
+    }
+
+    /** XP potrebni za sledeći nivo (unutar trenutnog nivoa) */
+    public long getXPForNextLevel(int currentLevel) {
+        if (currentLevel >= CUMULATIVE_XP_TABLE.length) return Long.MAX_VALUE;
+        return CUMULATIVE_XP_TABLE[currentLevel] - getCumulativeXPForLevel(currentLevel - 1);
+    }
+
+    /** Ukupan XP potreban da se dostigne dati nivo */
+    public long getCumulativeXPForLevel(int level) {
+        if (level < 0) return 0;
+        if (level >= CUMULATIVE_XP_TABLE.length) return CUMULATIVE_XP_TABLE[CUMULATIVE_XP_TABLE.length - 1];
+        return CUMULATIVE_XP_TABLE[level];
+    }
+
+    /** Total XP potreban za sledeći nivo */
+    public long getTotalXPForNextLevel(int currentLevel) {
+        if (currentLevel <= 0) return CUMULATIVE_XP_TABLE[1];
+        if (currentLevel >= CUMULATIVE_XP_TABLE.length - 1) return CUMULATIVE_XP_TABLE[CUMULATIVE_XP_TABLE.length - 1];
+        return CUMULATIVE_XP_TABLE[currentLevel + 1];
+    }
+
+    /** Titula za dati level */
     public String getTitleForLevel(int level) {
-        return TITLES.getOrDefault(level, "Sparkle");
+        if (level <= 0) return TITLES[0];
+        if (level >= TITLES.length) return TITLES[TITLES.length - 1];
+        return TITLES[level - 1];
     }
 
+    /** Osnovni XP za svaki task */
     public long getBaseTaskXP() {
-        return BASE_XP_PER_TASK;
-    }
-
-    public long calculateXPForImportance(int currentLevel, long baseXP) {
-        if (currentLevel <= 1) return baseXP;
-
-        long currentXP = baseXP;
-        for (int i = 2; i <= currentLevel; i++) {
-            double newXP = currentXP + (currentXP / 2.0);
-            currentXP = roundToNearestWhole(newXP);
-        }
-        return currentXP;
-    }
-
-    public long calculateXPForDifficulty(int currentLevel, long baseXP) {
-        return calculateXPForImportance(currentLevel, baseXP);
+        return 50;
     }
 }

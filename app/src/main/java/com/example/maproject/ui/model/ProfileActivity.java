@@ -24,14 +24,10 @@ import com.google.zxing.qrcode.QRCodeWriter;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    private ImageView avatarImageView, qrCodeImageView;
-    private ImageView titleIconImageView;
-    private ImageView xpBarImageView;
-
+    private ImageView avatarImageView, qrCodeImageView, titleIconImageView, xpBarImageView;
     private TextView usernameTextView, levelTextView, titleTextView;
     private TextView powerPointsTextView, experiencePointsTextView, coinsTextView, badgesTextView;
     private TextView xpProgressTextView;
-
     private Button changePasswordButton, backButton;
 
     private FirebaseAuth auth;
@@ -60,15 +56,15 @@ public class ProfileActivity extends AppCompatActivity {
         setupButtons();
 
         Button viewStatisticsButton = findViewById(R.id.viewStatisticsButton);
-        viewStatisticsButton.setOnClickListener(v -> {
-            Intent intent = new Intent(ProfileActivity.this, StatisticsActivity.class);
-            startActivity(intent);
-        });
+        viewStatisticsButton.setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, StatisticsActivity.class)));
     }
 
     private void initViews() {
         avatarImageView = findViewById(R.id.avatarImageView);
         qrCodeImageView = findViewById(R.id.qrCodeImageView);
+        titleIconImageView = findViewById(R.id.titleIconImageView);
+        xpBarImageView = findViewById(R.id.xpBarImageView);
+
         usernameTextView = findViewById(R.id.usernameTextView);
         levelTextView = findViewById(R.id.levelTextView);
         titleTextView = findViewById(R.id.titleTextView);
@@ -76,161 +72,106 @@ public class ProfileActivity extends AppCompatActivity {
         experiencePointsTextView = findViewById(R.id.experiencePointsTextView);
         coinsTextView = findViewById(R.id.coinsTextView);
         badgesTextView = findViewById(R.id.badgesTextView);
+        xpProgressTextView = findViewById(R.id.xpProgressTextView);
+
         changePasswordButton = findViewById(R.id.changePasswordButton);
         backButton = findViewById(R.id.backButton);
-
-        xpBarImageView = findViewById(R.id.xpBarImageView);
-        xpProgressTextView = findViewById(R.id.xpProgressTextView);
-        titleIconImageView = findViewById(R.id.titleIconImageView);
     }
 
     private void loadUserProfile() {
         db.collection("users").document(currentUserId)
                 .get()
                 .addOnSuccessListener(document -> {
-                    if (document.exists()) {
-                        String avatar = document.getString("avatar");
-                        setAvatar(avatar);
+                    if (!document.exists()) return;
 
-                        usernameTextView.setText(document.getString("username"));
+                    // --- Osnovni podaci ---
+                    String username = document.getString("username");
+                    String avatar = document.getString("avatar");
 
-                        String title = document.getString("title");
-                        titleTextView.setText(title != null ? title : "Početnik");
+                    long totalXp = document.getLong("totalExperiencePoints") != null ?
+                            document.getLong("totalExperiencePoints") : 0L;
+                    int coins = document.getLong("coins") != null ? document.getLong("coins").intValue() : 0;
+                    int badges = document.getLong("badges") != null ? document.getLong("badges").intValue() : 0;
 
+                    // --- Level i XP ---
+                    int level = levelingService.calculateLevelFromXP(totalXp);
+                    long currentLevelXP = levelingService.getCurrentLevelXP(totalXp, level);
+                    long xpForNextLevel = levelingService.getXPForNextLevel(level);
+                    int powerPoints = levelingService.calculatePPFromLevel(level);
 
-                        Object levelObj = document.get("level");
-                        int currentLevel = (levelObj instanceof Number) ? ((Number) levelObj).intValue() : 0;
-                        levelTextView.setText("LEVEL " + currentLevel);
+                    // --- Prikaz ---
+                    usernameTextView.setText(username != null ? username : "Korisnik");
+                    setAvatar(avatar);
 
-                        setTitleIcon(currentLevel);
+                    levelTextView.setText("LEVEL " + level);
+                    titleTextView.setText(levelingService.getTitleForLevel(level));
+                    powerPointsTextView.setText(String.valueOf(powerPoints));
+                    experiencePointsTextView.setText(String.valueOf(totalXp));
+                    coinsTextView.setText(String.valueOf(coins));
+                    badgesTextView.setText(String.valueOf(badges));
 
-                        Object powerPointsObj = document.get("powerPoints");
-                        long powerPoints = (powerPointsObj instanceof Number) ? ((Number) powerPointsObj).longValue() : 0L;
-                        powerPointsTextView.setText(String.valueOf(powerPoints));
+                    xpProgressTextView.setText(currentLevelXP + " / " + xpForNextLevel + " XP");
+                    updateXPBar(currentLevelXP, xpForNextLevel);
 
-                        Object totalXpObj = document.get("totalExperiencePoints");
-                        long totalXp = (totalXpObj instanceof Number) ? ((Number) totalXpObj).longValue() : 0L;
-                        experiencePointsTextView.setText(String.valueOf(totalXp));
-
-                        Object coinsObj = document.get("coins");
-                        long coins = (coinsObj instanceof Number) ? ((Number) coinsObj).longValue() : 0L;
-                        coinsTextView.setText(String.valueOf(coins));
-
-                        Object badgesObj = document.get("badges");
-                        long badges = (badgesObj instanceof Number) ? ((Number) badgesObj).longValue() : 0L;
-                        badgesTextView.setText(String.valueOf(badges));
-
-
-                        Object currentLevelXpObj = document.get("currentLevelXP");
-                        long currentXP = (currentLevelXpObj instanceof Number) ? ((Number) currentLevelXpObj).longValue() : 0L;
-
-                        long requiredXp = levelingService.getRequiredXPForLevelUp(currentLevel + 1);
-
-                        if (requiredXp == 0) requiredXp = 200;
-
-                        updateLevelAndXPView(currentLevel, currentXP, requiredXp);
-
-                        generateQRCode(currentUserId);
-                    }
+                    setTitleIcon(level);
+                    generateQRCode(currentUserId);
                 })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Greška pri učitavanju profila", Toast.LENGTH_SHORT).show();
-                });
+                .addOnFailureListener(e -> Toast.makeText(this, "Greška pri učitavanju profila", Toast.LENGTH_SHORT).show());
     }
 
-    private void updateLevelAndXPView(int currentLevel, long currentXP, long requiredXPForNextLevel) {
-        levelTextView.setText("LEVEL " + currentLevel);
-
-        xpProgressTextView.setText(currentXP + "/" + requiredXPForNextLevel);
-
-        double percentage = requiredXPForNextLevel > 0 ? (double) currentXP / requiredXPForNextLevel : 0.0;
-
-        if (percentage >= 1.0) {
-            percentage = 1.0;
-        }
+    private void updateXPBar(long currentXP, long maxXP) {
+        double percentage = maxXP > 0 ? (double) currentXP / maxXP : 0.0;
+        percentage = Math.min(percentage, 1.0);
 
         int xpImageIndex;
+        if (percentage <= 0.01) xpImageIndex = 1;
+        else if (percentage <= 0.25) xpImageIndex = 2;
+        else if (percentage <= 0.50) xpImageIndex = 3;
+        else if (percentage <= 0.75) xpImageIndex = 4;
+        else xpImageIndex = 5;
 
-
-        if (percentage <= 0.01) {
-            xpImageIndex = 1;
-        } else if (percentage <= 0.25) {
-            xpImageIndex = 2;
-        } else if (percentage <= 0.50) {
-            xpImageIndex = 3;
-        } else if (percentage <= 0.75) {
-            xpImageIndex = 4;
-        } else {
-            xpImageIndex = 5;
-        }
-
-        String xpIconName = "xp_" + xpImageIndex;
-        int xpIconResId = getResources().getIdentifier(xpIconName, "drawable", getPackageName());
-
-        if (xpIconResId != 0) {
-            xpBarImageView.setImageResource(xpIconResId);
-        } else {
-            xpBarImageView.setImageResource(R.drawable.xp_1);
-        }
-
-        setTitleIcon(currentLevel);
+        int xpIconResId = getResources().getIdentifier("xp_" + xpImageIndex, "drawable", getPackageName());
+        xpBarImageView.setImageResource(xpIconResId != 0 ? xpIconResId : R.drawable.xp_1);
     }
 
     private void setTitleIcon(int level) {
-        ImageView titleIcon = findViewById(R.id.titleIconImageView);
         int iconResource;
-
         if (level <= 1) iconResource = R.drawable.title_1;
         else if (level <= 2) iconResource = R.drawable.title_2;
         else if (level <= 3) iconResource = R.drawable.title_3;
         else if (level <= 4) iconResource = R.drawable.title_4;
         else iconResource = R.drawable.title_5;
 
-        titleIcon.setImageResource(iconResource);
+        titleIconImageView.setImageResource(iconResource);
     }
 
     private void setAvatar(String avatarName) {
+        if (avatarName == null) return;
         int avatarResId = getResources().getIdentifier(avatarName, "drawable", getPackageName());
-        if (avatarResId != 0) {
-            avatarImageView.setImageResource(avatarResId);
-        }
+        if (avatarResId != 0) avatarImageView.setImageResource(avatarResId);
     }
 
     private void generateQRCode(String userId) {
         QRCodeWriter writer = new QRCodeWriter();
         try {
             BitMatrix bitMatrix = writer.encode(userId, BarcodeFormat.QR_CODE, 512, 512);
-            int width = bitMatrix.getWidth();
-            int height = bitMatrix.getHeight();
-            Bitmap bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
-
-            for (int x = 0; x < width; x++) {
-                for (int y = 0; y < height; y++) {
+            Bitmap bmp = Bitmap.createBitmap(512, 512, Bitmap.Config.RGB_565);
+            for (int x = 0; x < 512; x++) {
+                for (int y = 0; y < 512; y++) {
                     bmp.setPixel(x, y, bitMatrix.get(x, y) ? 0xFF000000 : 0xFFFFFFFF);
                 }
             }
-
             qrCodeImageView.setImageBitmap(bmp);
         } catch (WriterException e) {
             Toast.makeText(this, "Greška pri generisanju QR koda", Toast.LENGTH_SHORT).show();
         }
     }
 
-
     private void setupButtons() {
-        changePasswordButton.setOnClickListener(v -> {
-            Intent intent = new Intent(ProfileActivity.this, ChangePasswordActivity.class);
-            startActivity(intent);
-        });
-
+        changePasswordButton.setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, ChangePasswordActivity.class)));
         backButton.setOnClickListener(v -> finish());
 
         Button viewInventoryButton = findViewById(R.id.viewInventoryButton);
-        viewInventoryButton.setOnClickListener(v -> {
-            startActivity(new Intent(ProfileActivity.this, InventoryActivity.class));
-        });
-
+        viewInventoryButton.setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, InventoryActivity.class)));
     }
-
-
 }

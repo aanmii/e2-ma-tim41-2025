@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.example.maproject.model.InventoryItem;
 import com.example.maproject.model.User;
+import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -31,14 +32,13 @@ public class UserRepository {
                 return;
             }
 
-
             auth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             FirebaseUser firebaseUser = auth.getCurrentUser();
                             if (firebaseUser != null) {
-                                sendVerificationEmail(firebaseUser, registrationStatus);
                                 saveUserProfile(firebaseUser.getUid(), email, username, avatar, registrationStatus);
+                                sendVerificationEmail(firebaseUser, registrationStatus);
                             }
                         } else {
                             String error = Objects.requireNonNull(task.getException()).getMessage();
@@ -63,14 +63,29 @@ public class UserRepository {
     }
 
     private void sendVerificationEmail(FirebaseUser firebaseUser, MutableLiveData<String> registrationStatus) {
-        firebaseUser.sendEmailVerification()
+        // Konfiguriši Action Code Settings za bolju verifikaciju
+        ActionCodeSettings actionCodeSettings = ActionCodeSettings.newBuilder()
+                .setHandleCodeInApp(false) // Otvori link u browseru
+                .setUrl("https://maproject-f8fb7.firebaseapp.com") // Zameni sa svojim domenom
+                .build();
+
+        firebaseUser.sendEmailVerification(actionCodeSettings)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        registrationStatus.postValue("Registration succesful! Check your inbox to verify your email in the next 24h.");
-                        Log.d(TAG, "Verification email sent.");
+                        registrationStatus.postValue("Registration successful! Check your email to verify your account. Link is valid for 1 hour.");
+                        Log.d(TAG, "Verification email sent to: " + firebaseUser.getEmail());
                     } else {
-                        registrationStatus.postValue("Failed to send verification mail.");
-                        Log.e(TAG, "Failed to send verification email.", task.getException());
+                        // Ako ne uspe sa settings, pokušaj bez njih
+                        firebaseUser.sendEmailVerification()
+                                .addOnCompleteListener(retryTask -> {
+                                    if (retryTask.isSuccessful()) {
+                                        registrationStatus.postValue("Registration successful! Check your email (and spam folder) to verify your account.");
+                                        Log.d(TAG, "Verification email sent (retry)");
+                                    } else {
+                                        registrationStatus.postValue("Registration successful, but failed to send verification email. Please contact support.");
+                                        Log.e(TAG, "Failed to send verification email", retryTask.getException());
+                                    }
+                                });
                     }
                 });
     }
@@ -94,15 +109,22 @@ public class UserRepository {
                     if (task.isSuccessful()) {
                         FirebaseUser firebaseUser = auth.getCurrentUser();
                         if (firebaseUser != null) {
-                            // Proveri da li je email verifikovan
+                            // KRITIČNO: Prvo reload, pa onda proveri verifikaciju
                             firebaseUser.reload().addOnCompleteListener(reloadTask -> {
-                                if (firebaseUser.isEmailVerified()) {
-                                    loginStatus.postValue("LOGIN_SUCCESS");
-                                    Log.d(TAG, "Login successful.");
+                                if (reloadTask.isSuccessful()) {
+                                    // Proveri da li je email verifikovan NAKON reload-a
+                                    if (firebaseUser.isEmailVerified()) {
+                                        loginStatus.postValue("LOGIN_SUCCESS");
+                                        Log.d(TAG, "Login successful for: " + firebaseUser.getEmail());
+                                    } else {
+                                        // Opcija za ponovno slanje emaila
+                                        loginStatus.postValue("Email not verified. Check your inbox and spam folder. Click 'Resend' if needed.");
+                                        Log.w(TAG, "Email not verified for: " + firebaseUser.getEmail());
+                                        // NE odjavljuj korisnika odmah, ostavi mu opciju da pošalje ponovo
+                                    }
                                 } else {
-                                    auth.signOut();
-                                    loginStatus.postValue("Email not verified. Check your spam inbox.");
-                                    Log.w(TAG, "Email not verified.");
+                                    loginStatus.postValue("Error checking verification status. Please try again.");
+                                    Log.e(TAG, "Failed to reload user", reloadTask.getException());
                                 }
                             });
                         }
@@ -110,6 +132,32 @@ public class UserRepository {
                         String error = Objects.requireNonNull(task.getException()).getMessage();
                         loginStatus.postValue("Login failed: " + error);
                         Log.e(TAG, "Login failed: " + error);
+                    }
+                });
+    }
+
+    // Nova metoda za ponovno slanje verifikacionog emaila
+    public void resendVerificationEmail(MutableLiveData<String> status) {
+        FirebaseUser user = auth.getCurrentUser();
+
+        if (user == null) {
+            status.postValue("No user logged in.");
+            return;
+        }
+
+        if (user.isEmailVerified()) {
+            status.postValue("Email is already verified!");
+            return;
+        }
+
+        user.sendEmailVerification()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        status.postValue("Verification email sent! Check your inbox and spam folder.");
+                        Log.d(TAG, "Verification email resent to: " + user.getEmail());
+                    } else {
+                        status.postValue("Failed to send verification email. Please try again later.");
+                        Log.e(TAG, "Failed to resend verification email", task.getException());
                     }
                 });
     }
@@ -129,20 +177,15 @@ public class UserRepository {
                         return;
                     }
 
-                    // Provera da li korisnik ima dovoljno novčića
                     int cost = calculateItemCost(item);
                     if (user.getCoins() < cost) {
                         status.postValue("Nemate dovoljno novčića!");
                         return;
                     }
 
-                    // Oduzmi novčiće
                     user.setCoins(user.getCoins() - cost);
-
-                    // Dodaj item
                     user.addItemToEquipment(item);
 
-                    // Sačuvaj nazad u Firestore
                     db.collection("users").document(userId).set(user.toMap())
                             .addOnSuccessListener(aVoid -> status.postValue("Kupljeno: " + item.getName()))
                             .addOnFailureListener(e -> status.postValue("Greška prilikom kupovine."));
@@ -151,8 +194,6 @@ public class UserRepository {
     }
 
     private int calculateItemCost(InventoryItem item) {
-        // TODO: implementiraj logiku za cene na osnovu tipa i opisa
-        // Primer hardkodiranih cena:
         switch (item.getItemId()) {
             case "potion1": return 50;
             case "potion2": return 70;
@@ -161,14 +202,11 @@ public class UserRepository {
             case "gloves": return 60;
             case "boots": return 80;
             case "shield": return 60;
-            case "sword": return 0; // oružje samo od boss-a
+            case "sword": return 0;
             case "bow": return 0;
             default: return 100;
         }
     }
-
-
-
 
     public void getUser(String userId, OnUserLoadedListener listener) {
         db.collection("users").document(userId)
@@ -187,17 +225,14 @@ public class UserRepository {
                 });
     }
 
-    // Callback interface
     public interface OnUserLoadedListener {
         void onUserLoaded(User user);
     }
-
 
     public void logout() {
         auth.signOut();
     }
 
-    // Interface za callback
     interface OnUsernameCheckListener {
         void onResult(boolean isAvailable);
     }
