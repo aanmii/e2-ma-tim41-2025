@@ -11,6 +11,7 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,8 +40,24 @@ public class NotificationRepository {
                         List<Notification> notifications = new ArrayList<>();
 
                         for (QueryDocumentSnapshot doc : querySnapshot) {
-                            Notification notification = doc.toObject(Notification.class);
+                            Notification notification = new Notification();
                             notification.setNotificationId(doc.getId());
+                            notification.setReceiverId(doc.getString("receiverId"));
+                            notification.setType(doc.getString("type"));
+                            notification.setContent(doc.getString("content"));
+                            notification.setReferenceId(doc.getString("referenceId"));
+                            notification.setRead(doc.getBoolean("isRead") != null && doc.getBoolean("isRead"));
+
+                            // Sigurno parsiranje timestamp-a
+                            Object tsObj = doc.get("timestamp");
+                            if (tsObj instanceof com.google.firebase.Timestamp) {
+                                notification.setTimestamp((com.google.firebase.Timestamp) tsObj);
+                            } else if (tsObj instanceof Long) {
+                                notification.setTimestamp(new com.google.firebase.Timestamp(new Date((Long) tsObj)));
+                            } else {
+                                notification.setTimestamp(com.google.firebase.Timestamp.now()); // fallback
+                            }
+
                             notifications.add(notification);
 
                             Log.d(TAG, "Loaded notification: " + doc.getId() +
@@ -65,16 +82,11 @@ public class NotificationRepository {
         db.collection("notifications")
                 .document(notificationId)
                 .update("isRead", true)
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "Notification marked as read: " + notificationId);
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error marking notification as read: " + notificationId, e);
-                });
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Notification marked as read: " + notificationId))
+                .addOnFailureListener(e -> Log.e(TAG, "Error marking notification as read: " + notificationId, e));
     }
 
     public void createNotification(String receiverId, String type, String content, String referenceId, OnCompleteListener listener) {
-        // VAŽNO: Proveri da primatelj nije isti kao pošiljalac
         String currentUserId = FirebaseAuth.getInstance().getCurrentUser() != null
                 ? FirebaseAuth.getInstance().getCurrentUser().getUid()
                 : null;
@@ -85,7 +97,6 @@ public class NotificationRepository {
             return;
         }
 
-        // Proveri da li već postoji ista notifikacija (spreči duplikate)
         db.collection("notifications")
                 .whereEqualTo("receiverId", receiverId)
                 .whereEqualTo("type", type)
@@ -94,13 +105,11 @@ public class NotificationRepository {
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     if (!querySnapshot.isEmpty()) {
-                        // Već postoji nepročitana notifikacija istog tipa
                         Log.d(TAG, "Notification already exists, skipping creation");
                         if (listener != null) listener.onComplete(true);
                         return;
                     }
 
-                    // Kreiraj novu notifikaciju
                     Map<String, Object> notification = new HashMap<>();
                     notification.put("receiverId", receiverId);
                     notification.put("type", type);
@@ -146,8 +155,7 @@ public class NotificationRepository {
                 });
     }
 
-    // Metoda za slanje notifikacije (wrapper oko createNotification)
-    public void sendNotification(com.example.maproject.model.Notification notification) {
+    public void sendNotification(Notification notification) {
         createNotification(
                 notification.getReceiverId(),
                 notification.getType(),
