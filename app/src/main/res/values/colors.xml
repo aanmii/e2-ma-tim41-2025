@@ -1,5 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Pastel Blue-Pink Palette -->
+    <color name="primary">#A8DAFF</color> <!-- Pastel Blue -->
+    <color name="primaryDark">#7AB8E8</color>
+    <color name="accent">#FFB3D9</color> <!-- Pastel Pink -->
+    <color name="accentLight">#FFC9E5</color>
+
+    <!-- Background gradients -->
+    <color name="background">#F5F7FA</color>
+    <color name="backgroundGradientStart">#E8F4FF</color>
+    <color name="backgroundGradientEnd">#FFE8F5</color>
+    <color name="cardBackground">#FFFFFF</color>
+
+    <!-- Text colors -->
+    <color name="textPrimary">#2C3E50</color>
+    <color name="textSecondary">#7F8C9B</color>
+    <color name="textWhite">#FFFFFF</color>
+
+    <!-- Chart colors - Pastel -->
+    <color name="chartPastelBlue">#A8DAFF</color>
+    <color name="chartPastelPink">#FFB3D9</color>
+    <color name="chartPastelPurple">#D4BAFF</color>
+    <color name="chartPastelMint">#B3FFD9</color>
+    <color name="chartPastelPeach">#FFD4BA</color>
+    <color name="chartPastelLavender">#E8BAFF</color>
+
+    <!-- Game elements -->
+    <color name="hp">#FF9AA2</color> <!-- Pastel Red -->
+    <color name="pp">#A8DAFF</color> <!-- Pastel Blue -->
+    <color name="xp">#B5EAD7</color> <!-- Pastel Mint -->
+    <color name="coins">#FFD4A3</color> <!-- Pastel Gold -->
+
+    <!-- Status colors - Pastel -->
+    <color name="success">#B5EAD7</color>
+    <color name="error">#FF9AA2</color>
+    <color name="warning">#FFD4A3</color>
+    <color name="info">#A8DAFF</color>
+
+    <color name="unreadNotificationBackground">#FFF3E0</color>
 </resources>

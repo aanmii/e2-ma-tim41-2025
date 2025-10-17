@@ -13,3 +13,25 @@
 .externalNativeBuild
 .cxx
 local.properties
+# Build folderi
+/app/build
+/.gradle
+
+# Firebase keys
+google-services.json
+*/google-services.json
+
+# Android Studio fajlovi
+/.idea
+
+.gradle/
+
+node_modules/
+functions/node_modules/
+
+# Debug keystore
+*.keystore
+
+# Ostalo (cache, logovi itd.)
+/.externalNativeBuild
+/.cxx

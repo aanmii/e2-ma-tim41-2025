@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Equipment shop"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/textPrimary"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Potions"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/textPrimary"
+            android:layout_marginBottom="8dp" />
+
+        <include layout="@layout/item_shop_card" android:id="@+id/item_potion1" />
+        <include layout="@layout/item_shop_card" android:id="@+id/item_potion2" />
+        <include layout="@layout/item_shop_card" android:id="@+id/item_potion3" />
+        <include layout="@layout/item_shop_card" android:id="@+id/item_potion4" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Clothes"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/textPrimary"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp" />
+
+        <include layout="@layout/item_shop_card" android:id="@+id/item_gloves" />
+        <include layout="@layout/item_shop_card" android:id="@+id/item_boots" />
+        <include layout="@layout/item_shop_card" android:id="@+id/item_shield" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Weapon"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/textPrimary"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp" />
+
+        <include layout="@layout/item_shop_card" android:id="@+id/item_bow" />
+        <include layout="@layout/item_shop_card" android:id="@+id/item_sword" />
+
+    </LinearLayout>
+</ScrollView>
