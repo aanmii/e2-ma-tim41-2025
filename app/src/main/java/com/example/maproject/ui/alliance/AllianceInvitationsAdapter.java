@@ -53,11 +53,7 @@ public class AllianceInvitationsAdapter extends RecyclerView.Adapter<AllianceInv
     @Override
     public void onBindViewHolder(@NonNull InvitationViewHolder holder, int position) {
         AllianceInvitation invitation = invitations.get(position);
-        holder.senderTextView.setText(invitation.getSenderUsername());
-        holder.allianceTextView.setText(invitation.getAllianceName());
-
-        holder.acceptButton.setOnClickListener(v -> listener.onAccept(invitation));
-        holder.rejectButton.setOnClickListener(v -> listener.onReject(invitation));
+        holder.bind(invitation, listener, userHasAlliance);
     }
 
     @Override
@@ -66,15 +62,31 @@ public class AllianceInvitationsAdapter extends RecyclerView.Adapter<AllianceInv
     }
 
     static class InvitationViewHolder extends RecyclerView.ViewHolder {
-        TextView senderTextView, allianceTextView;
+        TextView senderTextView, allianceTextView, warningTextView;
         Button acceptButton, rejectButton;
 
         public InvitationViewHolder(@NonNull View itemView) {
             super(itemView);
             senderTextView = itemView.findViewById(R.id.senderTextView);
             allianceTextView = itemView.findViewById(R.id.allianceNameTextView);
+            warningTextView = itemView.findViewById(R.id.warningTextView);
             acceptButton = itemView.findViewById(R.id.acceptButton);
             rejectButton = itemView.findViewById(R.id.rejectButton);
+        }
+
+        public void bind(AllianceInvitation invitation, InvitationActionListener listener, boolean userHasAlliance) {
+            senderTextView.setText("Poslao/la: " + invitation.getSenderUsername());
+            allianceTextView.setText(invitation.getAllianceName());
+
+            // Prikaži upozorenje ako korisnik već ima savez
+            if (userHasAlliance) {
+                warningTextView.setVisibility(View.VISIBLE);
+            } else {
+                warningTextView.setVisibility(View.GONE);
+            }
+
+            acceptButton.setOnClickListener(v -> listener.onAccept(invitation));
+            rejectButton.setOnClickListener(v -> listener.onReject(invitation));
         }
     }
 }

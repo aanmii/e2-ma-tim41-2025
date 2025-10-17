@@ -119,7 +119,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
 
         private int getIconResForType(String type) {
             switch (type) {
-                case "ALLIANCE_INVITE": return R.drawable.ic_alliance_invite;
+                case "ALLIANCE_INVITE": return R.drawable.ic_notification;
                 case "ALLIANCE_ACCEPTED": return R.drawable.ic_alliance_accept;
                 case "CHAT_MESSAGE": return R.drawable.ic_chat_message;
                 default: return R.drawable.ic_notification;

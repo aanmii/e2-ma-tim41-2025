@@ -7,12 +7,14 @@ import androidx.lifecycle.MutableLiveData;
 import com.example.maproject.model.Alliance;
 import com.example.maproject.model.AllianceInvitation;
 import com.example.maproject.model.Notification;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class AllianceRepository {
 
@@ -55,20 +57,34 @@ public class AllianceRepository {
     }
 
     // --- SEND INVITATION ---
-    public void sendInvitation(AllianceInvitation invitation, AllianceActionCallback callback) {
-        String invitationId = db.collection("invitations").document().getId();
-        invitation.setInvitationId(invitationId);
+// Ovo je samo relevantni deo AllianceRepository.java
+// Dodaj/zameni sendInvitation metodu u tvom AllianceRepository
 
-        db.collection("invitations").document(invitationId)
-                .set(new HashMap<>(invitation.toMap()))
-                .addOnSuccessListener(aVoid -> {
-                    Log.d(TAG, "Invitation sent");
+    public void sendInvitation(AllianceInvitation invitation, InvitationCallback callback) {
+        Map<String, Object> invitationData = new HashMap<>();
+        invitationData.put("allianceId", invitation.getAllianceId());
+        invitationData.put("allianceName", invitation.getAllianceName());
+        invitationData.put("senderId", invitation.getSenderId());
+        invitationData.put("senderUsername", invitation.getSenderUsername());
+        invitationData.put("recipientId", invitation.getRecipientId());
+        invitationData.put("status", "PENDING");
+        invitationData.put("timestamp", FieldValue.serverTimestamp());
+
+        db.collection("invitations")
+                .add(invitationData)
+                .addOnSuccessListener(documentReference -> {
+                    // VAŽNO: Postavi invitationId u invitation objektu
+                    invitation.setInvitationId(documentReference.getId());
                     callback.onComplete(true);
                 })
                 .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error sending invitation", e);
+                    Log.e("AllianceRepository", "Error sending invitation", e);
                     callback.onComplete(false);
                 });
+    }
+
+    public interface InvitationCallback {
+        void onComplete(boolean success);
     }
 
     // --- LOAD INVITATIONS ---
