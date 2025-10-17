@@ -7,10 +7,9 @@ public class AllianceInvitation {
     private String senderId;
     private String senderUsername;
     private String recipientId;
-    private String status; // PENDING, ACCEPTED, REJECTED
+    private String status;
     private com.google.firebase.Timestamp timestamp;
 
-    // Prazan konstruktor za Firebase
     public AllianceInvitation() {
     }
 

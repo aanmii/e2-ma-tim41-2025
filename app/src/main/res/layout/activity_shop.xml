@@ -11,21 +11,19 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- 🏪 Naslov -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🏪 Prodavnica"
+            android:text="Equipment shop"
             android:textSize="24sp"
             android:textStyle="bold"
             android:textColor="@color/textPrimary"
             android:layout_marginBottom="16dp" />
 
-        <!-- 🥤 Napici -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🥤 Napici"
+            android:text="Potions"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/textPrimary"
@@ -36,11 +34,10 @@
         <include layout="@layout/item_shop_card" android:id="@+id/item_potion3" />
         <include layout="@layout/item_shop_card" android:id="@+id/item_potion4" />
 
-        <!-- 🧥 Odeća -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🧥 Odeća"
+            android:text="Clothes"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/textPrimary"
@@ -51,11 +48,10 @@
         <include layout="@layout/item_shop_card" android:id="@+id/item_boots" />
         <include layout="@layout/item_shop_card" android:id="@+id/item_shield" />
 
-        <!-- ⚔️ Oružje -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="⚔️ Oružje"
+            android:text="Weapon"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/textPrimary"

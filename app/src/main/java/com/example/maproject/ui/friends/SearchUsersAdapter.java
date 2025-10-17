@@ -23,7 +23,7 @@ public class SearchUsersAdapter extends RecyclerView.Adapter<SearchUsersAdapter.
 
     public interface OnUserActionListener {
         void onAddFriend(User user);
-        void onViewProfile(User user); // nova metoda
+        void onViewProfile(User user);
     }
 
     public SearchUsersAdapter(List<User> users, OnUserActionListener listener) {
@@ -78,12 +78,10 @@ public class SearchUsersAdapter extends RecyclerView.Adapter<SearchUsersAdapter.
                 if (avatarResId != 0) avatarImageView.setImageResource(avatarResId);
             }
 
-            // Klik na dugme za dodavanje prijatelja
             if (addButton != null && listener != null) {
                 addButton.setOnClickListener(v -> listener.onAddFriend(user));
             }
 
-            // Klik na ceo item otvara profil
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onViewProfile(user);

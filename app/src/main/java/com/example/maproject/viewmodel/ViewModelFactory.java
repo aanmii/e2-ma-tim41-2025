@@ -21,7 +21,6 @@ public class ViewModelFactory implements ViewModelProvider.Factory {
         if (modelClass.isAssignableFrom(AuthViewModel.class)) {
             return (T) new AuthViewModel(userRepository);
         }
-        // add other view models
         throw new IllegalArgumentException("Unknown ViewModel class");
     }
 }

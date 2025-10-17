@@ -42,7 +42,6 @@ public class NotificationListenerService extends Service {
             try {
                 createNotificationChannels();
 
-                // Pokreni foreground servis odmah sa notifikacijom
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     startForeground(FOREGROUND_NOTIFICATION_ID, createForegroundNotification());
                 }
@@ -64,7 +63,6 @@ public class NotificationListenerService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
 
-            // Kanal za sistemske notifikacije
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     "Alliance Notifications",
@@ -73,7 +71,6 @@ public class NotificationListenerService extends Service {
             channel.setDescription("Notifikacije za savez, prijatelje i poruke");
             notificationManager.createNotificationChannel(channel);
 
-            // Kanal za foreground servis
             NotificationChannel foregroundChannel = new NotificationChannel(
                     FOREGROUND_CHANNEL_ID,
                     "Notification Service",
@@ -93,10 +90,9 @@ public class NotificationListenerService extends Service {
                 PendingIntent.FLAG_IMMUTABLE
         );
 
-        // Koristi default ikonu ako ic_notification ne postoji
         int iconResId = getResources().getIdentifier("ic_notification", "drawable", getPackageName());
         if (iconResId == 0) {
-            iconResId = android.R.drawable.ic_dialog_info; // Fallback ikona
+            iconResId = android.R.drawable.ic_dialog_info;
         }
 
         return new NotificationCompat.Builder(this, FOREGROUND_CHANNEL_ID)
@@ -150,7 +146,6 @@ public class NotificationListenerService extends Service {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        // Koristi default ikonu ako ic_notification ne postoji
         int iconResId = getResources().getIdentifier("ic_notification", "drawable", getPackageName());
         if (iconResId == 0) {
             iconResId = android.R.drawable.ic_dialog_info;
@@ -171,17 +166,17 @@ public class NotificationListenerService extends Service {
     }
 
     private String getTitleForType(String type) {
-        if (type == null) return "🔔 Notifikacija";
+        if (type == null) return "🔔 Notification";
 
         switch (type) {
             case "ALLIANCE_INVITE":
-                return "⚔️ Poziv u Savez";
+                return "⚔️ Invitation to a new alliance";
             case "ALLIANCE_ACCEPTED":
-                return "✅ Poziv Prihvaćen";
+                return "✅ Invitation accepted";
             case "CHAT_MESSAGE":
-                return "💬 Nova Poruka";
+                return "💬 New message";
             default:
-                return "🔔 Notifikacija";
+                return "🔔 Notification";
         }
     }
 

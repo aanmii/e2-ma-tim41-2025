@@ -91,7 +91,7 @@ public class NotificationsActivity extends AppCompatActivity implements Notifica
                 recyclerView.setVisibility(View.VISIBLE);
             } else {
                 recyclerView.setVisibility(View.GONE);
-                noNotificationsTextView.setText("Nema novih notifikacija");
+                noNotificationsTextView.setText("No new notifications");
                 noNotificationsContainer.setVisibility(View.VISIBLE);
             }
         });
@@ -107,7 +107,6 @@ public class NotificationsActivity extends AppCompatActivity implements Notifica
 
         switch (notification.getType()) {
             case "ALLIANCE_INVITE":
-                // Otvori AllianceActivity, on će sam prikazati dialog
                 Intent allianceIntent = new Intent(this, AllianceActivity.class);
                 startActivity(allianceIntent);
                 break;
@@ -126,12 +125,12 @@ public class NotificationsActivity extends AppCompatActivity implements Notifica
                     chatIntent.putExtra("ALLIANCE_ID", allianceId);
                     startActivity(chatIntent);
                 } else {
-                    Toast.makeText(this, "Greška: nevalidan ID saveza", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error: invalid alliance id", Toast.LENGTH_SHORT).show();
                 }
                 break;
 
             default:
-                Toast.makeText(this, "Nepoznat tip notifikacije", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Unknown notification type", Toast.LENGTH_SHORT).show();
                 break;
         }
     }

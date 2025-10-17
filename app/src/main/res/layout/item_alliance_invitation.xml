@@ -15,7 +15,6 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Header sa ikonom -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -40,7 +39,7 @@
                     android:id="@+id/allianceNameTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Ime Saveza"
+                    android:text="Alliance name"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="@color/primary"/>
@@ -49,18 +48,18 @@
                     android:id="@+id/senderTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Poslao/la: Vođa Saveza"
+                    android:text="Sent by: leader"
                     android:textSize="14sp"
                     android:textColor="@color/textSecondary"/>
             </LinearLayout>
         </LinearLayout>
 
-        <!-- Warning indikator (opciono, prikazuje se ako korisnik ima savez) -->
+
         <TextView
             android:id="@+id/warningTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="⚠️ Već si član drugog saveza. Prihvatanjem ćeš napustiti trenutni savez."
+            android:text="⚠️ You are already a member in a different alliance."
             android:textSize="12sp"
             android:textColor="@color/xp"
             android:textStyle="italic"
@@ -69,7 +68,6 @@
             android:visibility="gone"
             android:layout_marginBottom="8dp"/>
 
-        <!-- Dugmići -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -81,7 +79,7 @@
                 android:id="@+id/rejectButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Odbij"
+                android:text="Reject"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 app:strokeColor="@color/xp"
                 android:textColor="@color/xp"
@@ -91,7 +89,7 @@
                 android:id="@+id/acceptButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Prihvati"
+                android:text="Accept"
                 android:backgroundTint="@color/accent"
                 android:textColor="@color/textWhite"/>
         </LinearLayout>

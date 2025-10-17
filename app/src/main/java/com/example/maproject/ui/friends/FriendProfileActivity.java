@@ -31,14 +31,14 @@ public class FriendProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile); // koristi isti XML
+        setContentView(R.layout.activity_profile);
 
         db = FirebaseFirestore.getInstance();
         levelingService = new LevelingService();
 
         friendId = getIntent().getStringExtra("FRIEND_ID");
         if (friendId == null) {
-            Toast.makeText(this, "Greška: nepoznat prijatelj", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error: friend unknown", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -77,7 +77,7 @@ public class FriendProfileActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(document -> {
                     if (!document.exists()) {
-                        Toast.makeText(this, "Profil nije pronađen", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Profile not found", Toast.LENGTH_SHORT).show();
                         finish();
                         return;
                     }
@@ -109,7 +109,7 @@ public class FriendProfileActivity extends AppCompatActivity {
                     generateQRCode(friendId);
                 })
                 .addOnFailureListener(e ->
-                        Toast.makeText(this, "Greška pri učitavanju profila", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Error occurred while loading the profile", Toast.LENGTH_SHORT).show()
                 );
     }
 
@@ -165,7 +165,7 @@ public class FriendProfileActivity extends AppCompatActivity {
 
             qrCodeImageView.setImageBitmap(bmp);
         } catch (WriterException e) {
-            Toast.makeText(this, "Greška pri generisanju QR koda", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error while loading the QR code", Toast.LENGTH_SHORT).show();
         }
     }
 }

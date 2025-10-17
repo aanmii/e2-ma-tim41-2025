@@ -7,7 +7,6 @@
     android:background="@drawable/gradient_background"
     android:padding="20dp">
 
-    <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,7 +24,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Kreiraj Savez"
+            android:text="Create alliance"
             android:textSize="32sp"
             android:textStyle="bold"
             android:textColor="@color/textPrimary"/>
@@ -33,13 +32,12 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Okupi prijatelje za zajedničku misiju"
+            android:text="Gather your friends for a mission"
             android:textSize="14sp"
             android:textColor="@color/textSecondary"
             android:layout_marginTop="4dp"/>
     </LinearLayout>
 
-    <!-- Alliance Name Card -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -56,7 +54,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Naziv Saveza"
+                android:text="Alliance name"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/textPrimary"
@@ -75,13 +73,12 @@
                     android:id="@+id/allianceNameEditText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="npr. Hrabri Ratnici"
+                    android:hint="for example: Brave warriors"
                     android:inputType="text"/>
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Select Friends Card -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -99,7 +96,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Izaberi Prijatelje"
+                android:text="Select friends"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/textPrimary"
@@ -112,7 +109,6 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- Action Buttons -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -123,7 +119,7 @@
             android:layout_width="0dp"
             android:layout_height="60dp"
             android:layout_weight="1"
-            android:text="✓ Kreiraj Savez"
+            android:text="✓ Create alliance"
             android:textStyle="bold"
             android:textSize="16sp"
             app:cornerRadius="30dp"
@@ -134,7 +130,7 @@
             android:id="@+id/backButton"
             android:layout_width="wrap_content"
             android:layout_height="60dp"
-            android:text="← Nazad"
+            android:text="← Back"
             android:textStyle="bold"
             app:cornerRadius="30dp"
             app:strokeColor="@color/accent"

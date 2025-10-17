@@ -44,7 +44,6 @@ public class LevelingService {
         return (long) Math.ceil(value / 100.0) * 100L;
     }
 
-    /** Vraća level na osnovu total XP */
     public int calculateLevelFromXP(long totalXP) {
         for (int level = 1; level < CUMULATIVE_XP_TABLE.length; level++) {
             if (totalXP < CUMULATIVE_XP_TABLE[level]) return level;
@@ -52,46 +51,39 @@ public class LevelingService {
         return CUMULATIVE_XP_TABLE.length - 1;
     }
 
-    /** PP za dati level */
     public int calculatePPFromLevel(int level) {
         if (level < 0 || level >= PP_TABLE.length) return PP_TABLE[PP_TABLE.length - 1];
         return PP_TABLE[level];
     }
 
-    /** XP unutar trenutnog levela */
     public long getCurrentLevelXP(long totalXP, int currentLevel) {
         if (currentLevel <= 0) return totalXP;
         return totalXP - getCumulativeXPForLevel(currentLevel - 1);
     }
 
-    /** XP potrebni za sledeći nivo (unutar trenutnog nivoa) */
     public long getXPForNextLevel(int currentLevel) {
         if (currentLevel >= CUMULATIVE_XP_TABLE.length) return Long.MAX_VALUE;
         return CUMULATIVE_XP_TABLE[currentLevel] - getCumulativeXPForLevel(currentLevel - 1);
     }
 
-    /** Ukupan XP potreban da se dostigne dati nivo */
     public long getCumulativeXPForLevel(int level) {
         if (level < 0) return 0;
         if (level >= CUMULATIVE_XP_TABLE.length) return CUMULATIVE_XP_TABLE[CUMULATIVE_XP_TABLE.length - 1];
         return CUMULATIVE_XP_TABLE[level];
     }
 
-    /** Total XP potreban za sledeći nivo */
     public long getTotalXPForNextLevel(int currentLevel) {
         if (currentLevel <= 0) return CUMULATIVE_XP_TABLE[1];
         if (currentLevel >= CUMULATIVE_XP_TABLE.length - 1) return CUMULATIVE_XP_TABLE[CUMULATIVE_XP_TABLE.length - 1];
         return CUMULATIVE_XP_TABLE[currentLevel + 1];
     }
 
-    /** Titula za dati level */
     public String getTitleForLevel(int level) {
         if (level <= 0) return TITLES[0];
         if (level >= TITLES.length) return TITLES[TITLES.length - 1];
         return TITLES[level - 1];
     }
 
-    /** Osnovni XP za svaki task */
     public long getBaseTaskXP() {
         return 50;
     }

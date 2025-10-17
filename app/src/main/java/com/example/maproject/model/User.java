@@ -17,8 +17,8 @@ public class User {
     private long totalExperiencePoints;
     private int coins;
     private int badges;
-    private List<InventoryItem> equipment;        // Sva kupljena oprema
-    private List<InventoryItem> activeEquipment;  // Trenutno aktivna odeća/napitci
+    private List<InventoryItem> equipment;
+    private List<InventoryItem> activeEquipment;
     private boolean isEmailVerified;
     private long registrationTimestamp;
 
@@ -45,7 +45,6 @@ public class User {
         this.registrationTimestamp = System.currentTimeMillis();
     }
 
-    // --- Getteri i setteri ---
     public String getUserId() { return userId; }
     public String getEmail() { return email; }
     public String getUsername() { return username; }
@@ -78,12 +77,10 @@ public class User {
     public void setEmailVerified(boolean emailVerified) { isEmailVerified = emailVerified; }
     public void setRegistrationTimestamp(long registrationTimestamp) { this.registrationTimestamp = registrationTimestamp; }
 
-    // --- Dodavanje opreme ---
     public void addItemToEquipment(InventoryItem item) {
         for (InventoryItem existing : equipment) {
             if (existing.getItemId().equals(item.getItemId())) {
                 existing.setQuantity(existing.getQuantity() + item.getQuantity());
-                // Ako je odeća sa trajanjem
                 existing.setRemainingBattles(existing.getRemainingBattles() + item.getRemainingBattles());
                 return;
             }
@@ -91,7 +88,6 @@ public class User {
         equipment.add(item);
     }
 
-    // --- Map za Firestore ---
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);

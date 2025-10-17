@@ -73,12 +73,10 @@ public class FriendsActivity extends AppCompatActivity implements FriendRequestA
     }
 
     private void setupRecyclerViews() {
-        // Friends list (click opens profile)
         friendsAdapter = new FriendsAdapter(new ArrayList<>(), this::onFriendClick);
         friendsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         friendsRecyclerView.setAdapter(friendsAdapter);
 
-        // Search adapter: we assume SearchUsersAdapter has OnUserActionListener with onAddFriend + onViewProfile
         searchAdapter = new SearchUsersAdapter(new ArrayList<>(), new SearchUsersAdapter.OnUserActionListener() {
             @Override
             public void onAddFriend(User user) {
@@ -92,7 +90,7 @@ public class FriendsActivity extends AppCompatActivity implements FriendRequestA
                     intent.putExtra("FRIEND_ID", user.getUserId());
                     startActivity(intent);
                 } else {
-                    Toast.makeText(FriendsActivity.this, "Greška: ID korisnika nije pronađen", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(FriendsActivity.this, "Error: id not found", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -206,13 +204,12 @@ public class FriendsActivity extends AppCompatActivity implements FriendRequestA
                 .setMessage("Do you want to send a friend request to " + scannedUser.getUsername() + "?")
                 .setPositiveButton("Send Request", (dialog, which) -> onAddFriend(scannedUser))
                 .setNeutralButton("View Profile", (dialog, which) -> {
-                    // Otvori profil direktno iz dijaloga
                     if (scannedUser != null && scannedUser.getUserId() != null) {
                         Intent intent = new Intent(FriendsActivity.this, FriendProfileActivity.class);
                         intent.putExtra("FRIEND_ID", scannedUser.getUserId());
                         startActivity(intent);
                     } else {
-                        Toast.makeText(FriendsActivity.this, "Greška: ID korisnika nije pronađen", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(FriendsActivity.this, "Error: id not found", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -234,14 +231,13 @@ public class FriendsActivity extends AppCompatActivity implements FriendRequestA
         friendsRepository.addFriend(currentUserId, user, resultLiveData);
     }
 
-    // Otvara profil (koristi se i iz FriendsAdapter i iz search adaptera)
     private void onFriendClick(User friend) {
         if (friend != null && friend.getUserId() != null) {
             Intent intent = new Intent(FriendsActivity.this, FriendProfileActivity.class);
             intent.putExtra("FRIEND_ID", friend.getUserId());
             startActivity(intent);
         } else {
-            Toast.makeText(this, "Greška: ID prijatelja nije pronađen", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error: id not found", Toast.LENGTH_SHORT).show();
         }
     }
 

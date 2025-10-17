@@ -48,7 +48,6 @@ public class ChatRepository {
                 .collection("messages")
                 .add(message.toMap())
                 .addOnSuccessListener(documentReference -> {
-                    // **CENTRALNA IZMENA: Slanje notifikacija direktno sa klijenta**
                     sendChatNotifications(allianceId, message);
 
                     resultLiveData.postValue(true);
@@ -60,7 +59,6 @@ public class ChatRepository {
     }
 
     private void sendChatNotifications(String allianceId, ChatMessage message) {
-        // 1. Dohvati članove saveza
         db.collection("alliances").document(allianceId).get()
                 .addOnSuccessListener(allianceDoc -> {
                     Alliance alliance = allianceDoc.toObject(Alliance.class);
@@ -73,11 +71,8 @@ public class ChatRepository {
                     String senderId = message.getSenderId();
                     String senderUsername = message.getSenderUsername();
                     String content = message.getContent();
-
-                    // 2. Kreiraj i pošalji notifikacije svakom članu (osim pošiljaocu)
                     for (String memberId : members.keySet()) {
                         if (!memberId.equals(senderId)) {
-                            // Slanje notifikacije
                             String notificationContent = senderUsername + ": " + content;
                             if (notificationContent.length() > 80) {
                                 notificationContent = notificationContent.substring(0, 77) + "...";

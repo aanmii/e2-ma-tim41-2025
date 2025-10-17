@@ -3,10 +3,10 @@ package com.example.maproject.model;
 public class InventoryItem {
     private String itemId;
     private String name;
-    private String type; // potion, clothing, weapon
+    private String type;
     private int quantity;
-    private int remainingBattles; // za odeću / jednokratne napitke
-    private boolean active; // da li je oprema aktivna
+    private int remainingBattles;
+    private boolean active;
 
 
     public InventoryItem() {}

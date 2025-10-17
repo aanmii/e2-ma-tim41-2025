@@ -9,7 +9,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Aktivna oprema -->
         <TextView
             android:id="@+id/active_equipment_title"
             android:layout_width="wrap_content"
@@ -26,7 +25,6 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"/>
 
-        <!-- Dostupna oprema -->
         <TextView
             android:id="@+id/available_equipment_title"
             android:layout_width="wrap_content"

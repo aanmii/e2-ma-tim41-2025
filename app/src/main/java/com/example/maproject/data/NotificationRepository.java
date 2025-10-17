@@ -26,7 +26,6 @@ public class NotificationRepository {
         this.db = FirebaseFirestore.getInstance();
     }
 
-    // --- LOAD ALL NOTIFICATIONS ---
     public void loadNotifications(String userId, MutableLiveData<List<Notification>> liveData) {
         db.collection("notifications")
                 .whereEqualTo("receiverId", userId)
@@ -51,7 +50,6 @@ public class NotificationRepository {
                                 notification.setReferenceId(doc.getString("referenceId"));
                                 notification.setRead(Boolean.TRUE.equals(doc.getBoolean("isRead")));
 
-                                // Sigurno parsiranje timestamp-a
                                 Object tsObj = doc.get("timestamp");
                                 if (tsObj instanceof Timestamp) {
                                     notification.setTimestamp((Timestamp) tsObj);
@@ -73,7 +71,6 @@ public class NotificationRepository {
                 });
     }
 
-    // --- MARK AS READ ---
     public void markAsRead(String notificationId) {
         if (notificationId == null || notificationId.isEmpty()) {
             Log.e(TAG, "Cannot mark notification as read: invalid ID");
@@ -86,19 +83,16 @@ public class NotificationRepository {
                 .addOnFailureListener(e -> Log.e(TAG, "Error marking notification as read: " + notificationId, e));
     }
 
-    // --- CREATE NEW NOTIFICATION ---
     public void createNotification(String receiverId, String type, String content, String referenceId, OnCompleteListener listener) {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         String currentUserId = (auth.getCurrentUser() != null) ? auth.getCurrentUser().getUid() : null;
 
-        // Izbegni slanje notifikacije samom sebi
         if (currentUserId != null && currentUserId.equals(receiverId)) {
             Log.d(TAG, "Skipping notification: sender and receiver are the same user");
             if (listener != null) listener.onComplete(true);
             return;
         }
 
-        // Provera da ne postoji ista aktivna (nepročitana) notifikacija
         db.collection("notifications")
                 .whereEqualTo("receiverId", receiverId)
                 .whereEqualTo("type", type)
@@ -137,7 +131,6 @@ public class NotificationRepository {
                 });
     }
 
-    // --- DELETE NOTIFICATION ---
     public void deleteNotification(String notificationId, OnCompleteListener listener) {
         if (notificationId == null || notificationId.isEmpty()) {
             Log.e(TAG, "Cannot delete notification: invalid ID");
@@ -157,7 +150,6 @@ public class NotificationRepository {
                 });
     }
 
-    // --- SEND (WRAPPER ZA MODEL OBJEKAT) ---
     public void sendNotification(Notification notification) {
         if (notification == null) {
             Log.e(TAG, "sendNotification: Notification object is null");
@@ -179,7 +171,6 @@ public class NotificationRepository {
         );
     }
 
-    // --- CALLBACK INTERFEJS ---
     public interface OnCompleteListener {
         void onComplete(boolean success);
     }

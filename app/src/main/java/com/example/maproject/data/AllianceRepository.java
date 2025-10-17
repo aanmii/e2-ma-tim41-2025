@@ -27,7 +27,6 @@ public class AllianceRepository {
         notificationRepository = new NotificationRepository();
     }
 
-    // --- CALLBACK INTERFEJSI ---
     public interface AllianceActionCallback {
         void onComplete(boolean success);
     }
@@ -36,7 +35,6 @@ public class AllianceRepository {
         void onUsernameRetrieved(String username);
     }
 
-    // --- CREATE ALLIANCE ---
     public void createAlliance(Alliance alliance, AllianceActionCallback callback) {
         String allianceId = db.collection("alliances").document().getId();
         alliance.setAllianceId(allianceId);
@@ -56,9 +54,6 @@ public class AllianceRepository {
                 });
     }
 
-    // --- SEND INVITATION ---
-// Ovo je samo relevantni deo AllianceRepository.java
-// Dodaj/zameni sendInvitation metodu u tvom AllianceRepository
 
     public void sendInvitation(AllianceInvitation invitation, InvitationCallback callback) {
         Map<String, Object> invitationData = new HashMap<>();
@@ -73,7 +68,6 @@ public class AllianceRepository {
         db.collection("invitations")
                 .add(invitationData)
                 .addOnSuccessListener(documentReference -> {
-                    // VAŽNO: Postavi invitationId u invitation objektu
                     invitation.setInvitationId(documentReference.getId());
                     callback.onComplete(true);
                 })
@@ -87,7 +81,6 @@ public class AllianceRepository {
         void onComplete(boolean success);
     }
 
-    // --- LOAD INVITATIONS ---
     public void loadInvitations(String userId, MutableLiveData<List<AllianceInvitation>> invitationsLiveData) {
         db.collection("invitations")
                 .whereEqualTo("receiverId", userId)
@@ -103,7 +96,6 @@ public class AllianceRepository {
                 });
     }
 
-    // --- RESPOND TO INVITATION ---
     public void respondToInvitation(AllianceInvitation invitation, String userId, String username, AllianceActionCallback callback) {
         db.collection("users").document(userId).get()
                 .addOnSuccessListener(userDoc -> {
@@ -113,7 +105,7 @@ public class AllianceRepository {
                                 .addOnSuccessListener(allianceDoc -> {
                                     Boolean missionActive = allianceDoc.getBoolean("missionActive");
                                     if (missionActive != null && missionActive) {
-                                        callback.onComplete(false); // ne može da se pridruži
+                                        callback.onComplete(false);
                                     } else {
                                         leaveAndJoinAlliance(invitation, userId, username, currentAllianceId, callback);
                                     }
@@ -136,34 +128,57 @@ public class AllianceRepository {
                 }).addOnFailureListener(e -> callback.onComplete(false));
     }
 
+
     private void joinAlliance(AllianceInvitation invitation, String userId, String username, AllianceActionCallback callback) {
         String allianceId = invitation.getAllianceId();
+        String invitationId = invitation.getInvitationId();
+
+        if (allianceId == null || invitationId == null) {
+            Log.e(TAG, "Missing Alliance ID or Invitation ID during join process.");
+            callback.onComplete(false);
+            return;
+        }
+
+        final String finalUsername = username != null ? username : "NepoznatKorisnik";
+
         db.collection("alliances").document(allianceId).get()
                 .addOnSuccessListener(doc -> {
                     Alliance alliance = doc.toObject(Alliance.class);
                     if (alliance != null) {
-                        alliance.addMember(userId, username);
+                        alliance.addMember(userId, finalUsername);
+
                         db.collection("alliances").document(allianceId).set(new HashMap<>(alliance.toMap()))
                                 .addOnSuccessListener(aVoid -> db.collection("users").document(userId)
                                         .update("currentAllianceId", allianceId)
                                         .addOnSuccessListener(aVoid1 -> {
-                                            db.collection("invitations").document(invitation.getInvitationId())
+                                            db.collection("invitations").document(invitationId)
                                                     .update("status", "ACCEPTED");
                                             Notification notification = new Notification(
                                                     alliance.getLeaderId(),
                                                     "ALLIANCE_ACCEPTED",
-                                                    username + " je prihvatio/la poziv i pridružio/la se savezu " + alliance.getName() + ".",
+                                                    finalUsername + " je prihvatio/la poziv i pridružio/la se savezu " + alliance.getName() + ".",
                                                     allianceId
                                             );
                                             notificationRepository.sendNotification(notification);
                                             callback.onComplete(true);
-                                        }).addOnFailureListener(e -> callback.onComplete(false)))
-                                .addOnFailureListener(e -> callback.onComplete(false));
-                    } else callback.onComplete(false);
-                }).addOnFailureListener(e -> callback.onComplete(false));
+                                        }).addOnFailureListener(e -> {
+                                            Log.e(TAG, "Failed to update user's currentAllianceId.", e);
+                                            callback.onComplete(false);
+                                        }))
+                                .addOnFailureListener(e -> {
+                                    Log.e(TAG, "Failed to update alliance member list.", e);
+                                    callback.onComplete(false);
+                                });
+                    } else {
+                        Log.w(TAG, "Alliance document not found: " + allianceId);
+                        callback.onComplete(false);
+                    }
+                }).addOnFailureListener(e -> {
+                    Log.e(TAG, "Error fetching alliance for joining.", e);
+                    callback.onComplete(false);
+                });
     }
 
-    // --- DELETE ALLIANCE ---
     public void deleteAlliance(String allianceId, AllianceActionCallback callback) {
         db.collection("alliances").document(allianceId).get()
                 .addOnSuccessListener(doc -> {
@@ -181,8 +196,6 @@ public class AllianceRepository {
                     } else callback.onComplete(false);
                 }).addOnFailureListener(e -> callback.onComplete(false));
     }
-
-    // --- LEAVE ALLIANCE ---
     public void leaveAlliance(String allianceId, String userId, AllianceActionCallback callback) {
         db.collection("alliances").document(allianceId).get()
                 .addOnSuccessListener(doc -> {
@@ -199,7 +212,6 @@ public class AllianceRepository {
                 }).addOnFailureListener(e -> callback.onComplete(false));
     }
 
-    // --- LOAD USER ALLIANCE ---
     public void loadUserAlliance(String userId, MutableLiveData<Alliance> allianceLiveData) {
         db.collection("users").document(userId).get()
                 .addOnSuccessListener(userDoc -> {
@@ -216,7 +228,7 @@ public class AllianceRepository {
                 .addOnFailureListener(e -> allianceLiveData.postValue(null));
     }
 
-    // --- GET USERNAME ---
+
     public void getUsername(String userId, UsernameCallback callback) {
         db.collection("users").document(userId).get()
                 .addOnSuccessListener(doc -> callback.onUsernameRetrieved(doc.getString("username")))

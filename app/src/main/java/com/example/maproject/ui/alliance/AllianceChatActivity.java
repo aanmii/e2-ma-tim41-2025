@@ -71,7 +71,7 @@ public class AllianceChatActivity extends AppCompatActivity {
         if (allianceName != null) {
             chatToolbar.setTitle(allianceName);
         } else {
-            chatToolbar.setTitle("Grupni Chat");
+            chatToolbar.setTitle("Group chat");
         }
         setSupportActionBar(chatToolbar);
         if (getSupportActionBar() != null) {
@@ -86,8 +86,8 @@ public class AllianceChatActivity extends AppCompatActivity {
                     currentUsername = doc.getString("username");
                 })
                 .addOnFailureListener(e -> {
-                    currentUsername = "AnonimniKorisnik";
-                    Toast.makeText(this, "Greška: Ne mogu da učitam korisničko ime.", Toast.LENGTH_SHORT).show();
+                    currentUsername = "Anon";
+                    Toast.makeText(this, "Error: cant load username", Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -110,7 +110,7 @@ public class AllianceChatActivity extends AppCompatActivity {
 
     private void setupChat() {
         if (allianceId == null || currentUserId == null) {
-            Toast.makeText(this, "Greška: Nedostaju podaci za chat.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error: info for chat is missing.", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -143,12 +143,12 @@ public class AllianceChatActivity extends AppCompatActivity {
         String messageContent = messageEditText.getText().toString().trim();
 
         if (messageContent.isEmpty()) {
-            Toast.makeText(this, "Poruka ne može biti prazna.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Message cant be empty.", Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (currentUsername == null) {
-            Toast.makeText(this, "Molimo sačekajte, učitavamo vaše ime...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please wait, your name is loading", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -159,11 +159,9 @@ public class AllianceChatActivity extends AppCompatActivity {
         resultLiveData.observe(this, success -> {
             if (success) {
                 messageEditText.setText("");
-
-                // Pošalji notifikacije svim članovima osim sebi
                 sendNotificationsToMembers(messageContent);
             } else {
-                Toast.makeText(this, "Greška pri slanju poruke.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Error while sending message.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -176,9 +174,8 @@ public class AllianceChatActivity extends AppCompatActivity {
             return;
         }
 
-        String notificationContent = currentUsername + " je poslao/la poruku u " + allianceName;
+        String notificationContent = currentUsername + " sent message to " + allianceName;
 
-        // Skrati poruku ako je predugačka
         if (messageContent.length() > 50) {
             notificationContent = currentUsername + ": " + messageContent.substring(0, 47) + "...";
         } else {
@@ -186,7 +183,6 @@ public class AllianceChatActivity extends AppCompatActivity {
         }
 
         for (String memberId : allianceMemberIds) {
-            // Ne šalji notifikaciju sebi
             if (!memberId.equals(currentUserId)) {
                 notificationRepository.createNotification(
                         memberId,

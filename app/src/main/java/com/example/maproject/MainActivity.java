@@ -2,21 +2,22 @@ package com.example.maproject;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.view.View;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.maproject.data.AllianceRepository;
 import com.example.maproject.data.NotificationRepository;
 import com.example.maproject.data.UserRepository;
-import com.example.maproject.service.NotificationListenerService;
+import com.example.maproject.model.AllianceInvitation; // DODATO
 import com.example.maproject.ui.alliance.AllianceActivity;
 import com.example.maproject.ui.auth.LoginActivity;
 import com.example.maproject.ui.friends.FriendsActivity;
@@ -29,7 +30,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot; // DODATO
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -67,6 +73,51 @@ public class MainActivity extends AppCompatActivity {
         setupViewModel();
         checkUserAuthentication();
         setupButtons();
+
+        handleNotificationIntent(getIntent());
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        handleNotificationIntent(intent);
+    }
+
+    private void handleNotificationIntent(Intent intent) {
+        if (intent != null && intent.hasExtra("notification_type")) {
+            String type = intent.getStringExtra("notification_type");
+            String referenceId = intent.getStringExtra("reference_id");
+
+            if ("ALLIANCE_INVITE".equals(type)) {
+                  openAllianceFromNotification(referenceId);
+            } else if ("CHAT_MESSAGE".equals(type)) {
+                if (referenceId != null && !referenceId.isEmpty()) {
+                    Intent chatIntent = new Intent(this, AllianceActivity.class);
+                    chatIntent.putExtra("ALLIANCE_ID", referenceId);
+                    startActivity(chatIntent);
+                }
+            }
+        }
+    }
+
+    private void openAllianceFromNotification(String invitationId) {
+        if (invitationId == null) return;
+
+        FirebaseFirestore.getInstance().collection("invitations")
+                .document(invitationId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        String allianceId = doc.getString("allianceId");
+                        if (allianceId != null && !allianceId.isEmpty()) {
+                            Intent intent = new Intent(this, AllianceActivity.class);
+                            intent.putExtra("ALLIANCE_ID", allianceId);
+                            startActivity(intent);
+                        } else {
+                            Toast.makeText(this, "Alliance not found", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 
     private void initViews() {
@@ -90,14 +141,72 @@ public class MainActivity extends AppCompatActivity {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
             currentUserId = currentUser.getUid();
-            welcomeTextView.setText("Dobrodošli! 👋");
+            welcomeTextView.setText("Welcome! 👋");
 
             loadUserData();
             initializeFCMToken();
-            // Ovde možeš dodati notifikacije i saveze
+            startAllianceInvitationListener();
         } else {
             navigateToLogin();
         }
+    }
+
+
+    private void startAllianceInvitationListener() {
+        if (currentUserId == null) return;
+
+        invitationListener = db.collection("invitations")
+                .whereEqualTo("recipientId", currentUserId)
+                .whereEqualTo("status", "PENDING")
+                .addSnapshotListener((snapshots, e) -> {
+                    if (e != null) {
+                        Log.w("MainActivity", "Listen failed for invitations.", e);
+                        return;
+                    }
+
+                    if (snapshots != null && !snapshots.isEmpty()) {
+                        for (QueryDocumentSnapshot doc : snapshots) {
+                            AllianceInvitation invitation = doc.toObject(AllianceInvitation.class);
+
+                            invitation.setInvitationId(doc.getId());
+
+                            if (!isFinishing() && !isDestroyed()) {
+                                showImmediateInvitationDialog(invitation);
+                            }
+                            return;
+                        }
+                    }
+                });
+    }
+
+    private void showImmediateInvitationDialog(AllianceInvitation invitation) {
+        new AlertDialog.Builder(this)
+                .setTitle("⚔️ Alliance invite")
+                .setMessage(invitation.getSenderUsername() + " invites you into the alliance \"" + invitation.getAllianceName() + "\".")
+                .setCancelable(false)
+                .setPositiveButton("Accept", (dialog, which) -> {
+                    allianceRepository.respondToInvitation(invitation, currentUserId, currentUsername, success -> {
+                        runOnUiThread(() -> {
+                            if (success) {
+                                Toast.makeText(this, "Invite accepted into" + invitation.getAllianceName(), Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(this, "Error while accepting", Toast.LENGTH_LONG).show();
+                            }
+                        });
+                    });
+                })
+                .setNegativeButton("Reject", (dialog, which) -> {
+
+                    db.collection("invitations").document(invitation.getInvitationId())
+                            .update("status", "REJECTED")
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(this, "Invite rejected", Toast.LENGTH_SHORT).show();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(this, "Error while rejecting", Toast.LENGTH_SHORT).show();
+                            });
+                })
+                .show();
     }
 
     private void setupButtons() {
@@ -109,7 +218,7 @@ public class MainActivity extends AppCompatActivity {
         logoutButton.setOnClickListener(v -> {
             authViewModel.logout();
             sharedPreferences.edit().putBoolean("isLoggedIn", false).apply();
-            Toast.makeText(this, "Uspešno ste se odjavili", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Logout successful", Toast.LENGTH_SHORT).show();
             navigateToLogin();
         });
     }
@@ -123,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
                         intent.putExtra("ALLIANCE_ID", allianceId);
                         startActivity(intent);
                     } else {
-                        Toast.makeText(this, "Nisi član nijednog saveza", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "You are not in any alliance", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -134,18 +243,40 @@ public class MainActivity extends AppCompatActivity {
                 .addOnSuccessListener(doc -> {
                     if (doc.exists()) {
                         currentUsername = doc.getString("username");
-                        welcomeTextView.setText("Dobrodošli, " + currentUsername + "! 👋");
+                        welcomeTextView.setText("Welcome, " + currentUsername + "! 👋");
                     }
                 });
     }
 
+
     private void initializeFCMToken() {
+        if (currentUserId == null) {
+            Log.e("FCM_INIT", "UserID is NULL.");
+            return;
+        }
+
         FirebaseMessaging.getInstance().getToken()
                 .addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) return;
+                    if (!task.isSuccessful()) {
+                        Log.e("FCM_INIT", "FCM init succesful", task.getException());
+                        return;
+                    }
+
                     String token = task.getResult();
+
+                    Map<String, Object> tokenUpdate = new HashMap<>();
+                    tokenUpdate.put("fcmToken", token);
+
                     db.collection("users").document(currentUserId)
-                            .update("fcmToken", token);
+                            .set(tokenUpdate, SetOptions.merge())
+                            .addOnSuccessListener(aVoid -> {
+                                Log.d("FCM_INIT", "Token successfully fetched to Firestore. Token: " + token);
+                                Toast.makeText(this, "FCM Token refreshed!", Toast.LENGTH_SHORT).show();
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e("FCM_INIT", "Error while fetching FCM.", e);
+                                Toast.makeText(this, "FCM error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            });
                 });
     }
 
