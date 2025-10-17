@@ -13,21 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
-# built application files
-*.apk
-*.aab
-
-# Keystore/security files (Unless you have a secure way to share them, keep them out of Git)
-*.jks
-*.keystore
-
-# Logs and user-generated files
-*.log
-/lint-results.html
-/lint-results.xml
-
 # Build folderi
-
 /app/build
 /.gradle
 
@@ -35,18 +21,17 @@ local.properties
 google-services.json
 */google-services.json
 
+# Android Studio fajlovi
 /.idea
 
 .gradle/
 
+node_modules/
+functions/node_modules/
+
+# Debug keystore
+*.keystore
+
+# Ostalo (cache, logovi itd.)
 /.externalNativeBuild
 /.cxx
-
-# Gradle
-
-build/
-**/build/
-
-Thumbs.db
-
-
