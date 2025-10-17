@@ -128,25 +128,30 @@ public class CreateAllianceActivity extends AppCompatActivity {
             );
 
             allianceRepository.sendInvitation(invitation, success -> {
-                sentCount[0]++;
                 if (success) {
-                    // VAŽNO: Moramo da sačekamo da se pozivnica kreira da bismo dobili njen ID
-                    // Pozivnica se već kreirana u Firestore, sada šaljemo notifikaciju
+                    // KLJUČNA IZMENA: Sada dobijamo invitationId iz invitation objekta
+                    // nakon što je Firestore kreirao dokument
+                    String invitationId = invitation.getInvitationId();
 
-                    // Kreiraj notifikaciju sa allianceId kao referenceId
-                    notificationRepository.createNotification(
-                            friend.getUserId(),
-                            "ALLIANCE_INVITE",
-                            currentUsername + " te je pozvao/la u savez " + allianceName,
-                            allianceId,  // Koristimo allianceId umesto invitationId
-                            notifSuccess -> {
-                                if (!notifSuccess) {
-                                    android.util.Log.e("CreateAlliance", "Failed to send notification to " + friend.getUsername());
+                    if (invitationId != null && !invitationId.isEmpty()) {
+                        // Kreiraj notifikaciju sa invitationId kao referenceId
+                        notificationRepository.createNotification(
+                                friend.getUserId(),
+                                "ALLIANCE_INVITE",
+                                currentUsername + " te je pozvao/la u savez " + allianceName,
+                                invitationId,  // Sada koristimo invitationId
+                                notifSuccess -> {
+                                    if (!notifSuccess) {
+                                        android.util.Log.e("CreateAlliance", "Failed to send notification to " + friend.getUsername());
+                                    }
                                 }
-                            }
-                    );
+                        );
+                    } else {
+                        android.util.Log.e("CreateAlliance", "Invitation ID is null for " + friend.getUsername());
+                    }
                 }
 
+                sentCount[0]++;
                 if (sentCount[0] == totalInvitations) {
                     runOnUiThread(() -> {
                         Toast.makeText(CreateAllianceActivity.this, "Savez kreiran i pozivnice poslate!", Toast.LENGTH_LONG).show();

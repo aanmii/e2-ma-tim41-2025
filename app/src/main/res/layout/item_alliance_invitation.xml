@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/invitationCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="10dp"
@@ -59,7 +60,7 @@
             android:id="@+id/warningTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="⚠️ Napomena: Već si član drugog saveza"
+            android:text="⚠️ Već si član drugog saveza. Prihvatanjem ćeš napustiti trenutni savez."
             android:textSize="12sp"
             android:textColor="@color/xp"
             android:textStyle="italic"

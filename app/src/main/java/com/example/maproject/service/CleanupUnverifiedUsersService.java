@@ -8,7 +8,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 public class CleanupUnverifiedUsersService {
 
     private static final String TAG = "CleanupService";
-    private static final long TWENTY_FOUR_HOURS_MILLIS = 24 * 60 * 60 * 1000;
+    private static final long TWENTY_FOUR_HOURS_MILLIS = 5 * 60 * 1000;
 
     public static void cleanupUnverifiedUsers() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
