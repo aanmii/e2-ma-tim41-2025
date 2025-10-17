@@ -6,6 +6,7 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
+import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
@@ -21,13 +22,32 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static final String TAG = "FCMService";
     private static final String CHANNEL_ID = "alliance_notifications";
+    private static final int FOREGROUND_NOTIFICATION_ID = 1001;
+
+    private void startFCMForegroundService() {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle("Aplikacija aktivna")
+                .setContentText("Slušanje obaveštenja u pozadini...")
+                .setPriority(NotificationCompat.PRIORITY_MIN);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID, "Alliance Notifications", NotificationManager.IMPORTANCE_HIGH
+            );
+            ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
+
+            startForeground(FOREGROUND_NOTIFICATION_ID, builder.build());
+        }
+    }
 
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);
-        Log.d(TAG, "New FCM token: " + token);
+        Log.d(TAG, "New FCM token received: " + token);
 
-        // Sačuvaj token u Firestore
+        startFCMForegroundService();
+
         String userId = FirebaseAuth.getInstance().getCurrentUser() != null ?
                 FirebaseAuth.getInstance().getCurrentUser().getUid() : null;
 
@@ -35,8 +55,10 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             FirebaseFirestore.getInstance().collection("users")
                     .document(userId)
                     .update("fcmToken", token)
-                    .addOnSuccessListener(aVoid -> Log.d(TAG, "FCM token saved"))
-                    .addOnFailureListener(e -> Log.e(TAG, "Error saving FCM token", e));
+                    .addOnSuccessListener(aVoid -> Log.d(TAG, "FCM token saved successfully for: " + userId))
+                    .addOnFailureListener(e -> Log.e(TAG, "Error saving FCM token.", e));
+        } else {
+            Log.w(TAG, "User not logged in when token was generated. Token will be saved on next login.");
         }
     }
 
@@ -46,7 +68,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         Log.d(TAG, "Message received from: " + message.getFrom());
 
-        // Proveri da li poruka ima notification payload
+        startFCMForegroundService();
+
         if (message.getNotification() != null) {
             String title = message.getNotification().getTitle();
             String body = message.getNotification().getBody();
@@ -62,7 +85,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-        // Kreiraj notification channel (Android 8.0+)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
@@ -73,10 +95,15 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             notificationManager.createNotificationChannel(channel);
         }
 
-        // Intent za otvaranje aplikacije
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("notification_type", type);
-        intent.putExtra("reference_id", referenceId);
+        Intent intent;
+        if ("ALLIANCE_INVITE".equals(type)) {
+            intent = new Intent(this, MainActivity.class);
+            intent.putExtra("notification_type", type);
+            intent.putExtra("reference_id", referenceId);
+        } else {
+            intent = new Intent(this, MainActivity.class);
+        }
+
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(
@@ -84,7 +111,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
         );
 
-        // Kreiraj notifikaciju
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(title)

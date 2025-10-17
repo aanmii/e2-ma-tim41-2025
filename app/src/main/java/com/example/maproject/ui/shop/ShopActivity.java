@@ -32,31 +32,26 @@ public class ShopActivity extends AppCompatActivity {
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
         if (firebaseUser == null) {
-            Toast.makeText(this, "Korisnik nije ulogovan!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "User is not logged in", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
 
-        // Učitaj korisnika iz Firestore
         loadCurrentUser();
 
-        // 🔹 Napici
-        setupItem(R.id.item_potion1, R.drawable.ic_potion1, "Napitak snage +20%", "Povećava PP za 20%", "potion1", "potion", 50);
-        setupItem(R.id.item_potion2, R.drawable.ic_potion2, "Napitak snage +40%", "Povećava PP za 40%", "potion2", "potion", 70);
-        setupItem(R.id.item_potion3, R.drawable.ic_potion3, "Trajni napitak +5%", "Trajno povećava PP za 5%", "potion3", "potion", 200);
-        setupItem(R.id.item_potion4, R.drawable.ic_potion4, "Trajni napitak +10%", "Trajno povećava PP za 10%", "potion4", "potion", 1000);
+        setupItem(R.id.item_potion1, R.drawable.ic_potion1, "Strength potion +20%", "+20% PP", "potion1", "potion", 50);
+        setupItem(R.id.item_potion2, R.drawable.ic_potion2, "Strength potion +40%", "+40% PP", "potion2", "potion", 70);
+        setupItem(R.id.item_potion3, R.drawable.ic_potion3, "Permanent potion +5%", "+5% PP permanently", "potion3", "potion", 200);
+        setupItem(R.id.item_potion4, R.drawable.ic_potion4, "Permanent potion +10%", "+10% PP permanently", "potion4", "potion", 1000);
 
-        // 🔹 Odeća
-        setupItem(R.id.item_gloves, R.drawable.ic_gloves, "Rukavice", "+5 odbrane", "gloves", "clothing", 60);
-        setupItem(R.id.item_boots, R.drawable.ic_boots, "Čizme", "+7 brzine", "boots", "clothing", 80);
-        setupItem(R.id.item_shield, R.drawable.ic_shield, "Štit", "+15 odbrane", "shield", "clothing", 60);
+        setupItem(R.id.item_gloves, R.drawable.ic_gloves, "Hearty gloves", "+5 defense", "gloves", "clothing", 60);
+        setupItem(R.id.item_boots, R.drawable.ic_boots, "Sparkly boots", "+7 speed", "boots", "clothing", 80);
+        setupItem(R.id.item_shield, R.drawable.ic_shield, "Magic shield", "+15 defense", "shield", "clothing", 60);
 
-        // 🔹 Oružje (nekupljivo)
-        setupItem(R.id.item_bow, R.drawable.ic_bow, "Luk i strela", "+12 napada", "bow", "weapon", 0);
-        setupItem(R.id.item_sword, R.drawable.ic_sword, "Mač hrabrosti", "+15 napada", "sword", "weapon", 0);
+        setupItem(R.id.item_bow, R.drawable.ic_bow, "Arrow and bow", "+12 attacks", "bow", "weapon", 0);
+        setupItem(R.id.item_sword, R.drawable.ic_sword, "Sword", "+15 attacks", "sword", "weapon", 0);
     }
 
-    /** Popunjava jedan shop item sa cenom i kupovinom */
     private void setupItem(int itemId, int imageRes, String titleText, String descText, String itemKey, String type, int cost) {
         View itemView = findViewById(itemId);
         if (itemView == null) return;
@@ -72,13 +67,12 @@ public class ShopActivity extends AppCompatActivity {
         title.setText(titleText);
         desc.setText(descText);
 
-        // Pokaži cenu
         priceText.setText(String.valueOf(cost));
         coinIcon.setImageResource(R.drawable.coins);
 
         buyButton.setOnClickListener(v -> {
             if (cost <= 0) {
-                Toast.makeText(this, "Ovo oružje se dobija samo od boss-a!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "You can get this only from boss!", Toast.LENGTH_SHORT).show();
                 return;
             }
             InventoryItem item = new InventoryItem(itemKey, titleText, type, 1, type.equals("clothing") ? 2 : 1);

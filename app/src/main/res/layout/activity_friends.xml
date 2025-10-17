@@ -85,7 +85,6 @@
             android:layout_marginBottom="16dp"
             android:nestedScrollingEnabled="false"/>
 
-        <!-- FRIEND REQUESTS SECTION (NOVO) -->
         <TextView
             android:id="@+id/requestsHeader"
             android:layout_width="wrap_content"
@@ -102,9 +101,8 @@
             android:id="@+id/requestsRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false"
-            android:layout_marginBottom="16dp"/>
-        <!-- KRAJ FRIEND REQUESTS SECTION -->
+            android:nestedScrollingEnabled="false"/>
+
 
         <TextView
             android:layout_width="wrap_content"

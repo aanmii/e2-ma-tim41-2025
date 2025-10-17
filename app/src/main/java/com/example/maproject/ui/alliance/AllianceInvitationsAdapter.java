@@ -78,7 +78,6 @@ public class AllianceInvitationsAdapter extends RecyclerView.Adapter<AllianceInv
             senderTextView.setText("Poslao/la: " + invitation.getSenderUsername());
             allianceTextView.setText(invitation.getAllianceName());
 
-            // Prikaži upozorenje ako korisnik već ima savez
             if (userHasAlliance) {
                 warningTextView.setVisibility(View.VISIBLE);
             } else {

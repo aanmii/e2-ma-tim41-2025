@@ -8,9 +8,9 @@ public class Item {
     private String name;
     private Type type;
     private String description;
-    private int price; // u novčićima
-    private int effectPercent; // bonus u procentima
-    private boolean isPermanent; // trajno ili jednokratno (za napitke)
+    private int price;
+    private int effectPercent;
+    private boolean isPermanent;
 
     public Item(String id, String name, Type type, String description, int price, int effectPercent, boolean isPermanent) {
         this.id = id;
@@ -22,5 +22,5 @@ public class Item {
         this.isPermanent = isPermanent;
     }
 
-    // getteri i setteri
+
 }

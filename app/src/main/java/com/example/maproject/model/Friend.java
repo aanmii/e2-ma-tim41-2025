@@ -13,9 +13,9 @@ public class Friend {
     private FriendshipStatus status;
 
     public enum FriendshipStatus {
-        PENDING,    // Čeka se odobrenje
-        ACCEPTED,   // Prihvaćeno
-        REJECTED    // Odbijeno
+        PENDING,
+        ACCEPTED,
+        REJECTED
     }
 
     public Friend() {
@@ -30,7 +30,7 @@ public class Friend {
         this.createdAt = System.currentTimeMillis();
     }
 
-    // Getteri
+
     public String getFriendshipId() { return friendshipId; }
     public String getUserId() { return userId; }
     public String getFriendId() { return friendId; }
@@ -39,7 +39,7 @@ public class Friend {
     public long getCreatedAt() { return createdAt; }
     public FriendshipStatus getStatus() { return status; }
 
-    // Setteri
+
     public void setFriendshipId(String friendshipId) { this.friendshipId = friendshipId; }
     public void setUserId(String userId) { this.userId = userId; }
     public void setFriendId(String friendId) { this.friendId = friendId; }

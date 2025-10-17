@@ -68,7 +68,6 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                             User user = snapshot.toObject(User.class);
                             if (user == null) return;
 
-                            // smanji količinu u available
                             InventoryItem selected = item;
                             if (selected.getQuantity() > 1) {
                                 selected.setQuantity(selected.getQuantity() - 1);
@@ -76,16 +75,13 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                                 items.remove(position);
                             }
 
-                            // dodaj u active (kopija sa 1 jedinicom)
                             InventoryItem activeItem = new InventoryItem(selected.getItemId(),
                                     selected.getName(),
                                     selected.getType(),
-                                    1,  // quantity
-                                    selected.getRemainingBattles()); // ostavi postojeće remainingBattles
-                            activeItem.setActive(true); // aktiviraj ga
+                                    1,
+                                    selected.getRemainingBattles());
+                            activeItem.setActive(true);
 
-
-                            // update Firestore
                             user.setEquipment(items);
                             user.setActiveEquipment(otherList);
                             db.collection("users").document(userId)

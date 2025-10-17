@@ -38,7 +38,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHol
     @NonNull
     @Override
     public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Koristimo SAMO JEDAN LAYOUT FAJL za sve poruke
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_chat_message, parent, false);
         return new MessageViewHolder(view);
@@ -77,28 +76,22 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHol
             messageContentTextView.setText(message.getContent());
             messageTimeTextView.setText(timeFormat.format(message.getTimestamp()));
 
-            // 1. Prilagođavanje rasporeda (levo/desno)
             ConstraintSet constraintSet = new ConstraintSet();
             constraintSet.clone(parentLayout);
 
-            // Ukloni sve prethodne horizontalne veze
             constraintSet.clear(messageCard.getId(), ConstraintSet.START);
             constraintSet.clear(messageCard.getId(), ConstraintSet.END);
 
             if (isCurrentUser) {
-                // Poruka od korisnika (DESNO)
                 constraintSet.connect(messageCard.getId(), ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END, 0);
 
-                // Boje za poslatu poruku (koristimo accent boju za bubanj)
                 messageCard.setCardBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.accent));
                 messageContentTextView.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.textPrimary));
                 senderNameTextView.setVisibility(View.GONE);
 
             } else {
-                // Poruka od drugog korisnika (LEVO)
                 constraintSet.connect(messageCard.getId(), ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, 0);
 
-                // Boje za primljenu poruku (koristimo cardBackground za bubanj)
                 messageCard.setCardBackgroundColor(ContextCompat.getColor(itemView.getContext(), R.color.cardBackground));
                 messageContentTextView.setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.textPrimary));
 
@@ -106,7 +99,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.MessageViewHol
                 senderNameTextView.setVisibility(View.VISIBLE);
             }
 
-            // Primeni promene
             constraintSet.applyTo(parentLayout);
         }
     }

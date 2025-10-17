@@ -12,10 +12,9 @@ public class Alliance {
     private String leaderId;
     private String leaderUsername;
     private long createdAt;
-    private Map<String, String> members; // userId -> username
+    private Map<String, String> members;
     private boolean missionActive;
-    // Opcionalno, za čat:
-    // private String chatRef;
+
 
     public Alliance() {
         this.members = new ConcurrentHashMap<>();
@@ -27,12 +26,10 @@ public class Alliance {
         this.leaderUsername = leaderUsername;
         this.createdAt = System.currentTimeMillis();
         this.members = new ConcurrentHashMap<>();
-        // Vođa je automatski prvi član
         this.members.put(leaderId, leaderUsername);
         this.missionActive = false;
     }
 
-    // Getteri
     public String getAllianceId() { return allianceId; }
     public String getName() { return name; }
     public String getLeaderId() { return leaderId; }
@@ -42,7 +39,6 @@ public class Alliance {
     public boolean isMissionActive() { return missionActive; }
     public List<String> getMemberIds() { return members.keySet().stream().collect(Collectors.toList()); }
 
-    // Setteri
     public void setAllianceId(String allianceId) { this.allianceId = allianceId; }
     public void setName(String name) { this.name = name; }
     public void setLeaderId(String leaderId) { this.leaderId = leaderId; }
@@ -51,7 +47,6 @@ public class Alliance {
     public void setMembers(Map<String, String> members) { this.members = members; }
     public void setMissionActive(boolean missionActive) { this.missionActive = missionActive; }
 
-    // Pomoćne metode
     public void addMember(String userId, String username) {
         this.members.put(userId, username);
     }

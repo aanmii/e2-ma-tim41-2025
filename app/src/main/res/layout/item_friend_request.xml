@@ -38,7 +38,6 @@
             app:layout_constraintStart_toEndOf="@+id/requestAvatarImageView"
             app:layout_constraintTop_toTopOf="@+id/requestAvatarImageView" />
 
-        <!-- Dugme za ODBIJANJE -->
         <Button
             android:id="@+id/rejectRequestButton"
             style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -51,7 +50,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <!-- Dugme za PRIHVATANJE -->
         <Button
             android:id="@+id/acceptRequestButton"
             android:layout_width="wrap_content"

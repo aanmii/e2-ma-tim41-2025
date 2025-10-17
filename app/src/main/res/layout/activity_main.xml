@@ -12,7 +12,6 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <!-- Welcome Header -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -39,7 +38,7 @@
                     android:id="@+id/welcomeTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Dobrodošli!"
+                    android:text="Welcome!"
                     android:textSize="24sp"
                     android:textStyle="bold"
                     android:textColor="@color/textPrimary"
@@ -47,11 +46,10 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Quick Actions Grid -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Brzi pristup"
+            android:text="Quick access"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="@color/textPrimary"
@@ -64,7 +62,7 @@
             android:weightSum="2"
             android:layout_marginBottom="16dp">
 
-            <!-- Profile -->
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="120dp"
@@ -95,14 +93,14 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Profil"
+                        android:text="My profile"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/textPrimary"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Friends -->
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="120dp"
@@ -133,7 +131,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Prijatelji"
+                        android:text="My friends"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="@color/textPrimary"/>
@@ -141,7 +139,7 @@
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
-        <!-- Second Row (Notifications, Alliance, and NEW Shop) -->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -149,7 +147,7 @@
             android:weightSum="3"
             android:layout_marginBottom="24dp">
 
-            <!-- Notifications -->
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="120dp"
@@ -184,7 +182,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Notifikacije"
+                            android:text="Notifications"
                             android:textSize="14sp"
                             android:textStyle="bold"
                             android:textColor="@color/textPrimary"/>
@@ -240,14 +238,13 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Savez"
+                        android:text="Alliance"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:textColor="@color/textPrimary"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- SHOP (NEW) -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="120dp"
@@ -278,7 +275,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Prodavnica"
+                        android:text="Shop"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:textColor="@color/textPrimary"/>
@@ -286,12 +283,11 @@
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
-        <!-- Logout Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/logoutButton"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:text="🚪 Odjavi se"
+            android:text="🚪 Logout"
             android:textSize="16sp"
             android:textStyle="bold"
             app:cornerRadius="30dp"

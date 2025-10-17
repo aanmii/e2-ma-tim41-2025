@@ -63,10 +63,9 @@ public class UserRepository {
     }
 
     private void sendVerificationEmail(FirebaseUser firebaseUser, MutableLiveData<String> registrationStatus) {
-        // Konfiguriši Action Code Settings za bolju verifikaciju
         ActionCodeSettings actionCodeSettings = ActionCodeSettings.newBuilder()
-                .setHandleCodeInApp(false) // Otvori link u browseru
-                .setUrl("https://maproject-f8fb7.firebaseapp.com") // Zameni sa svojim domenom
+                .setHandleCodeInApp(false)
+                .setUrl("https://maproject-f8fb7.firebaseapp.com")
                 .build();
 
         firebaseUser.sendEmailVerification(actionCodeSettings)
@@ -75,7 +74,6 @@ public class UserRepository {
                         registrationStatus.postValue("Registration successful! Check your email to verify your account. Link is valid for 1 hour.");
                         Log.d(TAG, "Verification email sent to: " + firebaseUser.getEmail());
                     } else {
-                        // Ako ne uspe sa settings, pokušaj bez njih
                         firebaseUser.sendEmailVerification()
                                 .addOnCompleteListener(retryTask -> {
                                     if (retryTask.isSuccessful()) {
@@ -109,18 +107,16 @@ public class UserRepository {
                     if (task.isSuccessful()) {
                         FirebaseUser firebaseUser = auth.getCurrentUser();
                         if (firebaseUser != null) {
-                            // KRITIČNO: Prvo reload, pa onda proveri verifikaciju
+
                             firebaseUser.reload().addOnCompleteListener(reloadTask -> {
                                 if (reloadTask.isSuccessful()) {
-                                    // Proveri da li je email verifikovan NAKON reload-a
                                     if (firebaseUser.isEmailVerified()) {
                                         loginStatus.postValue("LOGIN_SUCCESS");
                                         Log.d(TAG, "Login successful for: " + firebaseUser.getEmail());
                                     } else {
-                                        // Opcija za ponovno slanje emaila
+
                                         loginStatus.postValue("Email not verified. Check your inbox and spam folder. Click 'Resend' if needed.");
                                         Log.w(TAG, "Email not verified for: " + firebaseUser.getEmail());
-                                        // NE odjavljuj korisnika odmah, ostavi mu opciju da pošalje ponovo
                                     }
                                 } else {
                                     loginStatus.postValue("Error checking verification status. Please try again.");
@@ -136,7 +132,6 @@ public class UserRepository {
                 });
     }
 
-    // Nova metoda za ponovno slanje verifikacionog emaila
     public void resendVerificationEmail(MutableLiveData<String> status) {
         FirebaseUser user = auth.getCurrentUser();
 
@@ -173,13 +168,13 @@ public class UserRepository {
 
                     User user = documentSnapshot.toObject(User.class);
                     if (user == null) {
-                        status.postValue("Greška pri učitavanju korisnika.");
+                        status.postValue("Error while loading users.");
                         return;
                     }
 
                     int cost = calculateItemCost(item);
                     if (user.getCoins() < cost) {
-                        status.postValue("Nemate dovoljno novčića!");
+                        status.postValue("You dont have enough coins!");
                         return;
                     }
 
@@ -187,10 +182,10 @@ public class UserRepository {
                     user.addItemToEquipment(item);
 
                     db.collection("users").document(userId).set(user.toMap())
-                            .addOnSuccessListener(aVoid -> status.postValue("Kupljeno: " + item.getName()))
-                            .addOnFailureListener(e -> status.postValue("Greška prilikom kupovine."));
+                            .addOnSuccessListener(aVoid -> status.postValue("Bought: " + item.getName()))
+                            .addOnFailureListener(e -> status.postValue("Error while buying."));
                 })
-                .addOnFailureListener(e -> status.postValue("Greška pri učitavanju korisnika."));
+                .addOnFailureListener(e -> status.postValue("Error while loading user."));
     }
 
     private int calculateItemCost(InventoryItem item) {

@@ -84,7 +84,6 @@ public class ProfileActivity extends AppCompatActivity {
                 .addOnSuccessListener(document -> {
                     if (!document.exists()) return;
 
-                    // --- Osnovni podaci ---
                     String username = document.getString("username");
                     String avatar = document.getString("avatar");
 
@@ -93,14 +92,12 @@ public class ProfileActivity extends AppCompatActivity {
                     int coins = document.getLong("coins") != null ? document.getLong("coins").intValue() : 0;
                     int badges = document.getLong("badges") != null ? document.getLong("badges").intValue() : 0;
 
-                    // --- Level i XP ---
                     int level = levelingService.calculateLevelFromXP(totalXp);
                     long currentLevelXP = levelingService.getCurrentLevelXP(totalXp, level);
                     long xpForNextLevel = levelingService.getXPForNextLevel(level);
                     int powerPoints = levelingService.calculatePPFromLevel(level);
 
-                    // --- Prikaz ---
-                    usernameTextView.setText(username != null ? username : "Korisnik");
+                    usernameTextView.setText(username != null ? username : "User");
                     setAvatar(avatar);
 
                     levelTextView.setText("LEVEL " + level);
@@ -116,7 +113,7 @@ public class ProfileActivity extends AppCompatActivity {
                     setTitleIcon(level);
                     generateQRCode(currentUserId);
                 })
-                .addOnFailureListener(e -> Toast.makeText(this, "Greška pri učitavanju profila", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> Toast.makeText(this, "Error occurred while loading the user profile", Toast.LENGTH_SHORT).show());
     }
 
     private void updateXPBar(long currentXP, long maxXP) {
@@ -163,7 +160,7 @@ public class ProfileActivity extends AppCompatActivity {
             }
             qrCodeImageView.setImageBitmap(bmp);
         } catch (WriterException e) {
-            Toast.makeText(this, "Greška pri generisanju QR koda", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Error while generating QR code", Toast.LENGTH_SHORT).show();
         }
     }
 

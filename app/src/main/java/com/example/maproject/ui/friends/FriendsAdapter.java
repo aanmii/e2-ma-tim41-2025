@@ -68,7 +68,6 @@ public class FriendsAdapter extends RecyclerView.Adapter<FriendsAdapter.FriendVi
         public void bind(User friend, OnFriendClickListener listener) {
             usernameTextView.setText(friend.getUsername() != null ? friend.getUsername() : "Unknown");
 
-            // Avatar prikaz
             if (friend.getAvatar() != null) {
                 int avatarResId = itemView.getContext().getResources()
                         .getIdentifier(friend.getAvatar(), "drawable",

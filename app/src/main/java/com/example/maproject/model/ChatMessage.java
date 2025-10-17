@@ -11,18 +11,18 @@ public class ChatMessage {
     private Date timestamp;
 
     public ChatMessage() {
-        // Obavezni prazan konstruktor za Firebase Firestore
+
     }
 
-    // Konstruktor koji koristi Activity (timestamp se setuje pri slanju)
+
     public ChatMessage(String senderId, String senderUsername, String content) {
         this.senderId = senderId;
         this.senderUsername = senderUsername;
         this.content = content;
-        // Napomena: this.timestamp će se setovati u toMap() ili u Firestore-u
+
     }
 
-    // --- GETTERI ---
+
     public String getSenderId() {
         return senderId;
     }
@@ -39,7 +39,7 @@ public class ChatMessage {
         return timestamp;
     }
 
-    // --- SETTERI ---
+
     public void setSenderId(String senderId) {
         this.senderId = senderId;
     }
@@ -56,13 +56,13 @@ public class ChatMessage {
         this.timestamp = timestamp;
     }
 
-    // Pomoćna funkcija za slanje (koristi je ChatRepository.java)
+
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("senderId", senderId);
         map.put("senderUsername", senderUsername);
         map.put("content", content);
-        map.put("timestamp", new Date()); // Postavi trenutno vreme
+        map.put("timestamp", new Date());
         return map;
     }
 }

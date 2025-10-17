@@ -83,8 +83,7 @@ public class NotificationsAdapter extends RecyclerView.Adapter<NotificationsAdap
         public void bind(Notification notification, OnNotificationClickListener listener, SimpleDateFormat timeFormat) {
             contentTextView.setText(notification.getContent());
 
-            // FIX: Convert the Firebase Timestamp object to a Java Date object for SimpleDateFormat.
-            // notification.getTimestamp() now returns com.google.firebase.Timestamp.
+
             Date displayDate = notification.getTimestamp() != null
                     ? notification.getTimestamp().toDate()
                     : null;
