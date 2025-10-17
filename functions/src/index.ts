@@ -1,13 +1,8 @@
 import * as admin from "firebase-admin";
 import {onDocumentCreated} from "firebase-functions/v2/firestore";
 
-// Inicijalizacija Firebase Admin SDK-a
 admin.initializeApp();
 
-/**
- * Aktivira se kada se novi dokument kreira u 'invitations' kolekciji.
- * Šalje Push notifikaciju primaocu pozivnice.
- */
 export const sendAllianceInviteNotification = onDocumentCreated(
   "invitations/{invitationId}",
   async (event) => {
@@ -27,7 +22,7 @@ export const sendAllianceInviteNotification = onDocumentCreated(
       return;
     }
 
-    // 1. Dohvatanje FCM tokena primaoca
+
     const userDoc = await admin.firestore()
       .collection("users")
       .doc(recepientId)
@@ -39,20 +34,19 @@ export const sendAllianceInviteNotification = onDocumentCreated(
       return;
     }
 
-    // 2. Kreiranje poruke za FCM
     const message = {
       token: fcmToken,
       notification: {
-        title: "⚔️ Poziv u Savez",
-        body: `${senderUsername} te poziva u savez "${allianceName}".`,
+        title: "⚔️Alliance invite",
+        body: `${senderUsername} invites you into "${allianceName}".`,
       },
       data: {
         type: "ALLIANCE_INVITE",
-        referenceId: invitationId, // ID pozivnice
+        referenceId: invitationId,
       },
     };
 
-    // 3. Slanje notifikacije
+
     try {
       await admin.messaging().send(message);
       console.log(`Alliance invitation notification sent to: ${recepientId}`);
@@ -77,13 +71,11 @@ export const sendChatNotification = onDocumentCreated(
     const senderUsername = chatMessage.senderUsername;
     const messageContent = chatMessage.content;
 
-    // 1. Dohvatanje ID-jeva svih članova saveza i imena saveza
     const allianceDoc = await admin.firestore()
       .collection("alliances")
       .doc(allianceId)
       .get();
 
-    // Pretpostavljam da su članovi pohranjeni kao mapa {userId: username}
     const membersMap = allianceDoc.data()?.members || {};
     const allianceName = allianceDoc.data()?.name || "Savez";
 
@@ -95,7 +87,6 @@ export const sendChatNotification = onDocumentCreated(
       return;
     }
 
-    // 2. Dohvatanje FCM tokena za SVE primaoce
     const usersSnapshot = await admin.firestore()
       .collection("users")
       .where(admin.firestore.FieldPath.documentId(), "in", recipientIds)
@@ -114,7 +105,6 @@ export const sendChatNotification = onDocumentCreated(
       return;
     }
 
-    // Priprema poruke
     const title = allianceName;
     const body = `${senderUsername}: ${messageContent.substring(0, 50)}${
       messageContent.length > 50 ? "..." : ""
@@ -127,11 +117,10 @@ export const sendChatNotification = onDocumentCreated(
       },
       data: {
         type: "CHAT_MESSAGE",
-        referenceId: allianceId, // ID Saveza
+        referenceId: allianceId,
       },
     };
 
-    // 3. Slanje notifikacije svima (multicast)
     try {
       await admin.messaging().sendEachForMulticast({tokens, ...message});
       console.log(
