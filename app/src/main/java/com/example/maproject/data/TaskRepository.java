@@ -34,6 +34,7 @@ public class TaskRepository {
                             .addOnCompleteListener(taskResult -> {
                                 if (taskResult.isSuccessful()) {
                                     statisticsManager.updateCreatedTaskCount(task.getUserId(), 1);
+                                    statisticsManager.updateActiveDays(task.getUserId());
                                 }
                                 onComplete.onComplete(taskResult);
                             });
@@ -43,25 +44,37 @@ public class TaskRepository {
                 });
     }
 
+
     public void updateTaskStatus(Task task, Task.Status oldStatus, OnCompleteListener<Void> onComplete) {
+        if (task.getStatus() == Task.Status.COMPLETED && task.getCompletedTime() == 0) {
+            task.setCompletedTime(System.currentTimeMillis());
+        }
+
         Map<String, Object> updates = new HashMap<>();
         updates.put("status", task.getStatus().name());
+        updates.put("completedTime", task.getCompletedTime());
 
         tasksCollection.document(task.getTaskId())
                 .update(updates)
                 .addOnCompleteListener(taskResult -> {
                     if (taskResult.isSuccessful()) {
-                        statisticsManager.updateStatisticsOnTaskStatusChange(task.getUserId(), task, oldStatus);
+                        statisticsManager.updateStatisticsOnTaskStatusChange(
+                                task.getUserId(),
+                                task,
+                                oldStatus
+                        );
                     }
                     onComplete.onComplete(taskResult);
                 });
     }
+
 
     public void updateTask(String taskId, Map<String, Object> updates, OnCompleteListener<Void> onComplete) {
         tasksCollection.document(taskId)
                 .update(updates)
                 .addOnCompleteListener(onComplete);
     }
+
 
     public void deleteTask(Task task, OnCompleteListener<Void> onComplete) {
         final Task.Status currentStatus = task.getStatus();
@@ -88,5 +101,22 @@ public class TaskRepository {
     public Query fetchTasksByUserId(String userId) {
         return tasksCollection.whereEqualTo("userId", userId)
                 .orderBy("executionTime", Query.Direction.ASCENDING);
+    }
+
+
+    public Query fetchTasksByDate(String userId, long startOfDay, long endOfDay) {
+        return tasksCollection
+                .whereEqualTo("userId", userId)
+                .whereGreaterThanOrEqualTo("executionTime", startOfDay)
+                .whereLessThan("executionTime", endOfDay)
+                .orderBy("executionTime", Query.Direction.ASCENDING);
+    }
+
+
+    public Query fetchCompletedTasks(String userId) {
+        return tasksCollection
+                .whereEqualTo("userId", userId)
+                .whereEqualTo("status", Task.Status.COMPLETED.name())
+                .orderBy("completedTime", Query.Direction.DESCENDING);
     }
 }

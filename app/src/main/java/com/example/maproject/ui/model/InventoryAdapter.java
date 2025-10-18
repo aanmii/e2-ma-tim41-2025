@@ -34,6 +34,10 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         this.otherList = otherList;
     }
 
+    public void setOtherAdapter(InventoryAdapter adapter) {
+        this.otherAdapter = adapter;
+    }
+
     @NonNull
     @Override
     public InventoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -68,28 +72,35 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                             User user = snapshot.toObject(User.class);
                             if (user == null) return;
 
-                            InventoryItem selected = item;
-                            if (selected.getQuantity() > 1) {
-                                selected.setQuantity(selected.getQuantity() - 1);
+                            if (item.getQuantity() > 1) {
+                                item.setQuantity(item.getQuantity() - 1);
                             } else {
                                 items.remove(position);
                             }
 
-                            InventoryItem activeItem = new InventoryItem(selected.getItemId(),
-                                    selected.getName(),
-                                    selected.getType(),
+                            InventoryItem activeItem = new InventoryItem(
+                                    item.getItemId(),
+                                    item.getName(),
+                                    item.getType(),
                                     1,
-                                    selected.getRemainingBattles());
+                                    item.getRemainingBattles()
+                            );
                             activeItem.setActive(true);
 
-                            user.setEquipment(items);
-                            user.setActiveEquipment(otherList);
-                            db.collection("users").document(userId)
-                                    .set(user.toMap())
-                                    .addOnSuccessListener(aVoid -> {
-                                        notifyDataSetChanged();
-                                        if (otherAdapter != null) otherAdapter.notifyDataSetChanged();
-                                    });
+                            if (otherList != null) {
+                                otherList.add(activeItem);
+                            }
+
+                            if (user != null) {
+                                user.setEquipment(items);
+                                user.setActiveEquipment(otherList);
+                                db.collection("users").document(userId)
+                                        .set(user.toMap())
+                                        .addOnSuccessListener(aVoid -> {
+                                            notifyDataSetChanged();
+                                            if (otherAdapter != null) otherAdapter.notifyDataSetChanged();
+                                        });
+                            }
                         });
             });
         }
