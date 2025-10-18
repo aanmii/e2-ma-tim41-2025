@@ -17,12 +17,14 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
+import java.util.List;
+
 public class FriendProfileActivity extends AppCompatActivity {
 
     private ImageView avatarImageView, qrCodeImageView, titleIconImageView, xpBarImageView;
     private TextView usernameTextView, levelTextView, titleTextView;
     private TextView powerPointsTextView, experiencePointsTextView, coinsTextView, badgesTextView, xpProgressTextView;
-    private Button backButton;
+    private Button backButton, viewInventoryButton;
 
     private FirebaseFirestore db;
     private LevelingService levelingService;
@@ -62,12 +64,12 @@ public class FriendProfileActivity extends AppCompatActivity {
         xpProgressTextView = findViewById(R.id.xpProgressTextView);
         titleIconImageView = findViewById(R.id.titleIconImageView);
         backButton = findViewById(R.id.backButton);
+        viewInventoryButton = findViewById(R.id.viewInventoryButton);
     }
 
     private void hideUnnecessaryButtons() {
         findViewById(R.id.changePasswordButton).setVisibility(android.view.View.GONE);
         findViewById(R.id.viewStatisticsButton).setVisibility(android.view.View.GONE);
-        findViewById(R.id.viewInventoryButton).setVisibility(android.view.View.GONE);
 
         backButton.setOnClickListener(v -> finish());
     }
@@ -85,42 +87,64 @@ public class FriendProfileActivity extends AppCompatActivity {
                     String avatar = document.getString("avatar");
                     setAvatar(avatar);
 
-                    usernameTextView.setText(document.getString("username"));
-                    titleTextView.setText(document.getString("title"));
+                    String username = document.getString("username");
+                    usernameTextView.setText(username != null ? username : "User");
 
-                    int currentLevel = ((Number) document.get("level")).intValue();
-                    levelTextView.setText("LEVEL " + currentLevel);
-                    setTitleIcon(currentLevel);
+                    // Postavi tekst dugmeta za opremu
+                    if (username != null) {
+                        viewInventoryButton.setText(username + "'s Equipment");
+                    }
 
-                    long powerPoints = getLong(document.get("powerPoints"));
-                    long totalXp = getLong(document.get("totalExperiencePoints"));
-                    long coins = getLong(document.get("coins"));
-                    long badges = getLong(document.get("badges"));
+                    long totalXp = document.getLong("totalExperiencePoints") != null ? document.getLong("totalExperiencePoints") : 0L;
+                    int level = levelingService.calculateLevelFromXP(totalXp);
+                    long currentLevelXP = levelingService.getCurrentLevelXP(totalXp, level);
+                    long xpForNextLevel = levelingService.getXPForNextLevel(level);
+                    int powerPoints = levelingService.calculatePPFromLevel(level);
 
+                    levelTextView.setText("LEVEL " + level);
+                    titleTextView.setText(levelingService.getTitleForLevel(level));
                     powerPointsTextView.setText(String.valueOf(powerPoints));
-                    experiencePointsTextView.setText(String.valueOf(totalXp));
+
+                    long coins = document.getLong("coins") != null ? document.getLong("coins") : 0;
+                    long badges = document.getLong("badges") != null ? document.getLong("badges") : 0;
+
                     coinsTextView.setText(String.valueOf(coins));
                     badgesTextView.setText(String.valueOf(badges));
+                    experiencePointsTextView.setText(String.valueOf(totalXp));
 
-                    long currentLevelXP = levelingService.getCurrentLevelXP(totalXp, currentLevel);
-                    long xpForNextLevel = levelingService.getXPForNextLevel(currentLevel);
-                    updateXPBar(currentLevel, currentLevelXP, xpForNextLevel);
+                    xpProgressTextView.setText(currentLevelXP + " / " + xpForNextLevel + " XP");
+                    updateXPBar(currentLevelXP, xpForNextLevel);
 
+                    setTitleIcon(level);
                     generateQRCode(friendId);
+
+                    setupInventoryButton(document);
                 })
                 .addOnFailureListener(e ->
                         Toast.makeText(this, "Error occurred while loading the profile", Toast.LENGTH_SHORT).show()
                 );
     }
 
-    private long getLong(Object obj) {
-        return (obj instanceof Number) ? ((Number) obj).longValue() : 0L;
+    private void setupInventoryButton(com.google.firebase.firestore.DocumentSnapshot document) {
+        viewInventoryButton.setOnClickListener(v -> {
+            if (document.get("activeEquipment") != null) {
+                List<String> activeEquipment = (List<String>) document.get("activeEquipment");
+                StringBuilder sb = new StringBuilder();
+                for (String item : activeEquipment) {
+                    sb.append(item).append("\n");
+                }
+
+                Toast.makeText(FriendProfileActivity.this, sb.toString(), Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(FriendProfileActivity.this, "No active equipment", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    private void updateXPBar(int currentLevel, long currentXP, long requiredXPForNextLevel) {
-        xpProgressTextView.setText(currentXP + "/" + requiredXPForNextLevel);
+    private void updateXPBar(long currentXP, long maxXP) {
+        double percentage = maxXP > 0 ? (double) currentXP / maxXP : 0.0;
+        percentage = Math.min(percentage, 1.0);
 
-        double percentage = requiredXPForNextLevel > 0 ? (double) currentXP / requiredXPForNextLevel : 0.0;
         int xpImageIndex;
         if (percentage <= 0.01) xpImageIndex = 1;
         else if (percentage <= 0.25) xpImageIndex = 2;
@@ -128,12 +152,12 @@ public class FriendProfileActivity extends AppCompatActivity {
         else if (percentage <= 0.75) xpImageIndex = 4;
         else xpImageIndex = 5;
 
-        String xpIconName = "xp_" + xpImageIndex;
-        int xpIconResId = getResources().getIdentifier(xpIconName, "drawable", getPackageName());
-        xpBarImageView.setImageResource(xpIconResId);
+        int xpIconResId = getResources().getIdentifier("xp_" + xpImageIndex, "drawable", getPackageName());
+        xpBarImageView.setImageResource(xpIconResId != 0 ? xpIconResId : R.drawable.xp_1);
     }
 
     private void setAvatar(String avatarName) {
+        if (avatarName == null) return;
         int avatarResId = getResources().getIdentifier(avatarName, "drawable", getPackageName());
         if (avatarResId != 0) avatarImageView.setImageResource(avatarResId);
     }
