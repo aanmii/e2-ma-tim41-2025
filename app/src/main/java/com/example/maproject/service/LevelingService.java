@@ -2,18 +2,18 @@ package com.example.maproject.service;
 
 public class LevelingService {
 
-    private static final long BASE_XP_LEVEL_1 = 200; // XP za prvi nivo
-    private static final int BASE_PP_LEVEL_2 = 40;   // PP nakon prvog nivoa
+    private static final long BASE_XP_LEVEL_1 = 200;
+    private static final int BASE_PP_LEVEL_1 = 40;
 
     private static final long[] CUMULATIVE_XP_TABLE = new long[100];
     private static final int[] PP_TABLE = new int[100];
 
     private static final String[] TITLES = {
-            "Sparkle",       // Level 1
-            "Rising Star",   // Level 2
-            "Brilliant Mind",// Level 3
-            "Master Creator",// Level 4
-            "Ultimate Visionary" // Level 5+
+            "Sparkle",
+            "Rising Star",
+            "Brilliant Mind",
+            "Master Creator",
+            "Ultimate Visionary"
     };
 
     static {
@@ -24,19 +24,19 @@ public class LevelingService {
         CUMULATIVE_XP_TABLE[0] = 0;
         PP_TABLE[0] = 0;
 
+        long prevXP = BASE_XP_LEVEL_1;
+        int prevPP = BASE_PP_LEVEL_1;
+
         // Level 1
         CUMULATIVE_XP_TABLE[1] = BASE_XP_LEVEL_1;
-        PP_TABLE[1] = 0;
-
-        long prevXP = BASE_XP_LEVEL_1;
-        int prevPP = BASE_PP_LEVEL_2;
+        PP_TABLE[1] = BASE_PP_LEVEL_1;
 
         for (int level = 2; level < 100; level++) {
             prevXP = roundUpToNextHundred(prevXP * 2 + prevXP / 2);
             CUMULATIVE_XP_TABLE[level] = CUMULATIVE_XP_TABLE[level - 1] + prevXP;
 
-            prevPP = (int) Math.round(prevPP + 0.75 * prevPP);
-            PP_TABLE[level] = PP_TABLE[level - 1] + prevPP;
+            prevPP = (int) Math.round(prevPP + (0.75 * prevPP));
+            PP_TABLE[level] = prevPP;
         }
     }
 
@@ -52,7 +52,8 @@ public class LevelingService {
     }
 
     public int calculatePPFromLevel(int level) {
-        if (level < 0 || level >= PP_TABLE.length) return PP_TABLE[PP_TABLE.length - 1];
+        if (level <= 0) return 0;
+        if (level >= PP_TABLE.length) return PP_TABLE[PP_TABLE.length - 1];
         return PP_TABLE[level];
     }
 
