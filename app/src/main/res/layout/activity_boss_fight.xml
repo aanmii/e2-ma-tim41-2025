@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_background"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Boss Info -->
+        <TextView
+            android:id="@+id/tvBossLevel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Boss Level 1"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="@color/textPrimary"
+            android:layout_gravity="center"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Boss HP Bar -->
+        <ProgressBar
+            android:id="@+id/bossHpBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:max="100"
+            android:progress="100"
+            android:progressTint="@android:color/holo_red_dark"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvBossHp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Boss HP: 200 / 200"
+            android:textSize="18sp"
+            android:textColor="@color/textPrimary"
+            android:layout_gravity="center"
+            android:layout_marginBottom="24dp" />
+
+        <!-- User Stats -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/gradient_background"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:id="@+id/tvUserPp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Your Power: 40 PP"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/textPrimary"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvAttacksRemaining"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Attacks: 5 / 5"
+                android:textSize="16sp"
+                android:textColor="@color/textSecondary"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvSuccessChance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hit Chance: 67%"
+                android:textSize="16sp"
+                android:textColor="@color/textSecondary" />
+        </LinearLayout>
+
+        <!-- Equipment Bonuses -->
+        <TextView
+            android:id="@+id/tvEquipmentBonuses"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Equipment Bonuses:\n-"
+            android:textSize="14sp"
+            android:textColor="@color/textSecondary"
+            android:background="@drawable/gradient_background"
+            android:padding="12dp"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Attack Button -->
+        <Button
+            android:id="@+id/btnAttack"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="⚔️ ATTACK"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:backgroundTint="@android:color/holo_red_dark"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Results Container -->
+        <LinearLayout
+            android:id="@+id/resultContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/gradient_background"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvResult"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🎉 VICTORY! 🎉"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_gravity="center"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/tvCoinsEarned"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Coins earned: 200"
+                android:textSize="18sp"
+                android:textColor="@color/textPrimary"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvItemDropped"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Item dropped: Magic Shield"
+                android:textSize="18sp"
+                android:textColor="@android:color/holo_green_dark"
+                android:visibility="gone" />
+        </LinearLayout>
+
+        <!-- Finish Button -->
+        <Button
+            android:id="@+id/btnFinishFight"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="FINISH"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+</ScrollView>
