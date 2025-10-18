@@ -55,13 +55,13 @@
             android:textColor="@color/textPrimary"
             android:layout_marginBottom="12dp"/>
 
+        <!-- PRVI RED: Profile & Friends -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:weightSum="2"
             android:layout_marginBottom="16dp">
-
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
@@ -99,7 +99,6 @@
                         android:textColor="@color/textPrimary"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
-
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
@@ -139,14 +138,13 @@
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
-
+        <!-- DRUGI RED: Notifications, Alliance, Shop -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:weightSum="3"
-            android:layout_marginBottom="24dp">
-
+            android:layout_marginBottom="16dp">
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
@@ -188,7 +186,6 @@
                             android:textColor="@color/textPrimary"/>
                     </LinearLayout>
 
-                    <!-- Badge -->
                     <TextView
                         android:id="@+id/notificationBadgeTextView"
                         android:layout_width="28dp"
@@ -206,7 +203,6 @@
                 </FrameLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Alliance -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="120dp"
@@ -268,7 +264,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="💰"
+                        android:text="🛒"
                         android:textSize="36sp"
                         android:layout_marginBottom="8dp"/>
 
@@ -283,6 +279,52 @@
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
+        <!-- NOVI - BOSS FIGHT DUGME (veliko, istaknuto) -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="12dp"
+            app:cardBackgroundColor="#8B0000"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
+
+            <LinearLayout
+                android:id="@+id/bossFightButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⚔️ 👹"
+                    android:textSize="48sp"
+                    android:layout_marginBottom="8dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="FIGHT BOSS"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Test your strength!"
+                    android:textSize="14sp"
+                    android:textColor="#FFCCCC"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Logout dugme -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/logoutButton"
             android:layout_width="match_parent"

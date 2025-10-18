@@ -11,6 +11,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class UserRepository {
@@ -166,37 +168,77 @@ public class UserRepository {
                 });
     }
 
-    public void buyItem(String userId, InventoryItem item, MutableLiveData<String> status) {
+// U UserRepository.java - ažuriraj buyItem metodu
+
+    public void buyItem(String userId, InventoryItem item, int price, OnStatusListener listener) {
         db.collection("users").document(userId)
                 .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (!documentSnapshot.exists()) {
-                        status.postValue("Korisnik ne postoji!");
-                        return;
-                    }
-
-                    User user = documentSnapshot.toObject(User.class);
+                .addOnSuccessListener(doc -> {
+                    User user = doc.toObject(User.class);
                     if (user == null) {
-                        status.postValue("Error while loading users.");
+                        listener.onStatus("User not found");
                         return;
                     }
 
-                    int cost = calculateItemCost(item);
-                    if (user.getCoins() < cost) {
-                        status.postValue("You dont have enough coins!");
+                    if (user.getCoins() < price) {
+                        listener.onStatus("Not enough coins!");
                         return;
                     }
 
-                    user.setCoins(user.getCoins() - cost);
-                    user.addItemToEquipment(item);
+                    // Oduzmi novčiće
+                    user.setCoins(user.getCoins() - price);
 
-                    db.collection("users").document(userId).set(user.toMap())
-                            .addOnSuccessListener(aVoid -> status.postValue("Bought: " + item.getName()))
-                            .addOnFailureListener(e -> status.postValue("Error while buying."));
+                    // Dodaj stavku u inventar
+                    List<InventoryItem> equipment = user.getEquipment();
+                    if (equipment == null) equipment = new ArrayList<>();
+
+                    // Proveri da li stavka već postoji
+                    boolean found = false;
+                    for (InventoryItem existing : equipment) {
+                        if (existing.getItemId().equals(item.getItemId())) {
+                            // Povećaj količinu
+                            existing.setQuantity(existing.getQuantity() + 1);
+                            found = true;
+
+                            // Log za debug
+                            Log.d("UserRepository", "Item stacked: " + item.getName() +
+                                    " | New quantity: " + existing.getQuantity() +
+                                    " | PP Bonus: " + existing.getPpBonus());
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        equipment.add(item);
+                        Log.d("UserRepository", "New item added: " + item.getName() +
+                                " | PP Bonus: " + item.getPpBonus() +
+                                " | Attack Bonus: " + item.getAttackSuccessBonus() +
+                                " | Extra Attack Chance: " + item.getExtraAttackChance());
+                    }
+
+                    user.setEquipment(equipment);
+
+                    // Sačuvaj koristeći toMap() da bi se svi podaci sačuvali
+                    db.collection("users").document(userId)
+                            .set(user.toMap())
+                            .addOnSuccessListener(aVoid -> {
+                                listener.onStatus("Item purchased successfully!");
+                                Log.d("UserRepository", "Equipment saved to Firestore");
+                            })
+                            .addOnFailureListener(e -> {
+                                listener.onStatus("Purchase failed: " + e.getMessage());
+                                Log.e("UserRepository", "Failed to save equipment", e);
+                            });
                 })
-                .addOnFailureListener(e -> status.postValue("Error while loading user."));
+                .addOnFailureListener(e -> {
+                    listener.onStatus("Error: " + e.getMessage());
+                    Log.e("UserRepository", "Failed to load user", e);
+                });
     }
 
+    public interface OnStatusListener {
+        void onStatus(String message);
+    }
     private int calculateItemCost(InventoryItem item) {
         switch (item.getItemId()) {
             case "potion1": return 50;

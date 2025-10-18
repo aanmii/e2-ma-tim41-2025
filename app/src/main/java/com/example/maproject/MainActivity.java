@@ -17,9 +17,10 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.maproject.data.AllianceRepository;
 import com.example.maproject.data.NotificationRepository;
 import com.example.maproject.data.UserRepository;
-import com.example.maproject.model.AllianceInvitation; // DODATO
+import com.example.maproject.model.AllianceInvitation;
 import com.example.maproject.ui.alliance.AllianceActivity;
 import com.example.maproject.ui.auth.LoginActivity;
+import com.example.maproject.ui.boss.BossFightActivity; // DODATO
 import com.example.maproject.ui.friends.FriendsActivity;
 import com.example.maproject.ui.model.ProfileActivity;
 import com.example.maproject.ui.notifications.NotificationsActivity;
@@ -30,7 +31,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.ListenerRegistration;
-import com.google.firebase.firestore.QueryDocumentSnapshot; // DODATO
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 
@@ -41,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView welcomeTextView, notificationBadgeTextView;
     private View profileButton, friendsButton, notificationsButton, allianceButton, shopButton;
+    private View bossFightButton; // DODATO
     private View logoutButton;
 
     private AuthViewModel authViewModel;
@@ -89,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
             String referenceId = intent.getStringExtra("reference_id");
 
             if ("ALLIANCE_INVITE".equals(type)) {
-                  openAllianceFromNotification(referenceId);
+                openAllianceFromNotification(referenceId);
             } else if ("CHAT_MESSAGE".equals(type)) {
                 if (referenceId != null && !referenceId.isEmpty()) {
                     Intent chatIntent = new Intent(this, AllianceActivity.class);
@@ -128,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
         notificationsButton = findViewById(R.id.notificationsButton);
         allianceButton = findViewById(R.id.allianceButton);
         shopButton = findViewById(R.id.shopButton);
+        bossFightButton = findViewById(R.id.bossFightButton); // DODATO
         logoutButton = findViewById(R.id.logoutButton);
     }
 
@@ -151,7 +154,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     private void startAllianceInvitationListener() {
         if (currentUserId == null) return;
 
@@ -167,7 +169,6 @@ public class MainActivity extends AppCompatActivity {
                     if (snapshots != null && !snapshots.isEmpty()) {
                         for (QueryDocumentSnapshot doc : snapshots) {
                             AllianceInvitation invitation = doc.toObject(AllianceInvitation.class);
-
                             invitation.setInvitationId(doc.getId());
 
                             if (!isFinishing() && !isDestroyed()) {
@@ -188,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
                     allianceRepository.respondToInvitation(invitation, currentUserId, currentUsername, success -> {
                         runOnUiThread(() -> {
                             if (success) {
-                                Toast.makeText(this, "Invite accepted into" + invitation.getAllianceName(), Toast.LENGTH_SHORT).show();
+                                Toast.makeText(this, "Invite accepted into " + invitation.getAllianceName(), Toast.LENGTH_SHORT).show();
                             } else {
                                 Toast.makeText(this, "Error while accepting", Toast.LENGTH_LONG).show();
                             }
@@ -196,7 +197,6 @@ public class MainActivity extends AppCompatActivity {
                     });
                 })
                 .setNegativeButton("Reject", (dialog, which) -> {
-
                     db.collection("invitations").document(invitation.getInvitationId())
                             .update("status", "REJECTED")
                             .addOnSuccessListener(aVoid -> {
@@ -215,6 +215,10 @@ public class MainActivity extends AppCompatActivity {
         notificationsButton.setOnClickListener(v -> startActivity(new Intent(this, NotificationsActivity.class)));
         allianceButton.setOnClickListener(v -> openAlliance());
         shopButton.setOnClickListener(v -> startActivity(new Intent(this, ShopActivity.class)));
+
+        // DODATO - Boss Fight dugme
+        bossFightButton.setOnClickListener(v -> startActivity(new Intent(this, BossFightActivity.class)));
+
         logoutButton.setOnClickListener(v -> {
             authViewModel.logout();
             sharedPreferences.edit().putBoolean("isLoggedIn", false).apply();
@@ -248,7 +252,6 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-
     private void initializeFCMToken() {
         if (currentUserId == null) {
             Log.e("FCM_INIT", "UserID is NULL.");
@@ -258,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
         FirebaseMessaging.getInstance().getToken()
                 .addOnCompleteListener(task -> {
                     if (!task.isSuccessful()) {
-                        Log.e("FCM_INIT", "FCM init succesful", task.getException());
+                        Log.e("FCM_INIT", "FCM init failed", task.getException());
                         return;
                     }
 
@@ -271,11 +274,9 @@ public class MainActivity extends AppCompatActivity {
                             .set(tokenUpdate, SetOptions.merge())
                             .addOnSuccessListener(aVoid -> {
                                 Log.d("FCM_INIT", "Token successfully fetched to Firestore. Token: " + token);
-                                Toast.makeText(this, "FCM Token refreshed!", Toast.LENGTH_SHORT).show();
                             })
                             .addOnFailureListener(e -> {
                                 Log.e("FCM_INIT", "Error while fetching FCM.", e);
-                                Toast.makeText(this, "FCM error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                             });
                 });
     }

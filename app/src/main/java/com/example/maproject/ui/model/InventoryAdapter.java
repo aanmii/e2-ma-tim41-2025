@@ -72,12 +72,14 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                             User user = snapshot.toObject(User.class);
                             if (user == null) return;
 
+                            // Smanji količinu ili ukloni iz inventara
                             if (item.getQuantity() > 1) {
                                 item.setQuantity(item.getQuantity() - 1);
                             } else {
                                 items.remove(position);
                             }
 
+                            // Kreiraj aktivnu stavku SA SVIM BONUSIMA
                             InventoryItem activeItem = new InventoryItem(
                                     item.getItemId(),
                                     item.getName(),
@@ -85,22 +87,46 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                                     1,
                                     item.getRemainingBattles()
                             );
+
+                            // **KLJUČNO - KOPIRAJ SVE BONUSE**
+                            activeItem.setPpBonus(item.getPpBonus());
+                            activeItem.setAttackSuccessBonus(item.getAttackSuccessBonus());
+                            activeItem.setExtraAttackChance(item.getExtraAttackChance());
+                            activeItem.setCoinBonus(item.getCoinBonus());
+                            activeItem.setPermanent(item.isPermanent());
+                            activeItem.setUpgradeLevel(item.getUpgradeLevel());
                             activeItem.setActive(true);
 
+                            // Dodaj u aktivnu opremu
                             if (otherList != null) {
                                 otherList.add(activeItem);
                             }
 
-                            if (user != null) {
-                                user.setEquipment(items);
-                                user.setActiveEquipment(otherList);
-                                db.collection("users").document(userId)
-                                        .set(user.toMap())
-                                        .addOnSuccessListener(aVoid -> {
-                                            notifyDataSetChanged();
-                                            if (otherAdapter != null) otherAdapter.notifyDataSetChanged();
-                                        });
-                            }
+                            // Sačuvaj u bazu
+                            user.setEquipment(items);
+                            user.setActiveEquipment(otherList);
+
+                            db.collection("users").document(userId)
+                                    .set(user.toMap())
+                                    .addOnSuccessListener(aVoid -> {
+                                        notifyDataSetChanged();
+                                        if (otherAdapter != null) {
+                                            otherAdapter.notifyDataSetChanged();
+                                        }
+
+                                        // Log za debug
+                                        android.util.Log.d("InventoryAdapter",
+                                                "Item activated: " + item.getName() +
+                                                        " | PP Bonus: " + activeItem.getPpBonus() +
+                                                        " | Attack Bonus: " + activeItem.getAttackSuccessBonus() +
+                                                        " | Extra Attack Chance: " + activeItem.getExtraAttackChance());
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        android.util.Log.e("InventoryAdapter", "Failed to save equipment", e);
+                                    });
+                        })
+                        .addOnFailureListener(e -> {
+                            android.util.Log.e("InventoryAdapter", "Failed to load user", e);
                         });
             });
         }

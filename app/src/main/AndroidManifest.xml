@@ -43,6 +43,7 @@
         <activity android:name=".ui.shop.ShopActivity" android:exported="false" />
         <activity android:name=".ui.model.InventoryActivity" android:exported="false" />
         <activity android:name=".ui.friends.FriendProfileActivity" android:exported="false" />
+        <activity android:name=".ui.boss.BossFightActivity" android:exported="false" />
 
         <service
             android:name=".service.MyFirebaseMessagingService"

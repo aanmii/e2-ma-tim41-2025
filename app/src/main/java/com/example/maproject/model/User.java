@@ -22,29 +22,30 @@ public class User {
     private boolean isEmailVerified;
     private long registrationTimestamp;
 
+    // Konstruktori
     public User() {
         this.equipment = new ArrayList<>();
         this.activeEquipment = new ArrayList<>();
+        this.level = 1;
+        this.powerPoints = 0;
     }
 
     public User(String userId, String email, String username, String avatar) {
+        this();
         this.userId = userId;
         this.email = email;
         this.username = username;
         this.avatar = avatar;
-        this.level = 1;
         this.title = "Beginner";
-        this.powerPoints = 0;
         this.currentLevelXP = 0;
         this.totalExperiencePoints = 0;
         this.coins = 0;
         this.badges = 0;
-        this.equipment = new ArrayList<>();
-        this.activeEquipment = new ArrayList<>();
         this.isEmailVerified = false;
         this.registrationTimestamp = System.currentTimeMillis();
     }
 
+    // Getteri
     public String getUserId() { return userId; }
     public String getEmail() { return email; }
     public String getUsername() { return username; }
@@ -56,11 +57,19 @@ public class User {
     public long getTotalExperiencePoints() { return totalExperiencePoints; }
     public int getCoins() { return coins; }
     public int getBadges() { return badges; }
-    public List<InventoryItem> getEquipment() { return equipment; }
-    public List<InventoryItem> getActiveEquipment() { return activeEquipment; }
+
+    public List<InventoryItem> getEquipment() {
+        return equipment != null ? equipment : new ArrayList<>();
+    }
+
+    public List<InventoryItem> getActiveEquipment() {
+        return activeEquipment != null ? activeEquipment : new ArrayList<>();
+    }
+
     public boolean isEmailVerified() { return isEmailVerified; }
     public long getRegistrationTimestamp() { return registrationTimestamp; }
 
+    // Setteri
     public void setUserId(String userId) { this.userId = userId; }
     public void setEmail(String email) { this.email = email; }
     public void setUsername(String username) { this.username = username; }
@@ -69,19 +78,31 @@ public class User {
     public void setTitle(String title) { this.title = title; }
     public void setPowerPoints(int powerPoints) { this.powerPoints = powerPoints; }
     public void setCurrentLevelXP(long currentLevelXP) { this.currentLevelXP = currentLevelXP; }
-    public void setTotalExperiencePoints(long totalExperiencePoints) { this.totalExperiencePoints = totalExperiencePoints; }
+    public void setTotalExperiencePoints(long totalExperiencePoints) {
+        this.totalExperiencePoints = totalExperiencePoints;
+    }
     public void setCoins(int coins) { this.coins = coins; }
     public void setBadges(int badges) { this.badges = badges; }
-    public void setEquipment(List<InventoryItem> equipment) { this.equipment = equipment; }
-    public void setActiveEquipment(List<InventoryItem> activeEquipment) { this.activeEquipment = activeEquipment; }
-    public void setEmailVerified(boolean emailVerified) { isEmailVerified = emailVerified; }
-    public void setRegistrationTimestamp(long registrationTimestamp) { this.registrationTimestamp = registrationTimestamp; }
+    public void setEquipment(List<InventoryItem> equipment) {
+        this.equipment = equipment != null ? equipment : new ArrayList<>();
+    }
+    public void setActiveEquipment(List<InventoryItem> activeEquipment) {
+        this.activeEquipment = activeEquipment != null ? activeEquipment : new ArrayList<>();
+    }
+    public void setEmailVerified(boolean emailVerified) {
+        this.isEmailVerified = emailVerified;
+    }
+    public void setRegistrationTimestamp(long registrationTimestamp) {
+        this.registrationTimestamp = registrationTimestamp;
+    }
 
+    // Helper metode
     public void addItemToEquipment(InventoryItem item) {
+        if (equipment == null) equipment = new ArrayList<>();
+
         for (InventoryItem existing : equipment) {
             if (existing.getItemId().equals(item.getItemId())) {
                 existing.setQuantity(existing.getQuantity() + item.getQuantity());
-                existing.setRemainingBattles(existing.getRemainingBattles() + item.getRemainingBattles());
                 return;
             }
         }
@@ -101,8 +122,8 @@ public class User {
         map.put("totalExperiencePoints", totalExperiencePoints);
         map.put("coins", coins);
         map.put("badges", badges);
-        map.put("equipment", equipment);
-        map.put("activeEquipment", activeEquipment);
+        map.put("equipment", equipment != null ? equipment : new ArrayList<>());
+        map.put("activeEquipment", activeEquipment != null ? activeEquipment : new ArrayList<>());
         map.put("isEmailVerified", isEmailVerified);
         map.put("registrationTimestamp", registrationTimestamp);
         return map;
