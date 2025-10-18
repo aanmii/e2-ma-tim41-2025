@@ -8,7 +8,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 public class CleanupUnverifiedUsersService {
 
     private static final String TAG = "CleanupService";
-    private static final long TWENTY_FOUR_HOURS_MILLIS = 5 * 60 * 1000;
+    private static final long TWENTY_FOUR_HOURS_MILLIS = 5 * 60 * 1000; // for testing purposes its 5 mins
 
     public static void cleanupUnverifiedUsers() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -24,13 +24,12 @@ public class CleanupUnverifiedUsersService {
 
                         document.getReference().delete()
                                 .addOnSuccessListener(aVoid -> {
-                                    Log.d(TAG, "Deleted unverified user: " + document.getId());
+                                    Log.d(TAG, "Deleted unverified Firestore user (Auth handled by Cloud Function): "
+                                            + document.getId());
                                 })
                                 .addOnFailureListener(e -> {
                                     Log.e(TAG, "Failed to delete user: " + document.getId(), e);
                                 });
-
-                        // todo: delete user - check this later
                     }
                 })
                 .addOnFailureListener(e -> {

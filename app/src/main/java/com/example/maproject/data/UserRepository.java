@@ -113,14 +113,16 @@ public class UserRepository {
                                     if (firebaseUser.isEmailVerified()) {
                                         loginStatus.postValue("LOGIN_SUCCESS");
                                         Log.d(TAG, "Login successful for: " + firebaseUser.getEmail());
+                                        updateFirestoreVerificationStatus(firebaseUser.getUid(), true);
                                     } else {
-
+                                        auth.signOut();
                                         loginStatus.postValue("Email not verified. Check your inbox and spam folder. Click 'Resend' if needed.");
                                         Log.w(TAG, "Email not verified for: " + firebaseUser.getEmail());
                                     }
                                 } else {
                                     loginStatus.postValue("Error checking verification status. Please try again.");
                                     Log.e(TAG, "Failed to reload user", reloadTask.getException());
+                                    auth.signOut();
                                 }
                             });
                         }
@@ -130,6 +132,13 @@ public class UserRepository {
                         Log.e(TAG, "Login failed: " + error);
                     }
                 });
+    }
+
+    private void updateFirestoreVerificationStatus(String userId, boolean isVerified) {
+        db.collection("users").document(userId)
+                .update("isEmailVerified", isVerified)
+                .addOnSuccessListener(aVoid -> Log.d(TAG, "Firestore 'isEmailVerified' updated to: " + isVerified))
+                .addOnFailureListener(e -> Log.e(TAG, "Failed to update 'isEmailVerified' in Firestore.", e));
     }
 
     public void resendVerificationEmail(MutableLiveData<String> status) {

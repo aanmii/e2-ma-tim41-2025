@@ -132,3 +132,47 @@ export const sendChatNotification = onDocumentCreated(
   }
 );
 
+import {onSchedule} from "firebase-functions/v2/scheduler";
+
+export const cleanupUnverifiedUsers =
+onSchedule("every 24 hours", async (event) => {
+  const db = admin.firestore();
+  const cutoffTime = Date.now() - 5 * 60 * 1000;
+
+  console.log("Starting cleanup of unverified users...");
+
+  try {
+    const snapshot = await db.collection("users")
+      .where("isEmailVerified", "==", false)
+      .where("registrationTimestamp", "<", cutoffTime)
+      .get();
+
+    if (snapshot.empty) {
+      console.log("No unverified users to delete.");
+      return;
+    }
+
+    for (const doc of snapshot.docs) {
+      const uid = doc.id;
+
+      try {
+        await admin.auth().deleteUser(uid);
+        console.log(`Deleted user from Auth: ${uid}`);
+      } catch (authErr) {
+        console.error(`Failed to delete user ${uid} from Auth:`, authErr);
+      }
+
+      try {
+        await doc.ref.delete();
+        console.log(`Deleted user document: ${uid}`);
+      } catch (firestoreErr) {
+        console.error(`Failed to delete doc for ${uid}:`, firestoreErr);
+      }
+    }
+
+    console.log("Cleanup complete.");
+  } catch (err) {
+    console.error("Error running cleanupUnverifiedUsers:", err);
+  }
+});
+

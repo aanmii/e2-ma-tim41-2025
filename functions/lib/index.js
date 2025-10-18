@@ -33,15 +33,10 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendChatNotification = exports.sendAllianceInviteNotification = void 0;
+exports.cleanupUnverifiedUsers = exports.sendChatNotification = exports.sendAllianceInviteNotification = void 0;
 const admin = __importStar(require("firebase-admin"));
 const firestore_1 = require("firebase-functions/v2/firestore");
-// Inicijalizacija Firebase Admin SDK-a
 admin.initializeApp();
-/**
- * Aktivira se kada se novi dokument kreira u 'invitations' kolekciji.
- * Šalje Push notifikaciju primaocu pozivnice.
- */
 exports.sendAllianceInviteNotification = (0, firestore_1.onDocumentCreated)("invitations/{invitationId}", async (event) => {
     var _a, _b;
     const invitationData = (_a = event.data) === null || _a === void 0 ? void 0 : _a.data();
@@ -57,7 +52,6 @@ exports.sendAllianceInviteNotification = (0, firestore_1.onDocumentCreated)("inv
         console.log("Receiver ID not specified.");
         return;
     }
-    // 1. Dohvatanje FCM tokena primaoca
     const userDoc = await admin.firestore()
         .collection("users")
         .doc(recepientId)
@@ -67,19 +61,17 @@ exports.sendAllianceInviteNotification = (0, firestore_1.onDocumentCreated)("inv
         console.log(`FCM token not found for user: ${recepientId}`);
         return;
     }
-    // 2. Kreiranje poruke za FCM
     const message = {
         token: fcmToken,
         notification: {
-            title: "⚔️ Poziv u Savez",
-            body: `${senderUsername} te poziva u savez "${allianceName}".`,
+            title: "⚔️Alliance invite",
+            body: `${senderUsername} invites you into "${allianceName}".`,
         },
         data: {
             type: "ALLIANCE_INVITE",
-            referenceId: invitationId, // ID pozivnice
+            referenceId: invitationId,
         },
     };
-    // 3. Slanje notifikacije
     try {
         await admin.messaging().send(message);
         console.log(`Alliance invitation notification sent to: ${recepientId}`);
@@ -99,12 +91,10 @@ exports.sendChatNotification = (0, firestore_1.onDocumentCreated)("alliances/{al
     const senderId = chatMessage.senderId;
     const senderUsername = chatMessage.senderUsername;
     const messageContent = chatMessage.content;
-    // 1. Dohvatanje ID-jeva svih članova saveza i imena saveza
     const allianceDoc = await admin.firestore()
         .collection("alliances")
         .doc(allianceId)
         .get();
-    // Pretpostavljam da su članovi pohranjeni kao mapa {userId: username}
     const membersMap = ((_b = allianceDoc.data()) === null || _b === void 0 ? void 0 : _b.members) || {};
     const allianceName = ((_c = allianceDoc.data()) === null || _c === void 0 ? void 0 : _c.name) || "Savez";
     const recipientIds = Object.keys(membersMap)
@@ -113,7 +103,6 @@ exports.sendChatNotification = (0, firestore_1.onDocumentCreated)("alliances/{al
         console.log("No other recipients in the alliance.");
         return;
     }
-    // 2. Dohvatanje FCM tokena za SVE primaoce
     const usersSnapshot = await admin.firestore()
         .collection("users")
         .where(admin.firestore.FieldPath.documentId(), "in", recipientIds)
@@ -129,7 +118,6 @@ exports.sendChatNotification = (0, firestore_1.onDocumentCreated)("alliances/{al
         console.log("No FCM tokens found for recipients.");
         return;
     }
-    // Priprema poruke
     const title = allianceName;
     const body = `${senderUsername}: ${messageContent.substring(0, 50)}${messageContent.length > 50 ? "..." : ""}`;
     const message = {
@@ -139,16 +127,52 @@ exports.sendChatNotification = (0, firestore_1.onDocumentCreated)("alliances/{al
         },
         data: {
             type: "CHAT_MESSAGE",
-            referenceId: allianceId, // ID Saveza
+            referenceId: allianceId,
         },
     };
-    // 3. Slanje notifikacije svima (multicast)
     try {
         await admin.messaging().sendEachForMulticast(Object.assign({ tokens }, message));
         console.log(`Notif sent to ${tokens.length} members of alliance: ${allianceId}`);
     }
     catch (error) {
         console.error("Error sending chat notification:", error);
+    }
+});
+const scheduler_1 = require("firebase-functions/v2/scheduler");
+exports.cleanupUnverifiedUsers = (0, scheduler_1.onSchedule)("every 24 hours", async (event) => {
+    const db = admin.firestore();
+    const cutoffTime = Date.now() - 5 * 60 * 1000;
+    console.log("Starting cleanup of unverified users...");
+    try {
+        const snapshot = await db.collection("users")
+            .where("isEmailVerified", "==", false)
+            .where("registrationTimestamp", "<", cutoffTime)
+            .get();
+        if (snapshot.empty) {
+            console.log("No unverified users to delete.");
+            return;
+        }
+        for (const doc of snapshot.docs) {
+            const uid = doc.id;
+            try {
+                await admin.auth().deleteUser(uid);
+                console.log(`Deleted user from Auth: ${uid}`);
+            }
+            catch (authErr) {
+                console.error(`Failed to delete user ${uid} from Auth:`, authErr);
+            }
+            try {
+                await doc.ref.delete();
+                console.log(`Deleted user document: ${uid}`);
+            }
+            catch (firestoreErr) {
+                console.error(`Failed to delete doc for ${uid}:`, firestoreErr);
+            }
+        }
+        console.log("Cleanup complete.");
+    }
+    catch (err) {
+        console.error("Error running cleanupUnverifiedUsers:", err);
     }
 });
 //# sourceMappingURL=index.js.map
