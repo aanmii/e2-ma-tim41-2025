@@ -2,20 +2,31 @@ package com.example.maproject.ui.friends;
 
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.maproject.R;
+import com.example.maproject.model.InventoryItem;
 import com.example.maproject.service.LevelingService;
+import com.example.maproject.ui.model.InventoryAdapter;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class FriendProfileActivity extends AppCompatActivity {
 
@@ -23,6 +34,9 @@ public class FriendProfileActivity extends AppCompatActivity {
     private TextView usernameTextView, levelTextView, titleTextView;
     private TextView powerPointsTextView, experiencePointsTextView, coinsTextView, badgesTextView, xpProgressTextView;
     private Button backButton;
+
+    private RecyclerView activeRecycler;
+    private InventoryAdapter activeAdapter;
 
     private FirebaseFirestore db;
     private LevelingService levelingService;
@@ -44,8 +58,21 @@ public class FriendProfileActivity extends AppCompatActivity {
         }
 
         initViews();
-        hideUnnecessaryButtons();
+
+        if (!friendId.equals(getCurrentUserId())) {
+            View inventoryButton = findViewById(R.id.viewInventoryButton);
+            if (inventoryButton != null) inventoryButton.setVisibility(View.GONE);
+
+            View changePassButton = findViewById(R.id.changePasswordButton);
+            if (changePassButton != null) changePassButton.setVisibility(View.GONE);
+
+            View analyticsButton = findViewById(R.id.viewStatisticsButton);
+            if (analyticsButton != null) analyticsButton.setVisibility(View.GONE);
+        }
+
+
         loadFriendProfile();
+        backButton.setOnClickListener(v -> finish());
     }
 
     private void initViews() {
@@ -62,14 +89,11 @@ public class FriendProfileActivity extends AppCompatActivity {
         xpProgressTextView = findViewById(R.id.xpProgressTextView);
         titleIconImageView = findViewById(R.id.titleIconImageView);
         backButton = findViewById(R.id.backButton);
-    }
 
-    private void hideUnnecessaryButtons() {
-        findViewById(R.id.changePasswordButton).setVisibility(android.view.View.GONE);
-        findViewById(R.id.viewStatisticsButton).setVisibility(android.view.View.GONE);
-        findViewById(R.id.viewInventoryButton).setVisibility(android.view.View.GONE);
+        activeRecycler = findViewById(R.id.active_equipment_recycler);
 
-        backButton.setOnClickListener(v -> finish());
+        activeRecycler.setLayoutManager(new LinearLayoutManager(this));
+
     }
 
     private void loadFriendProfile() {
@@ -85,42 +109,80 @@ public class FriendProfileActivity extends AppCompatActivity {
                     String avatar = document.getString("avatar");
                     setAvatar(avatar);
 
-                    usernameTextView.setText(document.getString("username"));
-                    titleTextView.setText(document.getString("title"));
+                    String username = document.getString("username");
+                    usernameTextView.setText(username != null ? username : "User");
 
-                    int currentLevel = ((Number) document.get("level")).intValue();
-                    levelTextView.setText("LEVEL " + currentLevel);
-                    setTitleIcon(currentLevel);
+                    long totalXp = document.getLong("totalExperiencePoints") != null ? document.getLong("totalExperiencePoints") : 0L;
+                    int level = levelingService.calculateLevelFromXP(totalXp);
+                    long currentLevelXP = levelingService.getCurrentLevelXP(totalXp, level);
+                    long xpForNextLevel = levelingService.getXPForNextLevel(level);
+                    int powerPoints = levelingService.calculatePPFromLevel(level);
 
-                    long powerPoints = getLong(document.get("powerPoints"));
-                    long totalXp = getLong(document.get("totalExperiencePoints"));
-                    long coins = getLong(document.get("coins"));
-                    long badges = getLong(document.get("badges"));
-
+                    levelTextView.setText("LEVEL " + level);
+                    titleTextView.setText(levelingService.getTitleForLevel(level));
                     powerPointsTextView.setText(String.valueOf(powerPoints));
-                    experiencePointsTextView.setText(String.valueOf(totalXp));
+
+                    long coins = document.getLong("coins") != null ? document.getLong("coins") : 0;
+                    long badges = document.getLong("badges") != null ? document.getLong("badges") : 0;
+
                     coinsTextView.setText(String.valueOf(coins));
                     badgesTextView.setText(String.valueOf(badges));
+                    experiencePointsTextView.setText(String.valueOf(totalXp));
 
-                    long currentLevelXP = levelingService.getCurrentLevelXP(totalXp, currentLevel);
-                    long xpForNextLevel = levelingService.getXPForNextLevel(currentLevel);
-                    updateXPBar(currentLevel, currentLevelXP, xpForNextLevel);
+                    xpProgressTextView.setText(currentLevelXP + " / " + xpForNextLevel + " XP");
+                    updateXPBar(currentLevelXP, xpForNextLevel);
 
+                    setTitleIcon(level);
                     generateQRCode(friendId);
+
+                    setupEquipmentLists(document);
                 })
-                .addOnFailureListener(e ->
-                        Toast.makeText(this, "Error occurred while loading the profile", Toast.LENGTH_SHORT).show()
+                .addOnFailureListener(e -> Toast.makeText(this, "Error occurred while loading the profile", Toast.LENGTH_SHORT).show());
+    }
+
+    private void setupEquipmentLists(DocumentSnapshot document) {
+        List<InventoryItem> activeEquipment = new ArrayList<>();
+        List<InventoryItem> availableEquipment = new ArrayList<>();
+
+        List<Map<String, Object>> activeList = (List<Map<String, Object>>) document.get("activeEquipment");
+        if (activeList != null) {
+            for (Map<String, Object> map : activeList) {
+                InventoryItem item = new InventoryItem(
+                        (String) map.get("itemId"),
+                        (String) map.get("name"),
+                        (String) map.get("type"),
+                        ((Long) map.get("quantity")).intValue(),
+                        ((Long) map.get("remainingBattles")).intValue()
                 );
+                item.setActive(map.get("active") != null ? (Boolean) map.get("active") : false);
+                activeEquipment.add(item);
+            }
+        }
+
+        List<Map<String, Object>> availableList = (List<Map<String, Object>>) document.get("availableEquipment");
+        if (availableList != null) {
+            for (Map<String, Object> map : availableList) {
+                InventoryItem item = new InventoryItem(
+                        (String) map.get("itemId"),
+                        (String) map.get("name"),
+                        (String) map.get("type"),
+                        ((Long) map.get("quantity")).intValue(),
+                        ((Long) map.get("remainingBattles")).intValue()
+                );
+                item.setActive(map.get("active") != null ? (Boolean) map.get("active") : false);
+                availableEquipment.add(item);
+            }
+        }
+
+        activeAdapter = new InventoryAdapter(activeEquipment, friendId, true, null, null);
+        activeRecycler.setAdapter(activeAdapter);
+
     }
 
-    private long getLong(Object obj) {
-        return (obj instanceof Number) ? ((Number) obj).longValue() : 0L;
-    }
+    private void updateXPBar(long currentXP, long maxXP) {
+        double percentage = maxXP > 0 ? (double) currentXP / maxXP : 0.0;
+        percentage = Math.min(percentage, 1.0);
 
-    private void updateXPBar(int currentLevel, long currentXP, long requiredXPForNextLevel) {
-        xpProgressTextView.setText(currentXP + "/" + requiredXPForNextLevel);
-
-        double percentage = requiredXPForNextLevel > 0 ? (double) currentXP / requiredXPForNextLevel : 0.0;
         int xpImageIndex;
         if (percentage <= 0.01) xpImageIndex = 1;
         else if (percentage <= 0.25) xpImageIndex = 2;
@@ -128,12 +190,12 @@ public class FriendProfileActivity extends AppCompatActivity {
         else if (percentage <= 0.75) xpImageIndex = 4;
         else xpImageIndex = 5;
 
-        String xpIconName = "xp_" + xpImageIndex;
-        int xpIconResId = getResources().getIdentifier(xpIconName, "drawable", getPackageName());
-        xpBarImageView.setImageResource(xpIconResId);
+        int xpIconResId = getResources().getIdentifier("xp_" + xpImageIndex, "drawable", getPackageName());
+        xpBarImageView.setImageResource(xpIconResId != 0 ? xpIconResId : R.drawable.xp_1);
     }
 
     private void setAvatar(String avatarName) {
+        if (avatarName == null) return;
         int avatarResId = getResources().getIdentifier(avatarName, "drawable", getPackageName());
         if (avatarResId != 0) avatarImageView.setImageResource(avatarResId);
     }
@@ -167,5 +229,9 @@ public class FriendProfileActivity extends AppCompatActivity {
         } catch (WriterException e) {
             Toast.makeText(this, "Error while loading the QR code", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private String getCurrentUserId() {
+        return FirebaseAuth.getInstance().getCurrentUser().getUid();
     }
 }
