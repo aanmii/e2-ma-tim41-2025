@@ -351,12 +351,14 @@
                     android:gravity="center_vertical"
                     android:layout_marginBottom="16dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="📱"
-                        android:textSize="24sp"
-                        android:layout_marginEnd="8dp"/>
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="8dp"
+                        android:src="@drawable/ic_qr"
+                        app:iconTint="@null"
+
+                        android:contentDescription="QR icon"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -382,26 +384,30 @@
             android:id="@+id/viewStatisticsButton"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:text="📊See my analytics"
+            android:text="See my analytics"
             android:textSize="16sp"
             android:textStyle="bold"
             app:cornerRadius="30dp"
             android:backgroundTint="@color/accent"
             android:textColor="@color/textWhite"
-            app:icon="@android:drawable/ic_menu_view"
-            app:iconTint="@color/textWhite"
+            app:icon="@drawable/ic_analytics"
+            app:iconTint="@null"
+
             android:layout_marginBottom="12dp"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/viewInventoryButton"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:text="🎒 My Equipment"
+            android:text="My Equipment"
             android:textSize="16sp"
             android:textStyle="bold"
             app:cornerRadius="30dp"
             android:backgroundTint="@color/primary"
             android:textColor="@color/textWhite"
+            app:icon="@drawable/ic_shop"
+            app:iconTint="@null"
+
             android:layout_marginBottom="12dp"/>
 
         <!-- Active Equipment RecyclerView -->
@@ -426,12 +432,15 @@
             android:id="@+id/changePasswordButton"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:text="🔒 Change password"
+            android:text="Change password"
             android:textSize="16sp"
             android:textStyle="bold"
             app:cornerRadius="30dp"
             android:backgroundTint="@color/primary"
             android:textColor="@color/textWhite"
+            app:icon="@drawable/ic_lock"
+            app:iconTint="@null"
+
             android:layout_marginBottom="12dp"/>
 
         <com.google.android.material.button.MaterialButton
