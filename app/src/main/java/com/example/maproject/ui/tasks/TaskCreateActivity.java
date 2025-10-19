@@ -284,178 +284,222 @@ public class TaskCreateActivity extends AppCompatActivity {
     }
 
     private void onSaveTask() {
-        // Prefer authenticated UID, but allow a debug fallback when running locally in debug builds
-        String creatorUid = null;
-        if (auth.getCurrentUser() != null) {
-            creatorUid = auth.getCurrentUser().getUid();
-        } else {
-            boolean isDebuggable = (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-            if (isDebuggable) {
-                creatorUid = "__DEBUG_USER__";
-                Log.w(TAG, "No authenticated user - using debug fallback UID for testing: " + creatorUid);
-                Toast.makeText(this, "[DEBUG] No user signed in - saving task with debug UID", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "You must be signed in to create a task", Toast.LENGTH_SHORT).show();
-                Log.w(TAG, "User not signed in, aborting task creation");
-                return;
-            }
-        }
-
-        if (titleInput == null) {
-            Toast.makeText(this, "Internal error: title input missing", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "titleInput is null");
-            return;
-        }
-
-        String title = titleInput.getText().toString().trim();
-        if (TextUtils.isEmpty(title)) {
-            titleInput.setError("Title required");
-            return;
-        }
-
-        String selectedCategory = null;
         try {
-            Object sel = categorySpinner != null ? categorySpinner.getSelectedItem() : null;
-            selectedCategory = sel != null ? sel.toString() : "Default";
-        } catch (Exception e) {
-            Log.w(TAG, "Could not read category spinner selection", e);
-            selectedCategory = "Default";
-        }
-
-        String frequency = (String) (frequencySpinner != null ? frequencySpinner.getSelectedItem() : "One-time");
-        String difficulty = (String) (difficultySpinner != null ? difficultySpinner.getSelectedItem() : "Very Easy");
-        String importance = (String) (importanceSpinner != null ? importanceSpinner.getSelectedItem() : "Normal");
-        String executionMsStr = executionTimeInput != null ? executionTimeInput.getText().toString().trim() : "";
-
-        if (TextUtils.isEmpty(executionMsStr)) {
-            // In debug builds, auto-fill execution time to help testing when user forgets to pick a date
-            boolean isDebuggable = (getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-            if (isDebuggable) {
-                long nowPlus1Min = System.currentTimeMillis() + 60_000L;
-                executionMsStr = String.valueOf(nowPlus1Min);
-                if (executionTimeInput != null) executionTimeInput.setText(executionMsStr);
-                Log.i(TAG, "[DEBUG] Auto-filled execution time for testing: " + executionMsStr);
+            // Prefer authenticated UID, but allow a debug fallback when running locally in debug builds
+            String creatorUid;
+            if (auth.getCurrentUser() != null) {
+                creatorUid = auth.getCurrentUser().getUid();
             } else {
-                if (executionTimeInput != null) executionTimeInput.setError("Execution time required");
+                boolean isDebuggable = (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+                if (isDebuggable) {
+                    creatorUid = "__DEBUG_USER__";
+                    Log.w(TAG, "No authenticated user - using debug fallback UID for testing: " + creatorUid);
+                    Toast.makeText(this, "[DEBUG] No user signed in - saving task with debug UID", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "You must be signed in to create a task", Toast.LENGTH_SHORT).show();
+                    Log.w(TAG, "User not signed in, aborting task creation");
+                    return;
+                }
+            }
+
+            if (titleInput == null) {
+                Toast.makeText(this, "Internal error: title input missing", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "titleInput is null");
                 return;
             }
-        }
 
-        long executionMs;
-        try {
-            executionMs = Long.parseLong(executionMsStr);
-        } catch (NumberFormatException ex) {
-            if (executionTimeInput != null) executionTimeInput.setError("Invalid date/time");
-            Toast.makeText(this, "Invalid execution time format", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, "Invalid execution time: " + executionMsStr, ex);
-            return;
-        }
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("title", title);
-        data.put("description", descriptionInput != null ? descriptionInput.getText().toString().trim() : "");
-        data.put("categoryName", selectedCategory);
-        data.put("executionTime", executionMs);
-        data.put("createdBy", creatorUid);
-
-        // difficulty & importance mapping to enums
-        Task.Difficulty diffEnum = null;
-        switch (difficulty) {
-            case "Very Easy": diffEnum = Task.Difficulty.VERY_EASY; break;
-            case "Easy": diffEnum = Task.Difficulty.EASY; break;
-            case "Hard": diffEnum = Task.Difficulty.HARD; break;
-            case "Extremely Hard": diffEnum = Task.Difficulty.EXTREMELY_HARD; break;
-        }
-        if (diffEnum == null) diffEnum = Task.Difficulty.VERY_EASY;
-        data.put("difficulty", diffEnum.name());
-
-        Task.Importance impEnum = null;
-        switch (importance) {
-            case "Normal": impEnum = Task.Importance.NORMAL; break;
-            case "Important": impEnum = Task.Importance.IMPORTANT; break;
-            case "Extremely Important": impEnum = Task.Importance.EXTREMELY_IMPORTANT; break;
-            case "Special": impEnum = Task.Importance.SPECIAL; break;
-        }
-        if (impEnum == null) impEnum = Task.Importance.NORMAL;
-        data.put("importance", impEnum.name());
-
-        // disable button while saving
-        if (saveButton != null) saveButton.setEnabled(false);
-
-        if ("Recurring".equals(frequency)) {
-            String intervalStr = recurrenceIntervalInput != null ? recurrenceIntervalInput.getText().toString().trim() : "";
-            if (TextUtils.isEmpty(intervalStr)) {
-                if (recurrenceIntervalInput != null) recurrenceIntervalInput.setError("Interval required");
-                if (saveButton != null) saveButton.setEnabled(true);
+            String title = titleInput.getText().toString().trim();
+            if (TextUtils.isEmpty(title)) {
+                titleInput.setError("Title required");
                 return;
             }
-            int interval;
+
+            String selectedCategory;
             try {
-                interval = Integer.parseInt(intervalStr);
-            } catch (NumberFormatException nfe) {
-                if (recurrenceIntervalInput != null) recurrenceIntervalInput.setError("Invalid interval");
-                Toast.makeText(this, "Invalid recurrence interval", Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "Invalid recurrence interval: " + intervalStr, nfe);
-                if (saveButton != null) saveButton.setEnabled(true);
+                Object sel = categorySpinner != null ? categorySpinner.getSelectedItem() : null;
+                selectedCategory = sel != null ? sel.toString() : "Default";
+            } catch (Exception e) {
+                Log.w(TAG, "Could not read category spinner selection", e);
+                selectedCategory = "Default";
+            }
+
+            String frequency = (String) (frequencySpinner != null ? frequencySpinner.getSelectedItem() : "One-time");
+            String difficulty = (String) (difficultySpinner != null ? difficultySpinner.getSelectedItem() : "Very Easy");
+            String importance = (String) (importanceSpinner != null ? importanceSpinner.getSelectedItem() : "Normal");
+            String executionMsStr = executionTimeInput != null ? executionTimeInput.getText().toString().trim() : "";
+
+            if (TextUtils.isEmpty(executionMsStr)) {
+                // In debug builds, auto-fill execution time to help testing when user forgets to pick a date
+                boolean isDebuggable = (getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+                if (isDebuggable) {
+                    long nowPlus1Min = System.currentTimeMillis() + 60_000L;
+                    executionMsStr = String.valueOf(nowPlus1Min);
+                    if (executionTimeInput != null) executionTimeInput.setText(executionMsStr);
+                    Log.i(TAG, "[DEBUG] Auto-filled execution time for testing: " + executionMsStr);
+                } else {
+                    if (executionTimeInput != null) executionTimeInput.setError("Execution time required");
+                    return;
+                }
+            }
+
+            long executionMs;
+            try {
+                executionMs = Long.parseLong(executionMsStr);
+            } catch (NumberFormatException ex) {
+                if (executionTimeInput != null) executionTimeInput.setError("Invalid date/time");
+                Toast.makeText(this, "Invalid execution time format", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Invalid execution time: " + executionMsStr, ex);
                 return;
             }
-            data.put("isRecurring", true);
-            data.put("recurrenceInterval", interval);
-            data.put("recurrenceUnit", recurrenceUnitSpinner != null ? recurrenceUnitSpinner.getSelectedItem().toString() : "DAY");
-            data.put("recurrenceStart", (recurrenceStartInput == null || TextUtils.isEmpty(recurrenceStartInput.getText().toString())) ? null : Long.parseLong(recurrenceStartInput.getText().toString()));
-            data.put("recurrenceEnd", (recurrenceEndInput == null || TextUtils.isEmpty(recurrenceEndInput.getText().toString())) ? null : Long.parseLong(recurrenceEndInput.getText().toString()));
 
-            if (editingTaskId == null) {
-                // New recurring: generate a recurrenceGroupId
-                String groupId = UUID.randomUUID().toString();
-                data.put("recurrenceGroupId", groupId);
-                Log.d(TAG, "Creating recurring task with data: " + data);
-                DocumentReference newDoc = db.collection("tasks").document();
-                newDoc.set(data).addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Recurring task created", Toast.LENGTH_SHORT).show();
-                    finish();
-                }).addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to create recurring task", e);
-                    Toast.makeText(this, "Failed to create recurring task: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
-                    if (saveButton != null) saveButton.setEnabled(true);
-                });
-            } else {
-                // existing recurring task: update only this doc (we ensured it's future instance)
-                Log.d(TAG, "Updating recurring task " + editingTaskId + " with data: " + data);
-                db.collection("tasks").document(editingTaskId).update(data).addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Task updated", Toast.LENGTH_SHORT).show();
-                    finish();
-                }).addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to update recurring task", e);
-                    Toast.makeText(this, "Failed to update task: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
-                    if (saveButton != null) saveButton.setEnabled(true);
-                });
-            }
+            Map<String, Object> data = new HashMap<>();
+            data.put("title", title);
+            data.put("description", descriptionInput != null ? descriptionInput.getText().toString().trim() : "");
+            data.put("categoryName", selectedCategory);
+            data.put("executionTime", executionMs);
+            // store canonical userId field
+            data.put("userId", creatorUid);
 
-        } else {
-            data.put("isRecurring", false);
-            Log.d(TAG, "Creating task with data: " + data);
-            if (editingTaskId == null) {
-                db.collection("tasks").add(data).addOnSuccessListener(docRef -> {
-                    Toast.makeText(this, "Task created (id=" + docRef.getId() + ")", Toast.LENGTH_SHORT).show();
-                    Log.d(TAG, "Task created: " + docRef.getId());
-                    finish();
-                }).addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to create task", e);
-                    Toast.makeText(this, "Failed to create task: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
-                    if (saveButton != null) saveButton.setEnabled(true);
-                });
-            } else {
-                Log.d(TAG, "Updating task " + editingTaskId + " with data: " + data);
-                db.collection("tasks").document(editingTaskId).update(data).addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Task updated", Toast.LENGTH_SHORT).show();
-                    finish();
-                }).addOnFailureListener(e -> {
-                    Log.e(TAG, "Failed to update task", e);
-                    Toast.makeText(this, "Failed to update task: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
-                    if (saveButton != null) saveButton.setEnabled(true);
-                });
+            // difficulty & importance mapping to enums
+            Task.Difficulty diffEnum = null;
+            switch (difficulty) {
+                case "Very Easy": diffEnum = Task.Difficulty.VERY_EASY; break;
+                case "Easy": diffEnum = Task.Difficulty.EASY; break;
+                case "Hard": diffEnum = Task.Difficulty.HARD; break;
+                case "Extremely Hard": diffEnum = Task.Difficulty.EXTREMELY_HARD; break;
             }
+            if (diffEnum == null) diffEnum = Task.Difficulty.VERY_EASY;
+            data.put("difficulty", diffEnum.name());
+
+            Task.Importance impEnum = null;
+            switch (importance) {
+                case "Normal": impEnum = Task.Importance.NORMAL; break;
+                case "Important": impEnum = Task.Importance.IMPORTANT; break;
+                case "Extremely Important": impEnum = Task.Importance.EXTREMELY_IMPORTANT; break;
+                case "Special": impEnum = Task.Importance.SPECIAL; break;
+            }
+            if (impEnum == null) impEnum = Task.Importance.NORMAL;
+            data.put("importance", impEnum.name());
+
+            // disable button while saving
+            if (saveButton != null) saveButton.setEnabled(false);
+
+            // set default status and createdTime; taskId will be set on the document before saving
+            data.put("status", Task.Status.ACTIVE.name());
+            data.put("createdTime", System.currentTimeMillis());
+
+            if ("Recurring".equals(frequency)) {
+                String intervalStr = recurrenceIntervalInput != null ? recurrenceIntervalInput.getText().toString().trim() : "";
+                if (TextUtils.isEmpty(intervalStr)) {
+                    if (recurrenceIntervalInput != null) recurrenceIntervalInput.setError("Interval required");
+                    if (saveButton != null) saveButton.setEnabled(true);
+                    return;
+                }
+                int interval;
+                try {
+                    interval = Integer.parseInt(intervalStr);
+                } catch (NumberFormatException nfe) {
+                    if (recurrenceIntervalInput != null) recurrenceIntervalInput.setError("Invalid interval");
+                    Toast.makeText(this, "Invalid recurrence interval", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Invalid recurrence interval: " + intervalStr, nfe);
+                    if (saveButton != null) saveButton.setEnabled(true);
+                    return;
+                }
+
+                data.put("isRecurring", true);
+                data.put("recurrenceInterval", interval);
+                data.put("recurrenceUnit", recurrenceUnitSpinner != null ? recurrenceUnitSpinner.getSelectedItem().toString() : "DAY");
+                // Safe-parse recurrence start/end to avoid NumberFormatException crashes
+                Long recStart = null;
+                if (recurrenceStartInput != null) {
+                    String s = recurrenceStartInput.getText().toString().trim();
+                    if (!TextUtils.isEmpty(s)) {
+                        try { recStart = Long.parseLong(s); } catch (NumberFormatException nfe) {
+                            recurrenceStartInput.setError("Invalid date");
+                            Log.w(TAG, "Invalid recurrenceStart value: " + s, nfe);
+                        }
+                    }
+                }
+                Long recEnd = null;
+                if (recurrenceEndInput != null) {
+                    String s = recurrenceEndInput.getText().toString().trim();
+                    if (!TextUtils.isEmpty(s)) {
+                        try { recEnd = Long.parseLong(s); } catch (NumberFormatException nfe) {
+                            recurrenceEndInput.setError("Invalid date");
+                            Log.w(TAG, "Invalid recurrenceEnd value: " + s, nfe);
+                        }
+                    }
+                }
+                data.put("recurrenceStart", recStart);
+                data.put("recurrenceEnd", recEnd);
+
+                if (editingTaskId == null) {
+                    // New recurring: generate a recurrenceGroupId and set taskId + userId + timestamps
+                    String groupId = UUID.randomUUID().toString();
+                    data.put("recurrenceGroupId", groupId);
+
+                    DocumentReference newDoc = db.collection("tasks").document();
+                    // set taskId on the stored document so future reads have it
+                    data.put("taskId", newDoc.getId());
+                    data.put("userId", creatorUid);
+
+                    Log.d(TAG, "Creating recurring task with data: " + data);
+                    newDoc.set(data).addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "Recurring task created", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }).addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to create recurring task", e);
+                        Toast.makeText(this, "Failed to create recurring task: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
+                        if (saveButton != null) saveButton.setEnabled(true);
+                    });
+                } else {
+                    // existing recurring task: update only this doc (we ensured it's future instance)
+                    Log.d(TAG, "Updating recurring task " + editingTaskId + " with data: " + data);
+                    db.collection("tasks").document(editingTaskId).update(data).addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "Task updated", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }).addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to update recurring task", e);
+                        Toast.makeText(this, "Failed to update task: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
+                        if (saveButton != null) saveButton.setEnabled(true);
+                    });
+                }
+
+            } else {
+                data.put("isRecurring", false);
+
+                if (editingTaskId == null) {
+                    // Create one-time task using a document reference so we can store taskId atomically
+                    DocumentReference newDoc = db.collection("tasks").document();
+                    data.put("taskId", newDoc.getId());
+                    data.put("userId", creatorUid);
+                    Log.d(TAG, "Creating one-time task with data: " + data);
+                    newDoc.set(data).addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "Task created (id=" + newDoc.getId() + ")", Toast.LENGTH_SHORT).show();
+                        Log.d(TAG, "Task created: " + newDoc.getId());
+                        finish();
+                    }).addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to create task", e);
+                        Toast.makeText(this, "Failed to create task: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
+                        if (saveButton != null) saveButton.setEnabled(true);
+                    });
+                } else {
+                    Log.d(TAG, "Updating task " + editingTaskId + " with data: " + data);
+                    db.collection("tasks").document(editingTaskId).update(data).addOnSuccessListener(aVoid -> {
+                        Toast.makeText(this, "Task updated", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }).addOnFailureListener(e -> {
+                        Log.e(TAG, "Failed to update task", e);
+                        Toast.makeText(this, "Failed to update task: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
+                        if (saveButton != null) saveButton.setEnabled(true);
+                    });
+                }
+            }
+        } catch (Exception e) {
+            // Catch any unexpected runtime error to avoid crashing the app and report useful diagnostics
+            Log.e(TAG, "Unhandled error saving task", e);
+            Toast.makeText(this, "An unexpected error occurred: " + (e.getMessage() != null ? e.getMessage() : ""), Toast.LENGTH_LONG).show();
+            if (saveButton != null) saveButton.setEnabled(true);
         }
     }
 }

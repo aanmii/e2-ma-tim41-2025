@@ -49,12 +49,13 @@
         <activity android:name=".ui.tasks.TaskCreateActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".ui.tasks.TaskManagement" android:exported="false" />
         <activity android:name=".ui.tasks.TaskListActivity" android:exported="false" />
+        <activity android:name=".ui.tasks.TaskDetailActivity" android:exported="false" />
         <activity android:name=".ui.tasks.CategoryManagementActivity" android:exported="false" />
         <activity android:name=".ui.model.SpecialMissionActivity" android:exported="false" />
 
         <service
             android:name=".service.MyFirebaseMessagingService"
-            android:exported="false"
+            android:exported="true"
             android:foregroundServiceType="dataSync"> <intent-filter>
             <action android:name="com.google.firebase.MESSAGING_EVENT" />
         </intent-filter>

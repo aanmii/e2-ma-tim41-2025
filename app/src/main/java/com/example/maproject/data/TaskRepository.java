@@ -1,4 +1,4 @@
-package com.example.maproject.repository;
+package com.example.maproject.data;
 
 import com.example.maproject.model.Task;
 import com.google.firebase.firestore.*;
