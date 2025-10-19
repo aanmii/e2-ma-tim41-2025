@@ -17,17 +17,26 @@ public class TaskService {
         return nowMillis <= task.getExecutionTime() + THREE_DAYS_MILLIS;
     }
 
-    public boolean markDone(Task task, long nowMillis) {
+    public boolean markDone(Task task, long nowMillis, String userId, StatisticsManagerService statsManager) {
         if (!canBeMarkedDone(task, nowMillis)) return false;
+
+        Task.Status oldStatus = task.getStatus();
         task.setStatus(Task.Status.COMPLETED);
         task.setCompletedTime(nowMillis);
+        statsManager.updateStatisticsOnTaskStatusChange(userId, task, oldStatus);
+
         return true;
     }
 
-    public boolean markCancelled(Task task, long nowMillis) {
+    public boolean markCancelled(Task task, long nowMillis, String userId, StatisticsManagerService statsManager) {
         if (task.getStatus() != Task.Status.ACTIVE) return false;
+
+        Task.Status oldStatus = task.getStatus();
         task.setStatus(Task.Status.CANCELLED);
         task.setCompletedTime(nowMillis);
+
+        statsManager.updateStatisticsOnTaskStatusChange(userId, task, oldStatus);
+
         return true;
     }
 

@@ -18,6 +18,7 @@ import com.example.maproject.data.AllianceRepository;
 import com.example.maproject.data.NotificationRepository;
 import com.example.maproject.data.UserRepository;
 import com.example.maproject.model.AllianceInvitation;
+import com.example.maproject.service.StatisticsManagerService;
 import com.example.maproject.ui.alliance.AllianceActivity;
 import com.example.maproject.ui.auth.LoginActivity;
 import com.example.maproject.ui.boss.BossFightActivity;
@@ -60,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private ListenerRegistration newNotificationListener;
 
     private ActivityResultLauncher<String> notificationPermissionLauncher;
+    private StatisticsManagerService statisticsManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         notificationRepository = new NotificationRepository();
         allianceRepository = new AllianceRepository();
+        statisticsManager = new StatisticsManagerService();
 
         initViews();
         setupViewModel();
@@ -145,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
         if (currentUser != null) {
             currentUserId = currentUser.getUid();
             welcomeTextView.setText("Welcome! 👋");
+            statisticsManager.initializeStatisticsForUser(currentUserId);
 
             loadUserData();
             initializeFCMToken();

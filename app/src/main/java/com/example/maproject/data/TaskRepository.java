@@ -1,6 +1,7 @@
 package com.example.maproject.data;
 
 import com.example.maproject.model.Task;
+import com.example.maproject.service.StatisticsManagerService;
 import com.google.firebase.firestore.*;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -8,13 +9,18 @@ import java.util.concurrent.CompletableFuture;
 public class TaskRepository {
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final StatisticsManagerService statisticsManager = new StatisticsManagerService();
 
     public CompletableFuture<Void> createTask(Task task) {
         CompletableFuture<Void> future = new CompletableFuture<>();
         DocumentReference ref = db.collection("tasks").document();
         task.setTaskId(ref.getId());
         ref.set(task)
-                .addOnSuccessListener(aVoid -> future.complete(null))
+                .addOnSuccessListener(aVoid -> {
+
+                    statisticsManager.updateCreatedTaskCount(task.getUserId(), 1);
+                    future.complete(null);
+                })
                 .addOnFailureListener(future::completeExceptionally);
         return future;
     }
