@@ -1,8 +1,5 @@
 package com.example.maproject.model;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class Task {
     private String taskId;
     private String userId;
@@ -12,46 +9,35 @@ public class Task {
     private String categoryName;
 
     public enum Difficulty {
-        VERY_EASY(1),    // 1 XP
-        EASY(3),         // 3 XP
-        HARD(7),         // 7 XP
-        EXTREMELY_HARD(20); // 20 XP
-
+        VERY_EASY(1), EASY(3), HARD(7), EXTREMELY_HARD(20);
         private final int xp;
         Difficulty(int xp) { this.xp = xp; }
         public int getXp() { return xp; }
     }
 
     public enum Importance {
-        NORMAL(1),           // 1 XP
-        IMPORTANT(3),        // 3 XP
-        EXTREMELY_IMPORTANT(10), // 10 XP
-        SPECIAL(100);        // 100 XP
-
+        NORMAL(1), IMPORTANT(3), EXTREMELY_IMPORTANT(10), SPECIAL(100);
         private final int xp;
         Importance(int xp) { this.xp = xp; }
         public int getXp() { return xp; }
     }
 
-    public enum Status {
-        ACTIVE,
-        COMPLETED,
-        NOT_DONE,
-        PAUSED,
-        CANCELLED
-    }
+    public enum Status { ACTIVE, COMPLETED, NOT_DONE, PAUSED, CANCELLED }
+    public enum RepetitionUnit { DAY, WEEK }
 
     private Difficulty difficulty;
     private Importance importance;
     private Status status;
     private boolean isRecurring;
+    private int recurrenceInterval;
+    private RepetitionUnit recurrenceUnit;
+    private long recurrenceStart;
+    private long recurrenceEnd;
     private long executionTime;
     private long completedTime;
     private long createdTime;
 
-
-    public Task() {
-    }
+    public Task() {}
 
     public Task(String userId, String title, String categoryId, String categoryName,
                 Difficulty difficulty, Importance importance, long executionTime) {
@@ -66,54 +52,39 @@ public class Task {
         this.createdTime = System.currentTimeMillis();
     }
 
+    // ✅ Getters & Setters
     public String getTaskId() { return taskId; }
-    public String getUserId() { return userId; }
-    public String getTitle() { return title; }
-    public String getDescription() { return description; }
-    public String getCategoryId() { return categoryId; }
-    public String getCategoryName() { return categoryName; }
-    public Difficulty getDifficulty() { return difficulty; }
-    public Importance getImportance() { return importance; }
-    public Status getStatus() { return status; }
-    public boolean isRecurring() { return isRecurring; }
-    public long getExecutionTime() { return executionTime; }
-    public long getCompletedTime() { return completedTime; }
-    public long getCreatedTime() { return createdTime; }
-
     public void setTaskId(String taskId) { this.taskId = taskId; }
+    public String getUserId() { return userId; }
     public void setUserId(String userId) { this.userId = userId; }
+    public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
+    public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+    public String getCategoryId() { return categoryId; }
     public void setCategoryId(String categoryId) { this.categoryId = categoryId; }
+    public String getCategoryName() { return categoryName; }
     public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
+    public Difficulty getDifficulty() { return difficulty; }
     public void setDifficulty(Difficulty difficulty) { this.difficulty = difficulty; }
+    public Importance getImportance() { return importance; }
     public void setImportance(Importance importance) { this.importance = importance; }
+    public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }
+    public boolean isRecurring() { return isRecurring; }
     public void setRecurring(boolean recurring) { isRecurring = recurring; }
+    public int getRecurrenceInterval() { return recurrenceInterval; }
+    public void setRecurrenceInterval(int recurrenceInterval) { this.recurrenceInterval = recurrenceInterval; }
+    public RepetitionUnit getRecurrenceUnit() { return recurrenceUnit; }
+    public void setRecurrenceUnit(RepetitionUnit recurrenceUnit) { this.recurrenceUnit = recurrenceUnit; }
+    public long getRecurrenceStart() { return recurrenceStart; }
+    public void setRecurrenceStart(long recurrenceStart) { this.recurrenceStart = recurrenceStart; }
+    public long getRecurrenceEnd() { return recurrenceEnd; }
+    public void setRecurrenceEnd(long recurrenceEnd) { this.recurrenceEnd = recurrenceEnd; }
+    public long getExecutionTime() { return executionTime; }
     public void setExecutionTime(long executionTime) { this.executionTime = executionTime; }
+    public long getCompletedTime() { return completedTime; }
     public void setCompletedTime(long completedTime) { this.completedTime = completedTime; }
+    public long getCreatedTime() { return createdTime; }
     public void setCreatedTime(long createdTime) { this.createdTime = createdTime; }
-
-
-    public int getTotalXP() {
-        return difficulty.getXp() + importance.getXp();
-    }
-
-    public Map<String, Object> toMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("taskId", taskId);
-        map.put("userId", userId);
-        map.put("title", title);
-        map.put("description", description);
-        map.put("categoryId", categoryId);
-        map.put("categoryName", categoryName);
-        map.put("difficulty", difficulty.name());
-        map.put("importance", importance.name());
-        map.put("status", status.name());
-        map.put("isRecurring", isRecurring);
-        map.put("executionTime", executionTime);
-        map.put("completedTime", completedTime);
-        map.put("createdTime", createdTime);
-        return map;
-    }
 }

@@ -23,4 +23,16 @@
     <string name="welcome">Welcome!</string>
     <string name="main_screen_subtitle">Main app window</string>
     <string name="logout">Logout</string>
+
+    <!-- Task detail labels -->
+    <string name="label_category">Category: %1$s</string>
+    <string name="label_execution">Execution: %1$s</string>
+    <string name="label_difficulty">Difficulty: %1$s</string>
+    <string name="label_importance">Importance: %1$s</string>
+    <string name="label_description">Description: %1$s</string>
+    <string name="label_status">Status: %1$s</string>
+
+    <string name="status_not_done">Status: NOT_DONE</string>
+    <string name="pause">Pause</string>
+    <string name="reactivate">Reactivate</string>
 </resources>

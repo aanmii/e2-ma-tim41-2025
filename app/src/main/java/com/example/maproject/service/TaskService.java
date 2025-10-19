@@ -1,0 +1,54 @@
+package com.example.maproject.service;
+
+import com.example.maproject.model.Task;
+import java.util.concurrent.TimeUnit;
+
+public class TaskService {
+
+    private static final long THREE_DAYS_MILLIS = TimeUnit.DAYS.toMillis(3);
+
+    public int calculateTotalXP(Task task) {
+        return task.getDifficulty().getXp() + task.getImportance().getXp();
+    }
+
+    public boolean canBeMarkedDone(Task task, long nowMillis) {
+        if (task.getStatus() != Task.Status.ACTIVE) return false;
+        if (nowMillis < task.getExecutionTime()) return false;
+        return nowMillis <= task.getExecutionTime() + THREE_DAYS_MILLIS;
+    }
+
+    public boolean markDone(Task task, long nowMillis) {
+        if (!canBeMarkedDone(task, nowMillis)) return false;
+        task.setStatus(Task.Status.COMPLETED);
+        task.setCompletedTime(nowMillis);
+        return true;
+    }
+
+    public boolean markCancelled(Task task, long nowMillis) {
+        if (task.getStatus() != Task.Status.ACTIVE) return false;
+        task.setStatus(Task.Status.CANCELLED);
+        task.setCompletedTime(nowMillis);
+        return true;
+    }
+
+    public boolean markPaused(Task task) {
+        if (task.getStatus() != Task.Status.ACTIVE || !task.isRecurring()) return false;
+        task.setStatus(Task.Status.PAUSED);
+        return true;
+    }
+
+    public boolean reactivate(Task task) {
+        if (task.getStatus() != Task.Status.PAUSED) return false;
+        task.setStatus(Task.Status.ACTIVE);
+        return true;
+    }
+
+    public boolean expireIfPastUpdateWindow(Task task, long nowMillis) {
+        if (task.getStatus() != Task.Status.ACTIVE) return false;
+        if (nowMillis > task.getExecutionTime() + THREE_DAYS_MILLIS) {
+            task.setStatus(Task.Status.NOT_DONE);
+            return true;
+        }
+        return false;
+    }
+}

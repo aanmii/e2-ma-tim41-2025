@@ -30,6 +30,7 @@ public class StatisticsManagerService {
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
 
+    @SuppressWarnings("unused")
     public void updateStatisticsOnTaskStatusChange(String userId, Task task, Task.Status oldStatus) {
         if (task.getStatus() == null || oldStatus == null) return;
 
@@ -48,7 +49,8 @@ public class StatisticsManagerService {
             updates.put("totalTasksCompleted", FieldValue.increment(-1));
             updates.put("tasksPerCategory." + categoryName, FieldValue.increment(-1));
 
-            int taskXP = task.getTotalXP();
+            // compute XP from difficulty and importance enums on Task
+            int taskXP = computeTaskXP(task);
             long difficultyValue = task.getDifficulty().ordinal();
 
             updates.put("totalCompletedTaskDifficultySum", FieldValue.increment(-difficultyValue));
@@ -57,6 +59,7 @@ public class StatisticsManagerService {
             updates.put("dailyCompletedCount." + todayDate, FieldValue.increment(-1));
 
             userRef.update("totalExperiencePoints", FieldValue.increment(-taskXP));
+
 
         } else if (oldStatus == Task.Status.NOT_DONE) {
             updates.put("totalTasksNotDone", FieldValue.increment(-1));
@@ -70,7 +73,8 @@ public class StatisticsManagerService {
             updates.put("tasksPerCategory." + categoryName, FieldValue.increment(1));
 
 
-            int taskXP = task.getTotalXP();
+            // compute XP from difficulty and importance enums on Task
+            int taskXP = computeTaskXP(task);
             long difficultyValue = task.getDifficulty().ordinal();
 
             updates.put("totalCompletedTaskDifficultySum", FieldValue.increment(difficultyValue));
@@ -98,6 +102,7 @@ public class StatisticsManagerService {
     }
 
 
+    @SuppressWarnings("unused")
     public void updateCreatedTaskCount(String userId, long increment) {
         DocumentReference statsRef = db.collection(STATS_COLLECTION).document(userId);
 
@@ -148,7 +153,8 @@ public class StatisticsManagerService {
                 if (daysDifference == 1) {
 
                     updates.put("activeDays", FieldValue.increment(1));
-                } else if (daysDifference > 1) {
+                } else {
+                    // For gaps longer than one day reset to 1 active day
                     updates.put("activeDays", 1L);
                 }
 
@@ -223,6 +229,7 @@ public class StatisticsManagerService {
     }
 
 
+    @SuppressWarnings("unused")
     public void updateSpecialMissionStats(String userId, boolean isStarted, boolean isCompleted) {
         DocumentReference statsRef = db.collection(STATS_COLLECTION).document(userId);
 
@@ -263,5 +270,20 @@ public class StatisticsManagerService {
 
         return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+    }
+
+    // Helper to compute task XP from Task's Difficulty and Importance enums
+    private int computeTaskXP(Task task) {
+        int difficultyXp = 0;
+        int importanceXp = 0;
+        if (task != null) {
+            if (task.getDifficulty() != null) {
+                difficultyXp = task.getDifficulty().getXp();
+            }
+            if (task.getImportance() != null) {
+                importanceXp = task.getImportance().getXp();
+            }
+        }
+        return difficultyXp + importanceXp;
     }
 }
