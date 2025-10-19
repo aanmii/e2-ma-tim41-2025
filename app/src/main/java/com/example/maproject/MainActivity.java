@@ -20,7 +20,7 @@ import com.example.maproject.data.UserRepository;
 import com.example.maproject.model.AllianceInvitation;
 import com.example.maproject.ui.alliance.AllianceActivity;
 import com.example.maproject.ui.auth.LoginActivity;
-import com.example.maproject.ui.boss.BossFightActivity; // DODATO
+import com.example.maproject.ui.boss.BossFightActivity;
 import com.example.maproject.ui.friends.FriendsActivity;
 import com.example.maproject.ui.model.ProfileActivity;
 import com.example.maproject.ui.notifications.NotificationsActivity;
@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
     private TextView welcomeTextView, notificationBadgeTextView;
     private View profileButton, friendsButton, notificationsButton, allianceButton, shopButton;
-    private View bossFightButton; // DODATO
+    private View bossFightButton;
     private View logoutButton;
 
     private AuthViewModel authViewModel;
@@ -130,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
         notificationsButton = findViewById(R.id.notificationsButton);
         allianceButton = findViewById(R.id.allianceButton);
         shopButton = findViewById(R.id.shopButton);
-        bossFightButton = findViewById(R.id.bossFightButton); // DODATO
+        bossFightButton = findViewById(R.id.bossFightButton);
         logoutButton = findViewById(R.id.logoutButton);
     }
 
@@ -148,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
             loadUserData();
             initializeFCMToken();
+            allianceRepository.cleanupOldInvitations(currentUserId);
             startAllianceInvitationListener();
         } else {
             navigateToLogin();
@@ -172,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
                             invitation.setInvitationId(doc.getId());
 
                             if (!isFinishing() && !isDestroyed()) {
-                                showImmediateInvitationDialog(invitation);
+                                checkAllianceStatusAndShowDialog(invitation);
                             }
                             return;
                         }
@@ -180,33 +181,102 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    private void showImmediateInvitationDialog(AllianceInvitation invitation) {
+    private void checkAllianceStatusAndShowDialog(AllianceInvitation invitation) {
+        db.collection("users").document(currentUserId)
+                .get()
+                .addOnSuccessListener(userDoc -> {
+                    String currentAllianceId = userDoc.getString("currentAllianceId");
+
+                    if (currentAllianceId != null && !currentAllianceId.isEmpty()) {
+                        db.collection("alliances").document(currentAllianceId)
+                                .get()
+                                .addOnSuccessListener(allianceDoc -> {
+                                    if (allianceDoc.exists()) {
+                                        String currentAllianceName = allianceDoc.getString("name");
+                                        Boolean isMissionActive = allianceDoc.getBoolean("missionActive");
+
+                                        if (Boolean.TRUE.equals(isMissionActive)) {
+                                            autoRejectInvitation(invitation,
+                                                    "You have an active mission in alliance \"" + currentAllianceName + "\". Invitation automatically rejected.");
+                                        } else {
+                                            showSwitchAllianceDialog(invitation, currentAllianceName);
+                                        }
+                                    } else {
+                                        showAcceptOrRejectDialog(invitation);
+                                    }
+                                });
+                    } else {
+                        showAcceptOrRejectDialog(invitation);
+                    }
+                });
+    }
+
+    private void showAcceptOrRejectDialog(AllianceInvitation invitation) {
         new AlertDialog.Builder(this)
-                .setTitle("⚔️ Alliance invite")
-                .setMessage(invitation.getSenderUsername() + " invites you into the alliance \"" + invitation.getAllianceName() + "\".")
+                .setTitle("Alliance Invitation")
+                .setMessage(invitation.getSenderUsername() + " invites you to alliance \"" +
+                        invitation.getAllianceName() + "\".\n\n")
                 .setCancelable(false)
                 .setPositiveButton("Accept", (dialog, which) -> {
-                    allianceRepository.respondToInvitation(invitation, currentUserId, currentUsername, success -> {
-                        runOnUiThread(() -> {
-                            if (success) {
-                                Toast.makeText(this, "Invite accepted into " + invitation.getAllianceName(), Toast.LENGTH_SHORT).show();
-                            } else {
-                                Toast.makeText(this, "Error while accepting", Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    });
+                    acceptInvitationDirectly(invitation);
                 })
                 .setNegativeButton("Reject", (dialog, which) -> {
-                    db.collection("invitations").document(invitation.getInvitationId())
-                            .update("status", "REJECTED")
-                            .addOnSuccessListener(aVoid -> {
-                                Toast.makeText(this, "Invite rejected", Toast.LENGTH_SHORT).show();
-                            })
-                            .addOnFailureListener(e -> {
-                                Toast.makeText(this, "Error while rejecting", Toast.LENGTH_SHORT).show();
-                            });
+                    rejectInvitationPermanently(invitation);
                 })
                 .show();
+    }
+
+    private void showSwitchAllianceDialog(AllianceInvitation invitation, String currentAllianceName) {
+        new AlertDialog.Builder(this)
+                .setTitle("⚔️ You are already in an alliance")
+                .setMessage("You are currently in alliance \"" + currentAllianceName + "\".\n\n" +
+                        invitation.getSenderUsername() + " invites you to alliance \"" +
+                        invitation.getAllianceName() + "\".\n\n" +
+                        "⚠️ If you accept, you will leave your current alliance!\n" +
+                        "This decision is final!")
+                .setCancelable(false)
+                .setPositiveButton("Leave & Join New Alliance", (dialog, which) -> {
+                    acceptInvitationDirectly(invitation);
+                })
+                .setNegativeButton("Stay in Current Alliance", (dialog, which) -> {
+                    rejectInvitationPermanently(invitation);
+                })
+                .show();
+    }
+
+    private void acceptInvitationDirectly(AllianceInvitation invitation) {
+        allianceRepository.respondToInvitation(invitation, currentUserId, currentUsername, success -> {
+            runOnUiThread(() -> {
+                if (success) {
+                    Toast.makeText(this, "Successfully joined alliance \"" + invitation.getAllianceName() + "\"!",
+                            Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(this, "Error while joining alliance", Toast.LENGTH_LONG).show();
+                }
+            });
+        });
+    }
+
+    private void rejectInvitationPermanently(AllianceInvitation invitation) {
+        db.collection("invitations").document(invitation.getInvitationId())
+                .update("status", "REJECTED")
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Invitation rejected", Toast.LENGTH_SHORT).show();
+                    Log.d("MainActivity", "Invitation rejected: " + invitation.getInvitationId());
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error while rejecting invitation", Toast.LENGTH_SHORT).show();
+                    Log.e("MainActivity", "Failed to reject invitation", e);
+                });
+    }
+
+    private void autoRejectInvitation(AllianceInvitation invitation, String reason) {
+        db.collection("invitations").document(invitation.getInvitationId())
+                .update("status", "AUTO_REJECTED")
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, reason, Toast.LENGTH_LONG).show();
+                    Log.d("MainActivity", "Invitation auto-rejected: " + invitation.getInvitationId());
+                });
     }
 
     private void setupButtons() {
@@ -215,8 +285,6 @@ public class MainActivity extends AppCompatActivity {
         notificationsButton.setOnClickListener(v -> startActivity(new Intent(this, NotificationsActivity.class)));
         allianceButton.setOnClickListener(v -> openAlliance());
         shopButton.setOnClickListener(v -> startActivity(new Intent(this, ShopActivity.class)));
-
-        // DODATO - Boss Fight dugme
         bossFightButton.setOnClickListener(v -> startActivity(new Intent(this, BossFightActivity.class)));
 
         logoutButton.setOnClickListener(v -> {

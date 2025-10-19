@@ -7,20 +7,15 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.MutableLiveData;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.maproject.R;
 import com.example.maproject.data.AllianceRepository;
 import com.example.maproject.model.Alliance;
-import com.example.maproject.model.AllianceInvitation;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.List;
 import java.util.Map;
 
 public class AllianceActivity extends AppCompatActivity {
@@ -30,11 +25,9 @@ public class AllianceActivity extends AppCompatActivity {
     private String currentUserId;
     private String currentUsername;
 
-    private View allianceLayout, invitationsLayout;
+    private View allianceLayout;
     private TextView allianceNameTextView, leaderNameTextView, membersTextView, missionStatusTextView;
     private Button leaveOrDeleteButton, startMissionButton, chatButton;
-    private RecyclerView invitationsRecyclerView;
-    private AllianceInvitationsAdapter invitationsAdapter;
 
     private Alliance currentAlliance;
 
@@ -49,8 +42,7 @@ public class AllianceActivity extends AppCompatActivity {
 
         initViews();
         loadCurrentUsername();
-        setupInvitationsRecyclerView();
-        observeAllianceAndInvitations();
+        observeCurrentAlliance();
     }
 
     private void initViews() {
@@ -63,73 +55,28 @@ public class AllianceActivity extends AppCompatActivity {
         startMissionButton = findViewById(R.id.startMissionButton);
         chatButton = findViewById(R.id.chatButton);
 
-        invitationsLayout = findViewById(R.id.invitationsLayout);
-        invitationsRecyclerView = findViewById(R.id.invitationsRecyclerView);
-
         allianceLayout.setVisibility(View.GONE);
-        invitationsLayout.setVisibility(View.GONE);
     }
 
     private void loadCurrentUsername() {
         allianceRepository.getUsername(currentUserId, username -> currentUsername = username);
     }
 
-    private void setupInvitationsRecyclerView() {
-        invitationsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        invitationsAdapter = new AllianceInvitationsAdapter(new AllianceInvitationsAdapter.InvitationActionListener() {
-            @Override
-            public void onAccept(AllianceInvitation invitation) {
-                handleAcceptInvitation(invitation);
-            }
-
-            @Override
-            public void onReject(AllianceInvitation invitation) {
-                handleRejectInvitation(invitation);
-            }
-        });
-        invitationsRecyclerView.setAdapter(invitationsAdapter);
-    }
-
-    private void observeAllianceAndInvitations() {
+    private void observeCurrentAlliance() {
         MutableLiveData<Alliance> allianceLiveData = new MutableLiveData<>();
         allianceLiveData.observe(this, alliance -> {
             currentAlliance = alliance;
-            if (alliance != null) displayAllianceView(alliance);
-            else {
-                allianceLayout.setVisibility(View.GONE);
-                observeInvitations();
+            if (alliance != null) {
+                displayAllianceView(alliance);
+            } else {
+                Toast.makeText(this, "You are not in any alliance", Toast.LENGTH_SHORT).show();
+                finish();
             }
         });
         allianceRepository.loadUserAlliance(currentUserId, allianceLiveData);
     }
 
-    private void observeInvitations() {
-        MutableLiveData<List<AllianceInvitation>> invitationsLiveData = new MutableLiveData<>();
-        invitationsLiveData.observe(this, invitations -> {
-            if (invitations != null && !invitations.isEmpty()) {
-                invitationsLayout.setVisibility(View.VISIBLE);
-                invitationsAdapter.updateInvitations(invitations);
-
-                checkIfUserHasAlliance();
-            } else {
-                invitationsLayout.setVisibility(View.GONE);
-            }
-        });
-        allianceRepository.loadInvitations(currentUserId, invitationsLiveData);
-    }
-
-    private void checkIfUserHasAlliance() {
-        db.collection("users").document(currentUserId)
-                .get()
-                .addOnSuccessListener(userDoc -> {
-                    String allianceId = userDoc.getString("currentAllianceId");
-                    boolean hasAlliance = (allianceId != null && !allianceId.isEmpty());
-                    invitationsAdapter.setUserHasAlliance(hasAlliance);
-                });
-    }
-
     private void displayAllianceView(Alliance alliance) {
-        invitationsLayout.setVisibility(View.GONE);
         allianceLayout.setVisibility(View.VISIBLE);
 
         allianceNameTextView.setText(alliance.getName());
@@ -162,102 +109,6 @@ public class AllianceActivity extends AppCompatActivity {
         });
 
         chatButton.setOnClickListener(v -> openChat(alliance.getAllianceId(), alliance.getName()));
-    }
-
-    private void handleAcceptInvitation(AllianceInvitation invitation) {
-        db.collection("users").document(currentUserId)
-                .get()
-                .addOnSuccessListener(userDoc -> {
-                    String currentAllianceId = userDoc.getString("currentAllianceId");
-
-                    if (currentAllianceId != null && !currentAllianceId.isEmpty()) {
-                        checkCurrentAllianceStatus(currentAllianceId, invitation);
-                    } else {
-                        acceptInvitationDirectly(invitation);
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error occurred while checking the alliance status", Toast.LENGTH_SHORT).show();
-                });
-    }
-
-    private void checkCurrentAllianceStatus(String currentAllianceId, AllianceInvitation newInvitation) {
-        db.collection("alliances").document(currentAllianceId)
-                .get()
-                .addOnSuccessListener(allianceDoc -> {
-                    if (allianceDoc.exists()) {
-                        String currentAllianceName = allianceDoc.getString("name");
-                        Boolean isMissionActive = allianceDoc.getBoolean("missionActive");
-
-                        if (Boolean.TRUE.equals(isMissionActive)) {
-                            showMissionActiveDialog(currentAllianceName);
-                        } else {
-                            showSwitchAllianceDialog(currentAllianceName, newInvitation);
-                        }
-                    } else {
-                        acceptInvitationDirectly(newInvitation);
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error occurred while checking the mission status", Toast.LENGTH_SHORT).show();
-                });
-    }
-
-    private void showMissionActiveDialog(String currentAllianceName) {
-        new AlertDialog.Builder(this)
-                .setTitle("⚠️ Active mission")
-                .setMessage("You are currently in alliance \"" + currentAllianceName +
-                        "\" which has active mission.\n\nU cant leave alliance while the mission is active!")
-                .setPositiveButton("Okay", null)
-                .show();
-    }
-
-    private void showSwitchAllianceDialog(String currentAllianceName, AllianceInvitation newInvitation) {
-        new AlertDialog.Builder(this)
-                .setTitle("⚔️ You are already a member in a different alliance")
-                .setMessage("You are currently in alliance \"" + currentAllianceName + "\".\n\n" +
-                        newInvitation.getSenderUsername() + " invites you in an alliance \"" +
-                        newInvitation.getAllianceName() + "\".\n\n" +
-                        "What do you want to do?")
-                .setCancelable(false)
-                .setPositiveButton("Leave your current alliance", (dialog, which) -> {
-                    acceptInvitationDirectly(newInvitation);
-                })
-                .setNegativeButton("Stay in your current alliance", (dialog, which) -> {
-                    handleRejectInvitation(newInvitation);
-                })
-                .setNeutralButton("Cancel", null)
-                .show();
-    }
-
-    private void acceptInvitationDirectly(AllianceInvitation invitation) {
-        allianceRepository.respondToInvitation(invitation, currentUserId, currentUsername, success -> {
-            runOnUiThread(() -> {
-                if (success) {
-                    Toast.makeText(this, "You are successfully added in alliance " + invitation.getAllianceName(), Toast.LENGTH_SHORT).show();
-                    observeAllianceAndInvitations();
-                } else {
-                    Toast.makeText(this, "Error while adding in alliance", Toast.LENGTH_LONG).show();
-                }
-            });
-        });
-    }
-
-    private void handleRejectInvitation(AllianceInvitation invitation) {
-        if (invitation.getInvitationId() == null || invitation.getInvitationId().isEmpty()) {
-            Toast.makeText(this, "Error: Incomplete call", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        db.collection("invitations").document(invitation.getInvitationId())
-                .update("status", "REJECTED")
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(this, "Invitation rejected", Toast.LENGTH_SHORT).show();
-                    observeInvitations();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error while rejecting the invite", Toast.LENGTH_SHORT).show();
-                });
     }
 
     private void deleteAlliance(String allianceId) {
