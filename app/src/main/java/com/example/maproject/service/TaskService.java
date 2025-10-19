@@ -1,14 +1,23 @@
 package com.example.maproject.service;
 
 import com.example.maproject.model.Task;
+import com.example.maproject.model.User;
+
 import java.util.concurrent.TimeUnit;
 
 public class TaskService {
 
     private static final long THREE_DAYS_MILLIS = TimeUnit.DAYS.toMillis(3);
 
-    public int calculateTotalXP(Task task) {
-        return task.getDifficulty().getXp() + task.getImportance().getXp();
+    public int calculateTotalXP(Task task, User user) {
+        long baseDifficultyXP = task.getDifficulty().getXp();
+        long baseImportanceXP = task.getImportance().getXp();
+
+        LevelingService levelingService = new LevelingService();
+        long bonusDifficultyXP = levelingService.getDifficultyBonusXPForLevel(user.getLevel());
+        long bonusImportanceXP = levelingService.getImportanceBonusXPForLevel(user.getLevel());
+
+        return (int) (baseDifficultyXP + baseImportanceXP + bonusDifficultyXP + bonusImportanceXP);
     }
 
     public boolean canBeMarkedDone(Task task, long nowMillis) {

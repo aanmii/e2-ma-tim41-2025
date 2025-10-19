@@ -10,6 +10,7 @@ constraintlayout = "2.1.4"
 roomCommonJvm = "2.8.2"
 firebaseFirestore = "26.0.1"
 materialVersion = "1.13.0"
+junitJunit = "4.12"
 
 [libraries]
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
@@ -23,6 +24,7 @@ constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayo
 room-common-jvm = { group = "androidx.room", name = "room-common-jvm", version.ref = "roomCommonJvm" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 google-material = { group = "com.google.android.material", name = "material", version.ref = "materialVersion" }
+junit-junit = { group = "junit", name = "junit", version.ref = "junitJunit" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

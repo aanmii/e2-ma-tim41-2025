@@ -12,7 +12,7 @@ public class LevelUpProcessor {
     private final TaskService taskService = new TaskService();
 
     public void awardXPAndCheckLevel(User user, Task task) {
-        long xpGained = taskService.calculateTotalXP(task);
+        int xpGained = taskService.calculateTotalXP(task, user);
         user.setTotalExperiencePoints(user.getTotalExperiencePoints() + xpGained);
         user.setCurrentLevelXP(levelingService.getCurrentLevelXP(user.getTotalExperiencePoints(), user.getLevel()));
 
@@ -21,11 +21,6 @@ public class LevelUpProcessor {
         }
 
         updateUserInDatabase(user);
-    }
-
-    private long calculateXPGained(int userLevel, Task task) {
-        // kept for backward compatibility but not used by awardXPAndCheckLevel anymore
-        return taskService.calculateTotalXP(task);
     }
 
     private void levelUpUser(User user) {
