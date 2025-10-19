@@ -3,21 +3,19 @@ package com.example.maproject.model;
 public class InventoryItem {
     private String itemId;
     private String name;
-    private String type; // "potion", "clothing", "weapon"
+    private String type;
     private int quantity;
-    private int remainingBattles; // Za odeću
+    private int remainingBattles;
 
-    // Bonusi
-    private int ppBonus; // Procenat povećanja PP
-    private int attackSuccessBonus; // Procenat povećanja šanse za pogodak
-    private int extraAttackChance; // Šansa za dodatni napad (%)
-    private int coinBonus; // Procenat povećanja novčića
+    private int ppBonus;
+    private int attackSuccessBonus;
+    private int extraAttackChance;
+    private int coinBonus;
 
-    private boolean isPermanent; // Za trajne napitke i oružje
-    private boolean isActive; // Da li je trenutno aktivirana
-    private int upgradeLevel; // Za oružje (počinje od 1)
+    private boolean isPermanent;
+    private boolean isActive;
+    private int upgradeLevel;
 
-    // Konstruktori
     public InventoryItem() {
         this.quantity = 1;
         this.upgradeLevel = 1;
@@ -34,7 +32,6 @@ public class InventoryItem {
         this.remainingBattles = remainingBattles;
     }
 
-    // Getteri i setteri
     public String getItemId() { return itemId; }
     public void setItemId(String itemId) { this.itemId = itemId; }
 
@@ -71,7 +68,6 @@ public class InventoryItem {
     public int getUpgradeLevel() { return upgradeLevel; }
     public void setUpgradeLevel(int upgradeLevel) { this.upgradeLevel = upgradeLevel; }
 
-    // Helper metode
     public String getDescription() {
         StringBuilder desc = new StringBuilder();
 

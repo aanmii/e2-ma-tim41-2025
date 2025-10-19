@@ -3,6 +3,7 @@ package com.example.maproject.ui.boss;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,6 +24,12 @@ public class BossFightActivity extends AppCompatActivity {
     private Button btnAttack, btnFinishFight;
     private View resultContainer;
     private TextView tvResult, tvCoinsEarned, tvItemDropped;
+
+    // Drop overlay
+    private View dropOverlay;
+    private ImageView ivDroppedItem;
+    private TextView tvDroppedItemName;
+    private Button btnCloseDropOverlay;
 
     // Data
     private BossFightRepository fightRepo;
@@ -57,10 +64,18 @@ public class BossFightActivity extends AppCompatActivity {
         tvCoinsEarned = findViewById(R.id.tvCoinsEarned);
         tvItemDropped = findViewById(R.id.tvItemDropped);
 
+        // Drop overlay
+        dropOverlay = findViewById(R.id.dropOverlay);
+        ivDroppedItem = findViewById(R.id.ivDroppedItem);
+        tvDroppedItemName = findViewById(R.id.tvDroppedItemName);
+        btnCloseDropOverlay = findViewById(R.id.btnCloseDropOverlay);
+
         btnAttack.setOnClickListener(v -> performAttack());
         btnFinishFight.setOnClickListener(v -> finish());
+        btnCloseDropOverlay.setOnClickListener(v -> dropOverlay.setVisibility(View.GONE));
 
         resultContainer.setVisibility(View.GONE);
+        dropOverlay.setVisibility(View.GONE);
     }
 
     private void prepareFight() {
@@ -97,7 +112,6 @@ public class BossFightActivity extends AppCompatActivity {
         tvAttacksRemaining.setText("Attacks: " + currentFight.getRemainingAttacks() + " / " + currentFight.getTotalAttacks());
         tvSuccessChance.setText("Hit Chance: " + currentFight.getSuccessChance() + "%");
 
-        // Prikaži DETALJNE bonuse od opreme
         StringBuilder bonuses = new StringBuilder("⚔️ EQUIPMENT BONUSES ⚔️\n\n");
 
         boolean hasBonuses = false;
@@ -131,8 +145,6 @@ public class BossFightActivity extends AppCompatActivity {
         tvEquipmentBonuses.setText(bonuses.toString());
     }
 
-
-
     private void updateBossHp() {
         tvBossHp.setText("Boss HP: " + currentFight.getBossCurrentHp() + " / " + currentFight.getBossMaxHp());
 
@@ -157,7 +169,6 @@ public class BossFightActivity extends AppCompatActivity {
         updateBossHp();
         tvAttacksRemaining.setText("Attacks: " + currentFight.getRemainingAttacks() + " / " + currentFight.getTotalAttacks());
 
-        // Proveri da li je borba završena
         if (currentFight.isBossDefeated() || !currentFight.hasAttacksRemaining()) {
             completeFight();
         }
@@ -193,9 +204,13 @@ public class BossFightActivity extends AppCompatActivity {
 
         tvCoinsEarned.setText("Coins earned: " + currentFight.getCoinsEarned());
 
-        if (currentFight.getItemDropped() != null) {
-            tvItemDropped.setText("Item dropped: " + currentFight.getItemDropped());
+
+        if (currentFight.getItemDropped() != null && currentFight.getItemDroppedName() != null) {
+            tvItemDropped.setText("Item dropped: " + currentFight.getItemDroppedName());
             tvItemDropped.setVisibility(View.VISIBLE);
+
+
+            showDropOverlay(currentFight.getItemDropped(), currentFight.getItemDroppedName());
         } else {
             tvItemDropped.setVisibility(View.GONE);
         }
@@ -203,5 +218,26 @@ public class BossFightActivity extends AppCompatActivity {
         Toast.makeText(this,
                 "Equipment effects applied!\nOne-time potions consumed.\nClothing durability reduced.",
                 Toast.LENGTH_LONG).show();
+    }
+
+    private void showDropOverlay(String itemId, String itemName) {
+        tvDroppedItemName.setText(itemName);
+
+
+        int imageRes = getImageResourceForItem(itemId);
+        ivDroppedItem.setImageResource(imageRes);
+
+        dropOverlay.setVisibility(View.VISIBLE);
+    }
+
+    private int getImageResourceForItem(String itemId) {
+        switch (itemId) {
+            case "sword": return R.drawable.ic_sword;
+            case "bow": return R.drawable.ic_bow;
+            case "gloves": return R.drawable.ic_gloves;
+            case "shield": return R.drawable.ic_shield;
+            case "boots": return R.drawable.ic_boots;
+            default: return R.drawable.ic_potion1;
+        }
     }
 }

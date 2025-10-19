@@ -22,12 +22,11 @@ public class User {
     private boolean isEmailVerified;
     private long registrationTimestamp;
 
-    // Konstruktori
     public User() {
         this.equipment = new ArrayList<>();
         this.activeEquipment = new ArrayList<>();
         this.level = 1;
-        this.powerPoints = 0;
+        this.powerPoints = 40;
     }
 
     public User(String userId, String email, String username, String avatar) {
@@ -45,7 +44,6 @@ public class User {
         this.registrationTimestamp = System.currentTimeMillis();
     }
 
-    // Getteri
     public String getUserId() { return userId; }
     public String getEmail() { return email; }
     public String getUsername() { return username; }
@@ -69,7 +67,6 @@ public class User {
     public boolean isEmailVerified() { return isEmailVerified; }
     public long getRegistrationTimestamp() { return registrationTimestamp; }
 
-    // Setteri
     public void setUserId(String userId) { this.userId = userId; }
     public void setEmail(String email) { this.email = email; }
     public void setUsername(String username) { this.username = username; }
@@ -96,7 +93,6 @@ public class User {
         this.registrationTimestamp = registrationTimestamp;
     }
 
-    // Helper metode
     public void addItemToEquipment(InventoryItem item) {
         if (equipment == null) equipment = new ArrayList<>();
 

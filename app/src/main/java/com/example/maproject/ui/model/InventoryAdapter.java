@@ -72,14 +72,14 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                             User user = snapshot.toObject(User.class);
                             if (user == null) return;
 
-                            // Smanji količinu ili ukloni iz inventara
+
                             if (item.getQuantity() > 1) {
                                 item.setQuantity(item.getQuantity() - 1);
                             } else {
                                 items.remove(position);
                             }
 
-                            // Kreiraj aktivnu stavku SA SVIM BONUSIMA
+
                             InventoryItem activeItem = new InventoryItem(
                                     item.getItemId(),
                                     item.getName(),
@@ -88,7 +88,7 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                                     item.getRemainingBattles()
                             );
 
-                            // **KLJUČNO - KOPIRAJ SVE BONUSE**
+
                             activeItem.setPpBonus(item.getPpBonus());
                             activeItem.setAttackSuccessBonus(item.getAttackSuccessBonus());
                             activeItem.setExtraAttackChance(item.getExtraAttackChance());
@@ -97,12 +97,12 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                             activeItem.setUpgradeLevel(item.getUpgradeLevel());
                             activeItem.setActive(true);
 
-                            // Dodaj u aktivnu opremu
+
                             if (otherList != null) {
                                 otherList.add(activeItem);
                             }
 
-                            // Sačuvaj u bazu
+
                             user.setEquipment(items);
                             user.setActiveEquipment(otherList);
 
@@ -142,6 +142,7 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
             case "boots": return R.drawable.ic_boots;
             case "shield": return R.drawable.ic_shield;
             case "sword": return R.drawable.ic_sword;
+            case "bow": return R.drawable.ic_bow;
             default: return R.drawable.ic_potion1;
         }
     }

@@ -21,7 +21,8 @@ public class BossFight {
     private String itemDropped; // ID opreme ako je dropovana
     private long timestamp;
 
-
+    private String itemDroppedName;
+    private int itemDroppedImage;
     public BossFight() {
         this.timestamp = System.currentTimeMillis();
         this.isCompleted = false;
@@ -102,7 +103,16 @@ public class BossFight {
     }
 
     public int getSuccessChance() {
-        // Bazna šansa + bonus od štita
+
         return Math.min(100, 67 + attackSuccessBonus); // 67% bazna šansa (placeholder)
     }
+
+    public String getItemDroppedName() { return itemDroppedName; }
+    public void setItemDroppedName(String itemDroppedName) { this.itemDroppedName = itemDroppedName; }
+
+    public int getItemDroppedImage() { return itemDroppedImage; }
+    public void setItemDroppedImage(int itemDroppedImage) { this.itemDroppedImage = itemDroppedImage; }
+
+
+
 }

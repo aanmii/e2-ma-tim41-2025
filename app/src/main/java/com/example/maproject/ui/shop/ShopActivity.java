@@ -17,6 +17,8 @@ import com.example.maproject.service.LevelingService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.List;
+
 public class ShopActivity extends AppCompatActivity {
 
     private UserRepository userRepository;
@@ -24,6 +26,17 @@ public class ShopActivity extends AppCompatActivity {
     private FirebaseUser firebaseUser;
     private User currentUser;
     private int userLevel = 1;
+
+
+    private static class WeaponReference {
+        InventoryItem weapon;
+        List<InventoryItem> containingList;
+
+        WeaponReference(InventoryItem weapon, List<InventoryItem> list) {
+            this.weapon = weapon;
+            this.containingList = list;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +48,6 @@ public class ShopActivity extends AppCompatActivity {
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
         if (firebaseUser == null) {
-            Toast.makeText(this, "User is not logged in", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -45,6 +57,7 @@ public class ShopActivity extends AppCompatActivity {
 
     private void loadCurrentUser() {
         userRepository.getUser(firebaseUser.getUid(), user -> {
+            if (user == null) return;
             currentUser = user;
             userLevel = levelingService.calculateLevelFromXP(user.getTotalExperiencePoints());
             setupAllItems();
@@ -52,6 +65,7 @@ public class ShopActivity extends AppCompatActivity {
     }
 
     private void setupAllItems() {
+
         setupItem(R.id.item_potion1, R.drawable.ic_potion1,
                 "Strength Potion +20%", "+20% PP (one-time)",
                 "potion1", "potion", 50, 20, false);
@@ -68,7 +82,6 @@ public class ShopActivity extends AppCompatActivity {
                 "Permanent Potion +10%", "+10% PP (permanent)",
                 "potion4", "potion", 1000, 10, true);
 
-        // ODEĆA - cene u procentima
         setupClothing(R.id.item_gloves, R.drawable.ic_gloves,
                 "Power Gloves", "+10% PP (2 fights)",
                 "gloves", 60, 10, 0, 0);
@@ -81,19 +94,50 @@ public class ShopActivity extends AppCompatActivity {
                 "Speed Boots", "40% chance +1 attack (2 fights)",
                 "boots", 80, 0, 0, 40);
 
-        // ORUŽJE - ne može se kupiti
         setupWeapon(R.id.item_sword, R.drawable.ic_sword,
                 "Mighty Sword", "+5% PP (permanent)",
                 "sword");
 
         setupWeapon(R.id.item_bow, R.drawable.ic_bow,
-                "Bow & Arrow", "+5% coin reward (permanent)",
+                "Bow & Arrow", "+5% hit chance (permanent)",
                 "bow");
+    }
+
+
+    private WeaponReference getWeaponReferenceFromInventory(String itemKey) {
+        if (currentUser == null) return null;
+        List<InventoryItem> equipment = currentUser.getEquipment();
+        List<InventoryItem> activeEquipment = currentUser.getActiveEquipment();
+
+
+        java.util.function.Function<List<InventoryItem>, WeaponReference> findWeapon = (list) -> {
+            if (list != null) {
+                for (InventoryItem item : list) {
+                    if (item.getItemId() != null && item.getItemId().equals(itemKey)) {
+                        if (!item.isPermanent()) item.setPermanent(true);
+                        if (!"weapon".equals(item.getType())) item.setType("weapon");
+                        return new WeaponReference(item, list);
+                    }
+                }
+            }
+            return null;
+        };
+
+
+        WeaponReference availableRef = findWeapon.apply(equipment);
+        if (availableRef != null) return availableRef;
+
+
+        WeaponReference activeRef = findWeapon.apply(activeEquipment);
+        if (activeRef != null) return activeRef;
+
+        return null;
     }
 
     private void setupItem(int itemId, int imageRes, String titleText, String descText,
                            String itemKey, String type, int pricePercentage,
                            int bonus, boolean isPermanent) {
+
         View itemView = findViewById(itemId);
         if (itemView == null) return;
 
@@ -113,10 +157,7 @@ public class ShopActivity extends AppCompatActivity {
         coinIcon.setImageResource(R.drawable.coins);
 
         buyButton.setOnClickListener(v -> {
-            if (currentUser == null) {
-                Toast.makeText(this, "Loading user data...", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            if (currentUser == null) return;
 
             if (currentUser.getCoins() < actualPrice) {
                 Toast.makeText(this, "Not enough coins! Need " + actualPrice,
@@ -140,6 +181,7 @@ public class ShopActivity extends AppCompatActivity {
     private void setupClothing(int itemId, int imageRes, String titleText, String descText,
                                String itemKey, int pricePercentage,
                                int ppBonus, int attackBonus, int extraAttackChance) {
+
         View itemView = findViewById(itemId);
         if (itemView == null) return;
 
@@ -190,19 +232,72 @@ public class ShopActivity extends AppCompatActivity {
 
         image.setImageResource(imageRes);
         title.setText(titleText);
-        desc.setText(descText);
-        priceText.setText("Boss drop only");
-        coinIcon.setVisibility(View.GONE);
-        buyButton.setText("NOT FOR SALE");
-        buyButton.setEnabled(false);
+
+        WeaponReference weaponRef = getWeaponReferenceFromInventory(itemKey);
+        int upgradePrice = calculateUpgradePrice(userLevel);
+
+        if (weaponRef != null) {
+            InventoryItem ownedWeapon = weaponRef.weapon;
+
+            priceText.setText(String.valueOf(upgradePrice));
+            coinIcon.setVisibility(View.VISIBLE);
+            coinIcon.setImageResource(R.drawable.coins);
+
+
+            desc.setText(descText + " (Current Lvl: " + ownedWeapon.getUpgradeLevel() + ")");
+
+            buyButton.setText("UPGRADE (Lvl " + ownedWeapon.getUpgradeLevel() + ")");
+            buyButton.setEnabled(true);
+
+            buyButton.setOnClickListener(v -> {
+                if (currentUser == null || currentUser.getCoins() < upgradePrice) {
+                    Toast.makeText(this, "Not enough coins! Need " + upgradePrice, Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+
+                upgradeWeapon(weaponRef, upgradePrice);
+            });
+
+        } else {
+            desc.setText(descText + " (Boss drop only)");
+            priceText.setText("Boss drop only");
+            coinIcon.setVisibility(View.GONE);
+            buyButton.setText("NOT FOR SALE");
+            buyButton.setEnabled(false);
+        }
+    }
+
+    private int calculateUpgradePrice(int level) {
+        return calculateItemPrice(60, level);
+    }
+
+    private void upgradeWeapon(WeaponReference weaponRef, int upgradePrice) {
+        InventoryItem weapon = weaponRef.weapon;
+
+
+        weapon.setUpgradeLevel(weapon.getUpgradeLevel() + 1);
+
+        currentUser.setCoins(currentUser.getCoins() - upgradePrice);
+
+
+
+        userRepository.updateUser(firebaseUser.getUid(), currentUser, success -> {
+            if (success) {
+                Toast.makeText(this,
+                        weapon.getName() + " upgraded to level " + weapon.getUpgradeLevel() + "!",
+                        Toast.LENGTH_SHORT).show();
+                loadCurrentUser(); // Osveži UI
+            } else {
+                Toast.makeText(this, "Upgrade failed! Please check your connection.", Toast.LENGTH_SHORT).show();
+                loadCurrentUser();
+            }
+        });
     }
 
     private int calculateItemPrice(int percentage, int level) {
-
         int priceBaseLevel = (level <= 1) ? 1 : (level - 1);
-
         int bossReward = calculateBossReward(priceBaseLevel);
-
         return (int) (bossReward * percentage / 100.0);
     }
 

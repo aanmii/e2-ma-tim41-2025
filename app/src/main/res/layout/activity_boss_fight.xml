@@ -142,6 +142,63 @@
                 android:textSize="18sp"
                 android:textColor="@android:color/holo_green_dark"
                 android:visibility="gone" />
+
+            <!-- DODAJ PRE </LinearLayout> zatvarajućeg taga -->
+
+            <!-- Equipment Drop Overlay -->
+            <FrameLayout
+                android:id="@+id/dropOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#CC000000"
+                android:visibility="gone"
+                android:clickable="true"
+                android:focusable="true">
+
+                <LinearLayout
+                    android:layout_width="300dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:orientation="vertical"
+                    android:background="@android:color/white"
+                    android:padding="24dp"
+                    android:gravity="center">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🎁 ITEM DROPPED! 🎁"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/holo_orange_dark"
+                        android:layout_marginBottom="16dp"/>
+
+                    <ImageView
+                        android:id="@+id/ivDroppedItem"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:src="@drawable/ic_sword"
+                        android:layout_marginBottom="16dp"/>
+
+                    <TextView
+                        android:id="@+id/tvDroppedItemName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Mighty Sword"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black"
+                        android:layout_marginBottom="24dp"/>
+
+                    <Button
+                        android:id="@+id/btnCloseDropOverlay"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="COLLECT"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+            </FrameLayout>
+
         </LinearLayout>
 
         <!-- Finish Button -->

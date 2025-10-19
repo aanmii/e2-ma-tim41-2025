@@ -14,7 +14,6 @@ import com.example.maproject.R;
 import com.example.maproject.service.LevelingService;
 import com.example.maproject.ui.auth.ChangePasswordActivity;
 import com.example.maproject.ui.statistics.StatisticsActivity;
-import com.example.maproject.ui.model.InventoryActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.zxing.BarcodeFormat;
@@ -52,11 +51,16 @@ public class ProfileActivity extends AppCompatActivity {
         }
 
         initViews();
-        loadUserProfile();
         setupButtons();
 
         Button viewStatisticsButton = findViewById(R.id.viewStatisticsButton);
         viewStatisticsButton.setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, StatisticsActivity.class)));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadUserProfile();
     }
 
     private void initViews() {
@@ -92,10 +96,12 @@ public class ProfileActivity extends AppCompatActivity {
                     int coins = document.getLong("coins") != null ? document.getLong("coins").intValue() : 0;
                     int badges = document.getLong("badges") != null ? document.getLong("badges").intValue() : 0;
 
+                    int powerPoints = document.getLong("powerPoints") != null ?
+                            document.getLong("powerPoints").intValue() : levelingService.calculatePPFromLevel(1);
+
                     int level = levelingService.calculateLevelFromXP(totalXp);
                     long currentLevelXP = levelingService.getCurrentLevelXP(totalXp, level);
                     long xpForNextLevel = levelingService.getXPForNextLevel(level);
-                    int powerPoints = levelingService.calculatePPFromLevel(level);
 
                     usernameTextView.setText(username != null ? username : "User");
                     setAvatar(avatar);
