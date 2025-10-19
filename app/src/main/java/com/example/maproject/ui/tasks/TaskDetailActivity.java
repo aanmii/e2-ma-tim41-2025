@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.maproject.R;
 import com.example.maproject.model.Task;
+import com.example.maproject.model.User;
+import com.example.maproject.service.LevelUpProcessor;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -18,6 +20,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 public class TaskDetailActivity extends AppCompatActivity {
 
@@ -171,8 +174,141 @@ public class TaskDetailActivity extends AppCompatActivity {
 
         taskRef.update(updates).addOnSuccessListener(aVoid -> {
             Toast.makeText(this, "Task marked done", Toast.LENGTH_SHORT).show();
-            loadTask();
+
+            // After marking done, determine whether this completion should award XP.
+            // Rules from spec:
+            // - Very Easy + Normal → max 5 times per day
+            // - Easy + Important → max 5 times per day
+            // - Hard + Extremely Important → max 2 times per day
+            // - Extremely Hard → max 1 time per week
+            // - Special → max 1 time per month
+            String userId = (String) currentData.get("userId");
+            String difficulty = (String) currentData.get("difficulty");
+            String importance = (String) currentData.get("importance");
+            long completedTime = (Long) updates.get("completedTime");
+
+            if (userId == null) {
+                // fallback: try to award to task's creator (if task stored creator under createdBy)
+                userId = (String) currentData.get("createdBy");
+            }
+
+            // Build query parameters depending on limits
+            long sinceTs = -1;
+            int allowed = Integer.MAX_VALUE;
+            boolean hasLimit = false;
+
+            if (importance != null && importance.equals("SPECIAL")) {
+                hasLimit = true;
+                allowed = 1;
+                sinceTs = now - TimeUnit.DAYS.toMillis(30); // rolling 30 days for "per month"
+            } else if (difficulty != null && difficulty.equals("EXTREMELY_HARD")) {
+                hasLimit = true;
+                allowed = 1;
+                sinceTs = now - TimeUnit.DAYS.toMillis(7);
+            } else if ("VERY_EASY".equals(difficulty) && "NORMAL".equals(importance)) {
+                hasLimit = true;
+                allowed = 5;
+                // start of day
+                long startOfDay = now - (now % TimeUnit.DAYS.toMillis(1));
+                sinceTs = startOfDay;
+            } else if ("EASY".equals(difficulty) && "IMPORTANT".equals(importance)) {
+                hasLimit = true;
+                allowed = 5;
+                long startOfDay = now - (now % TimeUnit.DAYS.toMillis(1));
+                sinceTs = startOfDay;
+            } else if ("HARD".equals(difficulty) && "EXTREMELY_IMPORTANT".equals(importance)) {
+                hasLimit = true;
+                allowed = 2;
+                long startOfDay = now - (now % TimeUnit.DAYS.toMillis(1));
+                sinceTs = startOfDay;
+            }
+
+            if (userId == null) {
+                // nothing we can do to award XP
+                loadTask();
+                return;
+            }
+
+            if (hasLimit) {
+                // Make final copies of local variables so the lambda can capture them (Java requires captured
+                // local variables to be final or effectively final).
+                final String finalUserId = userId;
+                final String finalDifficulty = difficulty;
+                final String finalImportance = importance;
+                final long finalCompletedTime = completedTime;
+                final int finalAllowed = allowed;
+                final long finalSinceTs = sinceTs;
+
+                FirebaseFirestore.getInstance().collection("tasks")
+                        .whereEqualTo("userId", finalUserId)
+                        .whereEqualTo("status", Task.Status.COMPLETED.name())
+                        .whereGreaterThanOrEqualTo("completedTime", finalSinceTs)
+                        .get()
+                        .addOnSuccessListener(qs -> {
+                            int count = 0;
+                            for (DocumentSnapshot d : qs.getDocuments()) {
+                                // count only tasks that match the same difficulty+importance rule when applicable
+                                String dDiff = d.getString("difficulty");
+                                String dImp = d.getString("importance");
+
+                                boolean matches = false;
+                                if (finalImportance != null && finalImportance.equals("SPECIAL")) {
+                                    if ("SPECIAL".equals(dImp)) matches = true;
+                                } else if (finalDifficulty != null && finalDifficulty.equals("EXTREMELY_HARD")) {
+                                    if ("EXTREMELY_HARD".equals(dDiff)) matches = true;
+                                } else if ("VERY_EASY".equals(finalDifficulty) && "NORMAL".equals(finalImportance)) {
+                                    if ("VERY_EASY".equals(dDiff) && "NORMAL".equals(dImp)) matches = true;
+                                } else if ("EASY".equals(finalDifficulty) && "IMPORTANT".equals(finalImportance)) {
+                                    if ("EASY".equals(dDiff) && "IMPORTANT".equals(dImp)) matches = true;
+                                } else if ("HARD".equals(finalDifficulty) && "EXTREMELY_IMPORTANT".equals(finalImportance)) {
+                                    if ("HARD".equals(dDiff) && "EXTREMELY_IMPORTANT".equals(dImp)) matches = true;
+                                }
+
+                                if (matches) count++;
+                            }
+
+                            if (count <= finalAllowed - 1) { // <= because current task should be counted as well
+                                // award XP
+                                awardXPToUser(finalUserId, finalDifficulty, finalImportance, finalCompletedTime);
+                            } else {
+                                Toast.makeText(this, "This completion does not award XP (limit reached)", Toast.LENGTH_SHORT).show();
+                            }
+
+                            loadTask();
+                        })
+                        .addOnFailureListener(e -> {
+                            // On failure to count, do not award XP to avoid accidental double-awards
+                            Toast.makeText(this, "Could not determine XP eligibility", Toast.LENGTH_SHORT).show();
+                            loadTask();
+                        });
+            } else {
+                // no limit applies, award XP
+                awardXPToUser(userId, difficulty, importance, completedTime);
+                loadTask();
+            }
+
         }).addOnFailureListener(e -> Toast.makeText(this, "Failed to update status", Toast.LENGTH_SHORT).show());
+    }
+
+    private void awardXPToUser(String userId, String difficulty, String importance, long completedTime) {
+        // Build a minimal Task object with difficulty/importance for XP calculation
+        Task t = new Task();
+        try {
+            if (difficulty != null) t.setDifficulty(Task.Difficulty.valueOf(difficulty));
+        } catch (IllegalArgumentException ignored) {}
+        try {
+            if (importance != null) t.setImportance(Task.Importance.valueOf(importance));
+        } catch (IllegalArgumentException ignored) {}
+
+        // load user and run LevelUpProcessor
+        FirebaseFirestore.getInstance().collection("users").document(userId).get()
+                .addOnSuccessListener(userDoc -> {
+                    if (!userDoc.exists()) return;
+                    User user = userDoc.toObject(User.class);
+                    if (user == null) return;
+                    new LevelUpProcessor().awardXPAndCheckLevel(user, t);
+                    Toast.makeText(this, "XP awarded for completion", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void cancelTask() {
