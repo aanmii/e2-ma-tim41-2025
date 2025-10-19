@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.maproject">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -44,6 +45,10 @@
         <activity android:name=".ui.model.InventoryActivity" android:exported="false" />
         <activity android:name=".ui.friends.FriendProfileActivity" android:exported="false" />
         <activity android:name=".ui.boss.BossFightActivity" android:exported="false" />
+        <activity android:name=".ui.tasks.TaskCreateActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".ui.tasks.TaskManagement" android:exported="false" />
+        <activity android:name=".ui.tasks.TaskListActivity" android:exported="false" />
+        <activity android:name=".ui.tasks.CategoryManagementActivity" android:exported="false" />
 
         <service
             android:name=".service.MyFirebaseMessagingService"

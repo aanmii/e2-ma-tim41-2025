@@ -399,34 +399,28 @@
             android:id="@+id/viewInventoryButton"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:text="My Equipment"
+            android:text="Open inventory"
             android:textSize="16sp"
             android:textStyle="bold"
             app:cornerRadius="30dp"
-            android:backgroundTint="@color/primary"
+            android:backgroundTint="@color/accent"
             android:textColor="@color/textWhite"
-            app:icon="@drawable/ic_shop"
-            app:iconTint="@null"
 
             android:layout_marginBottom="12dp"/>
 
-        <!-- Active Equipment RecyclerView -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Active Equipment"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginTop="16dp"
-            android:textColor="@color/textPrimary"/>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/active_equipment_recycler"
+        <!-- NEW: View Tasks button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/viewTasksButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"/>
+            android:layout_height="60dp"
+            android:text="Manage tasks"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="30dp"
+            android:backgroundTint="@color/accent"
+            android:textColor="@color/textWhite"
 
-
+            android:layout_marginBottom="12dp"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/changePasswordButton"

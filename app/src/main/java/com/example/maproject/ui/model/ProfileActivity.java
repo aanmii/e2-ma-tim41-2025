@@ -14,6 +14,7 @@ import com.example.maproject.R;
 import com.example.maproject.service.LevelingService;
 import com.example.maproject.ui.auth.ChangePasswordActivity;
 import com.example.maproject.ui.statistics.StatisticsActivity;
+import com.example.maproject.ui.tasks.TaskManagement;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.zxing.BarcodeFormat;
@@ -176,5 +177,9 @@ public class ProfileActivity extends AppCompatActivity {
 
         Button viewInventoryButton = findViewById(R.id.viewInventoryButton);
         viewInventoryButton.setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, InventoryActivity.class)));
+
+        // View Tasks button: opens Task Management (create/list/categories)
+        Button viewTasksButton = findViewById(R.id.viewTasksButton);
+        viewTasksButton.setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, TaskManagement.class)));
     }
 }
