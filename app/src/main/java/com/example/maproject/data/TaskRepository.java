@@ -2,121 +2,60 @@ package com.example.maproject.data;
 
 import com.example.maproject.model.Task;
 import com.example.maproject.service.StatisticsManagerService;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.SetOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-
-import java.util.Map;
-import java.util.HashMap;
+import com.google.firebase.firestore.*;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class TaskRepository {
 
-    private final FirebaseFirestore db;
-    private final StatisticsManagerService statisticsManager;
-    private final CollectionReference tasksCollection;
-    private static final String TASK_COLLECTION = "tasks";
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final StatisticsManagerService statisticsManager = new StatisticsManagerService();
 
-    public TaskRepository() {
-        this.db = FirebaseFirestore.getInstance();
-        this.statisticsManager = new StatisticsManagerService();
-        this.tasksCollection = db.collection(TASK_COLLECTION);
-    }
+    public CompletableFuture<Void> createTask(Task task) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        DocumentReference ref = db.collection("tasks").document();
+        task.setTaskId(ref.getId());
+        ref.set(task)
+                .addOnSuccessListener(aVoid -> {
 
-    public void createTask(Task task, OnCompleteListener<Void> onComplete) {
-        tasksCollection.add(task.toMap())
-                .addOnSuccessListener(documentReference -> {
-                    task.setTaskId(documentReference.getId());
-
-                    tasksCollection.document(task.getTaskId())
-                            .set(task.toMap(), SetOptions.merge())
-                            .addOnCompleteListener(taskResult -> {
-                                if (taskResult.isSuccessful()) {
-                                    statisticsManager.updateCreatedTaskCount(task.getUserId(), 1);
-                                    statisticsManager.updateActiveDays(task.getUserId());
-                                }
-                                onComplete.onComplete(taskResult);
-                            });
+                    statisticsManager.updateCreatedTaskCount(task.getUserId(), 1);
+                    future.complete(null);
                 })
-                .addOnFailureListener(e -> {
-                    onComplete.onComplete(com.google.android.gms.tasks.Tasks.forException(e));
-                });
+                .addOnFailureListener(future::completeExceptionally);
+        return future;
     }
 
-
-    public void updateTaskStatus(Task task, Task.Status oldStatus, OnCompleteListener<Void> onComplete) {
-        if (task.getStatus() == Task.Status.COMPLETED && task.getCompletedTime() == 0) {
-            task.setCompletedTime(System.currentTimeMillis());
-        }
-
-        Map<String, Object> updates = new HashMap<>();
-        updates.put("status", task.getStatus().name());
-        updates.put("completedTime", task.getCompletedTime());
-
-        tasksCollection.document(task.getTaskId())
-                .update(updates)
-                .addOnCompleteListener(taskResult -> {
-                    if (taskResult.isSuccessful()) {
-                        statisticsManager.updateStatisticsOnTaskStatusChange(
-                                task.getUserId(),
-                                task,
-                                oldStatus
-                        );
-                    }
-                    onComplete.onComplete(taskResult);
-                });
-    }
-
-
-    public void updateTask(String taskId, Map<String, Object> updates, OnCompleteListener<Void> onComplete) {
-        tasksCollection.document(taskId)
-                .update(updates)
-                .addOnCompleteListener(onComplete);
-    }
-
-
-    public void deleteTask(Task task, OnCompleteListener<Void> onComplete) {
-        final Task.Status currentStatus = task.getStatus();
-
-        tasksCollection.document(task.getTaskId()).delete()
-                .addOnCompleteListener(taskResult -> {
-                    if (taskResult.isSuccessful()) {
-
-                        Task taskForStats = task;
-                        taskForStats.setStatus(Task.Status.ACTIVE);
-
-                        statisticsManager.updateStatisticsOnTaskStatusChange(
-                                task.getUserId(),
-                                taskForStats,
-                                currentStatus
-                        );
-
-                        statisticsManager.updateCreatedTaskCount(task.getUserId(), -1);
-                    }
-                    onComplete.onComplete(taskResult);
-                });
-    }
-
-    public Query fetchTasksByUserId(String userId) {
-        return tasksCollection.whereEqualTo("userId", userId)
-                .orderBy("executionTime", Query.Direction.ASCENDING);
-    }
-
-
-    public Query fetchTasksByDate(String userId, long startOfDay, long endOfDay) {
-        return tasksCollection
+    public CompletableFuture<List<Task>> getTasksByUser(String userId) {
+        CompletableFuture<List<Task>> future = new CompletableFuture<>();
+        db.collection("tasks")
                 .whereEqualTo("userId", userId)
-                .whereGreaterThanOrEqualTo("executionTime", startOfDay)
-                .whereLessThan("executionTime", endOfDay)
-                .orderBy("executionTime", Query.Direction.ASCENDING);
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    List<Task> list = new ArrayList<>();
+                    for (DocumentSnapshot doc : snapshot.getDocuments()) {
+                        list.add(doc.toObject(Task.class));
+                    }
+                    future.complete(list);
+                })
+                .addOnFailureListener(future::completeExceptionally);
+        return future;
     }
 
+    public CompletableFuture<Void> updateTask(Task task) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        db.collection("tasks").document(task.getTaskId())
+                .set(task)
+                .addOnSuccessListener(aVoid -> future.complete(null))
+                .addOnFailureListener(future::completeExceptionally);
+        return future;
+    }
 
-    public Query fetchCompletedTasks(String userId) {
-        return tasksCollection
-                .whereEqualTo("userId", userId)
-                .whereEqualTo("status", Task.Status.COMPLETED.name())
-                .orderBy("completedTime", Query.Direction.DESCENDING);
+    public CompletableFuture<Void> deleteTask(String taskId) {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        db.collection("tasks").document(taskId)
+                .delete()
+                .addOnSuccessListener(aVoid -> future.complete(null))
+                .addOnFailureListener(future::completeExceptionally);
+        return future;
     }
 }

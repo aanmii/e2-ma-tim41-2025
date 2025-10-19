@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.example.maproject.model.InventoryItem;
 import com.example.maproject.model.User;
+import com.example.maproject.service.StatisticsManagerService;
 import com.google.firebase.auth.ActionCodeSettings;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -103,7 +104,10 @@ public class UserRepository {
         User user = new User(userId, email, username, avatar);
 
         db.collection("users").document(userId).set(user.toMap())
-                .addOnSuccessListener(aVoid -> {})
+                .addOnSuccessListener(aVoid -> {
+                    StatisticsManagerService statsManager = new StatisticsManagerService();
+                    statsManager.initializeStatisticsForUser(userId);
+                })
                 .addOnFailureListener(e -> {
                     registrationStatus.postValue("Error saving profile to Firestore.");
                 });

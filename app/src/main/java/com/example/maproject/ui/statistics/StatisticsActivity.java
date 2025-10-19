@@ -61,6 +61,8 @@ public class StatisticsActivity extends AppCompatActivity {
         if (auth.getCurrentUser() != null) {
             currentUserId = auth.getCurrentUser().getUid();
 
+            statisticsManager.fixMissingFields(currentUserId);
+
             initViews();
             loadStatistics();
             setupBackButton();
@@ -201,6 +203,7 @@ public class StatisticsActivity extends AppCompatActivity {
     }
 
     private void setupCategoryBarChart(DocumentSnapshot document) {
+
         Map<String, Object> tasksPerCategory = (Map<String, Object>) document.get("tasksPerCategory");
 
         List<BarEntry> entries = new ArrayList<>();
@@ -209,14 +212,28 @@ public class StatisticsActivity extends AppCompatActivity {
 
         if (tasksPerCategory != null && !tasksPerCategory.isEmpty()) {
             for (Map.Entry<String, Object> entry : tasksPerCategory.entrySet()) {
-                labels.add(entry.getKey());
+                String categoryName = entry.getKey();
+
+                if (categoryName.startsWith("_") || categoryName.equals("null") || categoryName.isEmpty()) {
+                    continue;
+                }
+
                 long count = entry.getValue() instanceof Long ? (Long) entry.getValue() : 0L;
-                entries.add(new BarEntry(index++, count));
+
+                if (count > 0) {
+                    labels.add(categoryName);
+                    entries.add(new BarEntry(index++, count));
+                }
             }
-        } else {
+        }
+
+
+        if (entries.isEmpty()) {
+            labels.clear();
             labels.add("No data");
             entries.add(new BarEntry(0, 0));
         }
+
 
         BarDataSet dataSet = new BarDataSet(entries, "");
         dataSet.setColors(new int[]{
@@ -241,7 +258,10 @@ public class StatisticsActivity extends AppCompatActivity {
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
         xAxis.setDrawGridLines(false);
+
+
         xAxis.setValueFormatter(new IndexAxisValueFormatter(labels));
+
 
         categoryBarChart.getAxisLeft().setDrawGridLines(false);
         categoryBarChart.getAxisRight().setEnabled(false);
@@ -267,7 +287,7 @@ public class StatisticsActivity extends AppCompatActivity {
             }
 
             entries.add(new Entry(i, xp));
-            // Prikaži samo MM-DD format
+
             labels.add(date.substring(5)); // Npr. "01-15"
         }
 

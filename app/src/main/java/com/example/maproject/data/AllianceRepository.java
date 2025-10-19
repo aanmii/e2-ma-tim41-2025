@@ -12,6 +12,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,6 @@ public class AllianceRepository {
                     callback.onComplete(false);
                 });
     }
-
 
     public void sendInvitation(AllianceInvitation invitation, InvitationCallback callback) {
         Map<String, Object> invitationData = new HashMap<>();
@@ -128,7 +128,6 @@ public class AllianceRepository {
                 }).addOnFailureListener(e -> callback.onComplete(false));
     }
 
-
     private void joinAlliance(AllianceInvitation invitation, String userId, String username, AllianceActionCallback callback) {
         String allianceId = invitation.getAllianceId();
         String invitationId = invitation.getInvitationId();
@@ -139,7 +138,7 @@ public class AllianceRepository {
             return;
         }
 
-        final String finalUsername = username != null ? username : "NepoznatKorisnik";
+        final String finalUsername = username != null ? username : "Unknown";
 
         db.collection("alliances").document(allianceId).get()
                 .addOnSuccessListener(doc -> {
@@ -156,7 +155,7 @@ public class AllianceRepository {
                                             Notification notification = new Notification(
                                                     alliance.getLeaderId(),
                                                     "ALLIANCE_ACCEPTED",
-                                                    finalUsername + " je prihvatio/la poziv i pridružio/la se savezu " + alliance.getName() + ".",
+                                                    finalUsername + " accepted your invite and joined " + alliance.getName() + ".",
                                                     allianceId
                                             );
                                             notificationRepository.sendNotification(notification);
@@ -196,6 +195,7 @@ public class AllianceRepository {
                     } else callback.onComplete(false);
                 }).addOnFailureListener(e -> callback.onComplete(false));
     }
+
     public void leaveAlliance(String allianceId, String userId, AllianceActionCallback callback) {
         db.collection("alliances").document(allianceId).get()
                 .addOnSuccessListener(doc -> {
@@ -228,10 +228,22 @@ public class AllianceRepository {
                 .addOnFailureListener(e -> allianceLiveData.postValue(null));
     }
 
-
     public void getUsername(String userId, UsernameCallback callback) {
         db.collection("users").document(userId).get()
                 .addOnSuccessListener(doc -> callback.onUsernameRetrieved(doc.getString("username")))
                 .addOnFailureListener(e -> callback.onUsernameRetrieved("Unknown"));
+    }
+
+    public void cleanupOldInvitations(String userId) {
+        db.collection("invitations")
+                .whereEqualTo("recipientId", userId)
+                .whereIn("status", Arrays.asList("REJECTED", "AUTO_REJECTED", "ACCEPTED"))
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (QueryDocumentSnapshot doc : querySnapshot) {
+                        doc.getReference().delete();
+                        Log.d("AllianceRepository", "Deleted old invitation: " + doc.getId());
+                    }
+                });
     }
 }

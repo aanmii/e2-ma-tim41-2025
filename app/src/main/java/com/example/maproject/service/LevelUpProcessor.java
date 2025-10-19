@@ -9,9 +9,10 @@ public class LevelUpProcessor {
 
     private final LevelingService levelingService = new LevelingService();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final TaskService taskService = new TaskService();
 
     public void awardXPAndCheckLevel(User user, Task task) {
-        long xpGained = calculateXPGained(user.getLevel(), task);
+        int xpGained = taskService.calculateTotalXP(task, user);
         user.setTotalExperiencePoints(user.getTotalExperiencePoints() + xpGained);
         user.setCurrentLevelXP(levelingService.getCurrentLevelXP(user.getTotalExperiencePoints(), user.getLevel()));
 
@@ -20,12 +21,6 @@ public class LevelUpProcessor {
         }
 
         updateUserInDatabase(user);
-    }
-
-    private long calculateXPGained(int userLevel, Task task) {
-        long baseDifficultyXP = task.getDifficulty().ordinal() * 10L;
-        long baseImportanceXP = task.getImportance().ordinal() * 5L;
-        return levelingService.getBaseTaskXP() + baseDifficultyXP + baseImportanceXP;
     }
 
     private void levelUpUser(User user) {

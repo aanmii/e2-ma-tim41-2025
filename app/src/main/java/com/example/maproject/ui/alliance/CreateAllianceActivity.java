@@ -13,7 +13,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.maproject.R;
 import com.example.maproject.data.AllianceRepository;
 import com.example.maproject.data.FriendsRepository;
-import com.example.maproject.data.NotificationRepository;
 import com.example.maproject.model.Alliance;
 import com.example.maproject.model.AllianceInvitation;
 import com.example.maproject.model.User;
@@ -34,7 +33,6 @@ public class CreateAllianceActivity extends AppCompatActivity {
 
     private FriendsRepository friendsRepository;
     private AllianceRepository allianceRepository;
-    private NotificationRepository notificationRepository;
     private FirebaseFirestore db;
     private String currentUserId;
     private String currentUsername;
@@ -47,7 +45,6 @@ public class CreateAllianceActivity extends AppCompatActivity {
         currentUserId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         friendsRepository = new FriendsRepository();
         allianceRepository = new AllianceRepository();
-        notificationRepository = new NotificationRepository();
         db = FirebaseFirestore.getInstance();
         selectedFriends = new ArrayList<>();
 
@@ -128,30 +125,12 @@ public class CreateAllianceActivity extends AppCompatActivity {
             );
 
             allianceRepository.sendInvitation(invitation, success -> {
-                if (success) {
-                    String invitationId = invitation.getInvitationId();
-
-                    if (invitationId != null && !invitationId.isEmpty()) {
-                        notificationRepository.createNotification(
-                                friend.getUserId(),
-                                "ALLIANCE_INVITE",
-                                currentUsername + " invited you into an alliance " + allianceName,
-                                invitationId,
-                                notifSuccess -> {
-                                    if (!notifSuccess) {
-                                        android.util.Log.e("CreateAlliance", "Failed to send notification to " + friend.getUsername());
-                                    }
-                                }
-                        );
-                    } else {
-                        android.util.Log.e("CreateAlliance", "Invitation ID is null for " + friend.getUsername());
-                    }
-                }
-
                 sentCount[0]++;
                 if (sentCount[0] == totalInvitations) {
                     runOnUiThread(() -> {
-                        Toast.makeText(CreateAllianceActivity.this, "Alliance created and invitations sent!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(CreateAllianceActivity.this,
+                                "Alliance created! Invitations sent to " + totalInvitations + " friends.",
+                                Toast.LENGTH_LONG).show();
                         finish();
                     });
                 }

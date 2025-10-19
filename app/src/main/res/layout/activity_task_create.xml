@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <EditText
+            android:id="@+id/input_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Title" />
+
+        <EditText
+            android:id="@+id/input_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Description (optional)"
+            android:inputType="textMultiLine"
+            android:minLines="2"
+            android:layout_marginTop="8dp" />
+
+        <Spinner
+            android:id="@+id/spinner_category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
+
+        <Spinner
+            android:id="@+id/spinner_frequency"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
+
+        <Spinner
+            android:id="@+id/spinner_difficulty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
+
+        <Spinner
+            android:id="@+id/spinner_importance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
+
+        <EditText
+            android:id="@+id/input_execution_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Execution time (tap to pick)"
+            android:focusable="false"
+            android:layout_marginTop="8dp" />
+
+        <LinearLayout
+            android:id="@+id/container_recurrence"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginTop="8dp">
+
+            <EditText
+                android:id="@+id/input_recurrence_interval"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Repetition interval (e.g., 1)" />
+
+            <Spinner
+                android:id="@+id/spinner_recurrence_unit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp" />
+
+            <EditText
+                android:id="@+id/input_recurrence_start"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Start date (tap to pick)"
+                android:focusable="false"
+                android:layout_marginTop="8dp" />
+
+            <EditText
+                android:id="@+id/input_recurrence_end"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="End date (optional, tap to pick)"
+                android:focusable="false"
+                android:layout_marginTop="8dp" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/button_save_task"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Task"
+            android:layout_marginTop="16dp" />
+
+    </LinearLayout>
+</ScrollView>

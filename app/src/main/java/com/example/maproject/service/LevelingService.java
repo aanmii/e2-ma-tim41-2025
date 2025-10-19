@@ -7,6 +7,8 @@ public class LevelingService {
 
     private static final long[] CUMULATIVE_XP_TABLE = new long[100];
     private static final int[] PP_TABLE = new int[100];
+    private static final long[] TASK_XP_DIFFICULTY_BONUS = new long[100];
+    private static final long[] TASK_XP_IMPORTANCE_BONUS = new long[100];
 
     private static final String[] TITLES = {
             "Sparkle",
@@ -23,13 +25,19 @@ public class LevelingService {
     private static void initializeTables() {
         CUMULATIVE_XP_TABLE[0] = 0;
         PP_TABLE[0] = 0;
+        TASK_XP_DIFFICULTY_BONUS[0] = 0;
+        TASK_XP_IMPORTANCE_BONUS[0] = 0;
 
         long prevXP = BASE_XP_LEVEL_1;
         int prevPP = BASE_PP_LEVEL_1;
+        long prevDiffBonus = 0;
+        long prevImpBonus = 0;
 
         // Level 1
         CUMULATIVE_XP_TABLE[1] = BASE_XP_LEVEL_1;
         PP_TABLE[1] = BASE_PP_LEVEL_1;
+        TASK_XP_DIFFICULTY_BONUS[1] = prevDiffBonus;
+        TASK_XP_IMPORTANCE_BONUS[1] = prevImpBonus;
 
         for (int level = 2; level < 100; level++) {
             prevXP = roundUpToNextHundred(prevXP * 2 + prevXP / 2);
@@ -37,6 +45,12 @@ public class LevelingService {
 
             prevPP = (int) Math.round(prevPP + (0.75 * prevPP));
             PP_TABLE[level] = prevPP;
+
+            prevDiffBonus = Math.round(prevDiffBonus + prevDiffBonus / 2.0 + 1); // dodajemo +1 da bonus raste od 1
+            prevImpBonus = Math.round(prevImpBonus + prevImpBonus / 2.0 + 1);
+
+            TASK_XP_DIFFICULTY_BONUS[level] = prevDiffBonus;
+            TASK_XP_IMPORTANCE_BONUS[level] = prevImpBonus;
         }
     }
 
@@ -85,7 +99,17 @@ public class LevelingService {
         return TITLES[level - 1];
     }
 
-    public long getBaseTaskXP() {
-        return 50;
+    public long getDifficultyBonusXPForLevel(int level) {
+        if (level <= 0) return TASK_XP_DIFFICULTY_BONUS[1];
+        if (level >= TASK_XP_DIFFICULTY_BONUS.length)
+            return TASK_XP_DIFFICULTY_BONUS[TASK_XP_DIFFICULTY_BONUS.length - 1];
+        return TASK_XP_DIFFICULTY_BONUS[level];
+    }
+
+    public long getImportanceBonusXPForLevel(int level) {
+        if (level <= 0) return TASK_XP_IMPORTANCE_BONUS[1];
+        if (level >= TASK_XP_IMPORTANCE_BONUS.length)
+            return TASK_XP_IMPORTANCE_BONUS[TASK_XP_IMPORTANCE_BONUS.length - 1];
+        return TASK_XP_IMPORTANCE_BONUS[level];
     }
 }

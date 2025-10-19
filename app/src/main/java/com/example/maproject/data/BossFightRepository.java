@@ -2,15 +2,19 @@ package com.example.maproject.data;
 
 import com.example.maproject.model.BossFight;
 import com.example.maproject.model.InventoryItem;
+import com.example.maproject.model.Task;
 import com.example.maproject.model.User;
 import com.example.maproject.service.LevelingService;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 public class BossFightRepository {
 
@@ -33,28 +37,151 @@ public class BossFightRepository {
                         return;
                     }
 
-                    int userLevel = levelingService.calculateLevelFromXP(user.getTotalExperiencePoints());
-                    BossFight fight = new BossFight(userId, userLevel);
+                    // First check if there is an undefeated boss fight for this user
+                    db.collection("boss_fights")
+                            .whereEqualTo("userId", userId)
+                            .whereEqualTo("victory", false)
+                            .orderBy("timestamp", Query.Direction.DESCENDING)
+                            .limit(1)
+                            .get()
+                            .addOnSuccessListener(fightSnapshot -> {
+                                if (!fightSnapshot.isEmpty()) {
+                                    DocumentSnapshot fdoc = fightSnapshot.getDocuments().get(0);
+                                    BossFight existing = new BossFight(userId, fdoc.getLong("bossLevel").intValue());
 
-                    fight.setBossMaxHp(calculateBossHp(userLevel));
-                    fight.setBossCurrentHp(fight.getBossMaxHp());
+                                    // Restore HP if available in history, otherwise recalc
+                                    if (fdoc.contains("bossMaxHp")) {
+                                        existing.setBossMaxHp(fdoc.getLong("bossMaxHp").intValue());
+                                    } else {
+                                        existing.setBossMaxHp(calculateBossHp(existing.getBossLevel()));
+                                    }
 
-                    int userPp = user.getPowerPoints();
+                                    if (fdoc.contains("bossCurrentHp")) {
+                                        existing.setBossCurrentHp(fdoc.getLong("bossCurrentHp").intValue());
+                                    } else {
+                                        existing.setBossCurrentHp(existing.getBossMaxHp());
+                                    }
 
-                    if (userPp == 0) {
-                        userPp = levelingService.calculatePPFromLevel(userLevel);
-                        user.setPowerPoints(userPp);
+                                    int userPp = user.getPowerPoints();
+                                    if (userPp == 0) {
+                                        userPp = levelingService.calculatePPFromLevel(levelingService.calculateLevelFromXP(user.getTotalExperiencePoints()));
+                                        user.setPowerPoints(userPp);
+                                        db.collection("users").document(userId)
+                                                .update("powerPoints", userPp);
+                                    }
 
-                        final int finalPp = userPp;
+                                    existing.setUserBasePp(userPp);
+                                    applyEquipmentBonuses(existing, user.getActiveEquipment());
 
-                        db.collection("users").document(userId)
-                                .update("powerPoints", finalPp);
-                    }
+                                    // Compute player's task success rate for the current stage (last 7 days)
+                                    long cut = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7);
+                                    db.collection("tasks")
+                                            .whereEqualTo("userId", userId)
+                                            .whereGreaterThanOrEqualTo("createdTime", cut)
+                                            .get()
+                                            .addOnSuccessListener(snapshot -> {
+                                                int total = 0;
+                                                int completed = 0;
+                                                for (DocumentSnapshot tdoc : snapshot.getDocuments()) {
+                                                    Task task = tdoc.toObject(Task.class);
+                                                    if (task == null) continue;
+                                                    Task.Status status = task.getStatus();
+                                                    if (status == Task.Status.PAUSED || status == Task.Status.CANCELLED) continue;
+                                                    total++;
+                                                    if (status == Task.Status.COMPLETED) completed++;
+                                                }
 
-                    fight.setUserBasePp(userPp);
-                    applyEquipmentBonuses(fight, user.getActiveEquipment());
+                                                if (total > 0) {
+                                                    int rate = (int) Math.round((completed * 100.0) / total);
+                                                    existing.setSuccessRatePercent(rate);
+                                                }
 
-                    listener.onPrepared(fight);
+                                                listener.onPrepared(existing);
+                                            })
+                                            .addOnFailureListener(e -> listener.onPrepared(existing));
+
+                                    return;
+                                }
+
+                                // No undefeated boss - create a new one for the user's level
+                                int userLevel = levelingService.calculateLevelFromXP(user.getTotalExperiencePoints());
+                                BossFight fight = new BossFight(userId, userLevel);
+
+                                fight.setBossMaxHp(calculateBossHp(userLevel));
+                                fight.setBossCurrentHp(fight.getBossMaxHp());
+
+                                int userPp = user.getPowerPoints();
+
+                                if (userPp == 0) {
+                                    userPp = levelingService.calculatePPFromLevel(userLevel);
+                                    user.setPowerPoints(userPp);
+
+                                    final int finalPp = userPp;
+
+                                    db.collection("users").document(userId)
+                                            .update("powerPoints", finalPp);
+                                }
+
+                                fight.setUserBasePp(userPp);
+                                applyEquipmentBonuses(fight, user.getActiveEquipment());
+
+                                // Compute player's task success rate for the current stage (last 7 days)
+                                long cut = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(7);
+                                db.collection("tasks")
+                                        .whereEqualTo("userId", userId)
+                                        .whereGreaterThanOrEqualTo("createdTime", cut)
+                                        .get()
+                                        .addOnSuccessListener(snapshot -> {
+                                            int total = 0;
+                                            int completed = 0;
+                                            for (DocumentSnapshot tdoc : snapshot.getDocuments()) {
+                                                Task task = tdoc.toObject(Task.class);
+                                                if (task == null) continue;
+                                                Task.Status status = task.getStatus();
+                                                if (status == Task.Status.PAUSED || status == Task.Status.CANCELLED) continue;
+                                                total++;
+                                                if (status == Task.Status.COMPLETED) completed++;
+                                            }
+
+                                            if (total > 0) {
+                                                int rate = (int) Math.round((completed * 100.0) / total);
+                                                fight.setSuccessRatePercent(rate);
+                                            }
+
+                                            listener.onPrepared(fight);
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            // If tasks query fails, still return prepared fight with default rate
+                                            listener.onPrepared(fight);
+                                        });
+
+                            })
+                            .addOnFailureListener(e -> {
+                                // If boss_fights query fails, fall back to spawning a new boss
+                                int userLevel = levelingService.calculateLevelFromXP(user.getTotalExperiencePoints());
+                                BossFight fight = new BossFight(userId, userLevel);
+
+                                fight.setBossMaxHp(calculateBossHp(userLevel));
+                                fight.setBossCurrentHp(fight.getBossMaxHp());
+
+                                int userPp = user.getPowerPoints();
+
+                                if (userPp == 0) {
+                                    userPp = levelingService.calculatePPFromLevel(userLevel);
+                                    user.setPowerPoints(userPp);
+
+                                    final int finalPp = userPp;
+
+                                    db.collection("users").document(userId)
+                                            .update("powerPoints", finalPp);
+                                }
+
+                                fight.setUserBasePp(userPp);
+                                applyEquipmentBonuses(fight, user.getActiveEquipment());
+
+                                listener.onPrepared(fight);
+                            });
+
                 })
                 .addOnFailureListener(e -> listener.onError(e.getMessage()));
     }
@@ -159,8 +286,17 @@ public class BossFightRepository {
                         fight.setCoinsEarned(coins);
                         user.setCoins(user.getCoins() + coins);
 
-                        if (random.nextInt(100) < 80){
-                            InventoryItem droppedItem = generateEquipmentDrop();
+                        // Spec: 20% chance to receive an item. Within that: 95% clothing, 5% weapon.
+                        int dropRoll = random.nextInt(100);
+                        if (dropRoll < 20) { // 20% base chance
+                            int kindRoll = random.nextInt(100);
+                            InventoryItem droppedItem;
+                            if (kindRoll < 95) {
+                                droppedItem = generateClothingDrop();
+                            } else {
+                                droppedItem = generateWeaponDrop();
+                            }
+
                             if (droppedItem != null) {
                                 fight.setItemDropped(droppedItem.getItemId());
                                 fight.setItemDroppedName(droppedItem.getName());
@@ -169,13 +305,22 @@ public class BossFightRepository {
                         }
 
                     } else if (fight.getBossCurrentHp() <= fight.getBossMaxHp() / 2) {
+                        // Boss not defeated but lost at least 50% HP
                         int coins = calculateBossReward(fight.getBossLevel()) / 2;
                         coins = (int) Math.round(coins * (1 + fight.getCoinBonusPercent() / 100.0));
                         fight.setCoinsEarned(coins);
                         user.setCoins(user.getCoins() + coins);
 
-                        if (random.nextInt(100) < 10) {
-                            InventoryItem droppedItem = generateEquipmentDrop();
+                        int dropRoll = random.nextInt(100);
+                        if (dropRoll < 10) { // half of 20% = 10%
+                            int kindRoll = random.nextInt(100);
+                            InventoryItem droppedItem;
+                            if (kindRoll < 95) {
+                                droppedItem = generateClothingDrop();
+                            } else {
+                                droppedItem = generateWeaponDrop();
+                            }
+
                             if (droppedItem != null) {
                                 fight.setItemDropped(droppedItem.getItemId());
                                 fight.setItemDroppedName(droppedItem.getName());
@@ -247,56 +392,53 @@ public class BossFightRepository {
         user.setActiveEquipment(updatedActive);
     }
 
-    private InventoryItem generateEquipmentDrop() {
-        boolean isClothing = random.nextInt(100) < 70;
+    private InventoryItem generateClothingDrop() {
+        String[] clothingIds = {"gloves", "shield", "boots"};
+        String id = clothingIds[random.nextInt(clothingIds.length)];
 
-        if (isClothing) {
-            String[] clothingIds = {"gloves", "shield", "boots"};
-            String id = clothingIds[random.nextInt(clothingIds.length)];
+        InventoryItem item = new InventoryItem();
+        item.setItemId(id);
+        item.setType("clothing");
+        item.setQuantity(1);
+        item.setRemainingBattles(2);
+        item.setUpgradeLevel(1);
 
-            InventoryItem item = new InventoryItem();
-            item.setItemId(id);
-            item.setType("clothing");
-            item.setQuantity(1);
-            item.setRemainingBattles(2);
-            item.setUpgradeLevel(1);
-
-            switch (id) {
-                case "gloves":
-                    item.setName("Power Gloves");
-                    item.setPpBonus(10);
-                    break;
-                case "shield":
-                    item.setName("Magic Shield");
-                    item.setAttackSuccessBonus(10);
-                    break;
-                case "boots":
-                    item.setName("Speed Boots");
-                    item.setExtraAttackChance(40);
-                    break;
-            }
-            return item;
-
-        } else {
-            String[] weaponIds = {"sword", "bow"};
-            String id = weaponIds[random.nextInt(weaponIds.length)];
-
-            InventoryItem item = new InventoryItem();
-            item.setItemId(id);
-            item.setType("weapon");
-            item.setQuantity(1);
-            item.setUpgradeLevel(1);
-            item.setPermanent(true);
-
-            if (id.equals("sword")) {
-                item.setName("Mighty Sword");
-                item.setPpBonus(5);
-            } else {
-                item.setName("Bow & Arrow");
-                item.setAttackSuccessBonus(5);
-            }
-            return item;
+        switch (id) {
+            case "gloves":
+                item.setName("Power Gloves");
+                item.setPpBonus(10);
+                break;
+            case "shield":
+                item.setName("Magic Shield");
+                item.setAttackSuccessBonus(10);
+                break;
+            case "boots":
+                item.setName("Speed Boots");
+                item.setExtraAttackChance(40);
+                break;
         }
+        return item;
+    }
+
+    private InventoryItem generateWeaponDrop() {
+        String[] weaponIds = {"sword", "bow"};
+        String id = weaponIds[random.nextInt(weaponIds.length)];
+
+        InventoryItem item = new InventoryItem();
+        item.setItemId(id);
+        item.setType("weapon");
+        item.setQuantity(1);
+        item.setUpgradeLevel(1);
+        item.setPermanent(true);
+
+        if (id.equals("sword")) {
+            item.setName("Mighty Sword");
+            item.setPpBonus(5);
+        } else {
+            item.setName("Bow & Arrow");
+            item.setAttackSuccessBonus(5);
+        }
+        return item;
     }
 
     private void addItemToInventory(User user, InventoryItem newItem) {
@@ -331,6 +473,8 @@ public class BossFightRepository {
         fightData.put("coinsEarned", fight.getCoinsEarned());
         fightData.put("itemDropped", fight.getItemDropped());
         fightData.put("timestamp", fight.getTimestamp());
+        fightData.put("bossMaxHp", fight.getBossMaxHp());
+        fightData.put("bossCurrentHp", fight.getBossCurrentHp());
 
         db.collection("boss_fights")
                 .document(fight.getFightId())
@@ -365,3 +509,4 @@ public class BossFightRepository {
         void onError(String error);
     }
 }
+
