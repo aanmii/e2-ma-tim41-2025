@@ -3,6 +3,7 @@ package com.example.maproject.ui.model;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -53,18 +54,18 @@ public class ProfileActivity extends AppCompatActivity {
         }
 
         initViews();
+        hideActiveEquipmentSection();
         setupButtons();
 
         Button viewStatisticsButton = findViewById(R.id.viewStatisticsButton);
         viewStatisticsButton.setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, StatisticsActivity.class)));
 
-        // Add a MaterialButton programmatically to open the Alliance Special Mission window (styled to match other buttons)
+        // Add a MaterialButton programmatically to open the Alliance Special Mission window
         ViewGroup statsParent = (ViewGroup) viewStatisticsButton.getParent();
         com.google.android.material.button.MaterialButton viewSpecialMissionButton = new com.google.android.material.button.MaterialButton(this);
         viewSpecialMissionButton.setText("Alliance Special Mission");
         viewSpecialMissionButton.setAllCaps(false);
         viewSpecialMissionButton.setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, SpecialMissionActivity.class)));
-        // set height to 60dp to match other material buttons in the profile screen
         int heightPx = (int) (60 * getResources().getDisplayMetrics().density + 0.5f);
         viewSpecialMissionButton.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, heightPx));
         try {
@@ -100,6 +101,14 @@ public class ProfileActivity extends AppCompatActivity {
 
         changePasswordButton = findViewById(R.id.changePasswordButton);
         backButton = findViewById(R.id.backButton);
+    }
+
+    private void hideActiveEquipmentSection() {
+
+        View activeEquipmentRecycler = findViewById(R.id.active_equipment_recycler);
+        if (activeEquipmentRecycler != null && activeEquipmentRecycler.getParent() != null && activeEquipmentRecycler.getParent().getParent() != null) {
+            ((View) activeEquipmentRecycler.getParent().getParent()).setVisibility(View.GONE);
+        }
     }
 
     private void loadUserProfile() {
@@ -197,7 +206,6 @@ public class ProfileActivity extends AppCompatActivity {
         Button viewInventoryButton = findViewById(R.id.viewInventoryButton);
         viewInventoryButton.setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, InventoryActivity.class)));
 
-        // View Tasks button: opens Task Management (create/list/categories)
         Button viewTasksButton = findViewById(R.id.viewTasksButton);
         viewTasksButton.setOnClickListener(v -> startActivity(new Intent(ProfileActivity.this, TaskManagement.class)));
     }

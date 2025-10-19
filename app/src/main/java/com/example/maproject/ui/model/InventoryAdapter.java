@@ -22,16 +22,26 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
     private List<InventoryItem> items;
     private String userId;
     private boolean isActiveSection;
+    private boolean isViewOnly;
     private InventoryAdapter otherAdapter;
     private List<InventoryItem> otherList;
+
 
     public InventoryAdapter(List<InventoryItem> items, String userId, boolean isActiveSection,
                             InventoryAdapter otherAdapter, List<InventoryItem> otherList) {
         this.items = items;
         this.userId = userId;
         this.isActiveSection = isActiveSection;
+        this.isViewOnly = false;
         this.otherAdapter = otherAdapter;
         this.otherList = otherList;
+    }
+
+    // Novi konstruktor za view-only mode (za prijatelje)
+    public InventoryAdapter(List<InventoryItem> items, boolean isViewOnly) {
+        this.items = items;
+        this.isViewOnly = isViewOnly;
+        this.isActiveSection = true;
     }
 
     public void setOtherAdapter(InventoryAdapter adapter) {
@@ -55,6 +65,13 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         holder.itemQuantity.setText("x" + item.getQuantity());
         holder.itemImage.setImageResource(getImageResource(item.getItemId()));
 
+        // Ako je view-only mode (za prijatelje), sakrij dugme
+        if (isViewOnly) {
+            holder.activateButton.setVisibility(View.GONE);
+            return;
+        }
+
+        // Postojeća logika za aktivaciju
         if (isActiveSection || item.isActive()) {
             holder.activateButton.setText("Activated ✅");
             holder.activateButton.setEnabled(false);
@@ -72,13 +89,11 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                             User user = snapshot.toObject(User.class);
                             if (user == null) return;
 
-
                             if (item.getQuantity() > 1) {
                                 item.setQuantity(item.getQuantity() - 1);
                             } else {
                                 items.remove(position);
                             }
-
 
                             InventoryItem activeItem = new InventoryItem(
                                     item.getItemId(),
@@ -88,7 +103,6 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                                     item.getRemainingBattles()
                             );
 
-
                             activeItem.setPpBonus(item.getPpBonus());
                             activeItem.setAttackSuccessBonus(item.getAttackSuccessBonus());
                             activeItem.setExtraAttackChance(item.getExtraAttackChance());
@@ -97,11 +111,9 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                             activeItem.setUpgradeLevel(item.getUpgradeLevel());
                             activeItem.setActive(true);
 
-
                             if (otherList != null) {
                                 otherList.add(activeItem);
                             }
-
 
                             user.setEquipment(items);
                             user.setActiveEquipment(otherList);
@@ -114,7 +126,6 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
                                             otherAdapter.notifyDataSetChanged();
                                         }
 
-                                        // Log za debug
                                         android.util.Log.d("InventoryAdapter",
                                                 "Item activated: " + item.getName() +
                                                         " | PP Bonus: " + activeItem.getPpBonus() +
