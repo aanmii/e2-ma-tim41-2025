@@ -23,6 +23,10 @@ public class BossFight {
 
     private String itemDroppedName;
     private int itemDroppedImage;
+
+    // Player success rate determined from tasks in the stage (0-100)
+    private int successRatePercent = 67; // default fallback
+
     public BossFight() {
         this.timestamp = System.currentTimeMillis();
         this.isCompleted = false;
@@ -102,9 +106,12 @@ public class BossFight {
         return remainingAttacks > 0;
     }
 
-    public int getSuccessChance() {
+    public int getSuccessRatePercent() { return successRatePercent; }
+    public void setSuccessRatePercent(int successRatePercent) { this.successRatePercent = successRatePercent; }
 
-        return Math.min(100, 67 + attackSuccessBonus); // 67% bazna šansa (placeholder)
+    public int getSuccessChance() {
+        int base = Math.min(100, successRatePercent + attackSuccessBonus);
+        return base;
     }
 
     public String getItemDroppedName() { return itemDroppedName; }
