@@ -50,6 +50,7 @@
         <activity android:name=".ui.tasks.TaskManagement" android:exported="false" />
         <activity android:name=".ui.tasks.TaskListActivity" android:exported="false" />
         <activity android:name=".ui.tasks.CategoryManagementActivity" android:exported="false" />
+        <activity android:name=".ui.model.SpecialMissionActivity" android:exported="false" />
 
         <service
             android:name=".service.MyFirebaseMessagingService"
