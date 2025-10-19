@@ -14,20 +14,20 @@
         android:gravity="center"
         android:layout_marginBottom="24dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="⚔️"
-            android:textSize="48sp"
-            android:layout_marginBottom="8dp"/>
+        <ImageView
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:src="@drawable/ic_alliance"
+            android:contentDescription="Alliance icon"
+            android:layout_marginBottom="8dp" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Create alliance"
+            android:text="Create Alliance"
             android:textSize="32sp"
             android:textStyle="bold"
-            android:textColor="@color/textPrimary"/>
+            android:textColor="@color/textPrimary" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -35,7 +35,7 @@
             android:text="Gather your friends for a mission"
             android:textSize="14sp"
             android:textColor="@color/textSecondary"
-            android:layout_marginTop="4dp"/>
+            android:layout_marginTop="4dp" />
     </LinearLayout>
 
     <com.google.android.material.card.MaterialCardView
@@ -58,7 +58,7 @@
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/textPrimary"
-                android:layout_marginBottom="12dp"/>
+                android:layout_marginBottom="12dp" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
@@ -74,7 +74,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="for example: Brave warriors"
-                    android:inputType="text"/>
+                    android:inputType="text" />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
@@ -100,12 +100,12 @@
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@color/textPrimary"
-                android:layout_marginBottom="12dp"/>
+                android:layout_marginBottom="12dp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/selectFriendsRecyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="match_parent" />
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
@@ -119,12 +119,12 @@
             android:layout_width="0dp"
             android:layout_height="60dp"
             android:layout_weight="1"
-            android:text="✓ Create alliance"
+            android:text="✓ Create Alliance"
             android:textStyle="bold"
             android:textSize="16sp"
             app:cornerRadius="30dp"
             android:backgroundTint="@color/accent"
-            android:layout_marginEnd="8dp"/>
+            android:layout_marginEnd="8dp" />
 
         <Button
             android:id="@+id/backButton"
@@ -136,7 +136,7 @@
             app:strokeColor="@color/accent"
             app:strokeWidth="2dp"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_marginStart="8dp"/>
+            android:layout_marginStart="8dp" />
     </LinearLayout>
 
 </LinearLayout>

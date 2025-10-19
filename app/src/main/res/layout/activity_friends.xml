@@ -11,16 +11,31 @@
         android:orientation="vertical"
         android:padding="20dp">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="👥 Friends"
-            android:textSize="32sp"
-            android:textStyle="bold"
-            android:textColor="@color/textPrimary"
-            android:layout_gravity="center"
-            android:layout_marginBottom="24dp"/>
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginBottom="24dp">
 
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@drawable/ic_friends"
+                android:contentDescription="Friends icon"
+                android:layout_marginEnd="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Friends"
+                android:textSize="32sp"
+                android:textStyle="bold"
+                android:textColor="@color/textPrimary"/>
+        </LinearLayout>
+
+        <!-- Search & QR -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -54,7 +69,7 @@
                             android:id="@+id/searchEditText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="🔍 Search Users..."
+                            android:hint="Search Users..."
                             android:inputType="text"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
@@ -70,7 +85,7 @@
                     android:id="@+id/scanQRButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="📷 Scan QR Code"
+                    android:text="Scan QR Code"
                     android:textStyle="bold"
                     app:cornerRadius="12dp"
                     android:backgroundTint="@color/accent"
@@ -78,6 +93,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- RecyclerViews -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/searchResultsRecyclerView"
             android:layout_width="match_parent"
@@ -103,7 +119,6 @@
             android:layout_height="wrap_content"
             android:nestedScrollingEnabled="false"/>
 
-
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -120,6 +135,7 @@
             android:nestedScrollingEnabled="false"
             android:layout_marginBottom="16dp"/>
 
+        <!-- Buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -131,7 +147,7 @@
                 android:layout_width="0dp"
                 android:layout_height="60dp"
                 android:layout_weight="1"
-                android:text="⚔️ Create Alliance"
+                android:text="Create Alliance"
                 android:textStyle="bold"
                 app:cornerRadius="30dp"
                 android:backgroundTint="@color/primary"
