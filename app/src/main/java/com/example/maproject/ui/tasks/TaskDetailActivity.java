@@ -2,6 +2,7 @@ package com.example.maproject.ui.tasks;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -15,6 +16,7 @@ import com.example.maproject.model.User;
 import com.example.maproject.service.LevelUpProcessor;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Date;
@@ -24,6 +26,8 @@ import java.util.concurrent.TimeUnit;
 import com.example.maproject.service.StatisticsManagerService;
 
 public class TaskDetailActivity extends AppCompatActivity {
+
+    private static final String TAG = "TaskDetailActivity";
 
     private TextView textTitle, textCategory, textExecutionTime, textDifficulty, textImportance, textDescription, textStatus;
     private Button buttonMarkDone, buttonPauseReactivate, buttonCancel, buttonEdit, buttonDelete;
@@ -437,15 +441,38 @@ public class TaskDetailActivity extends AppCompatActivity {
             db.collection("tasks").whereEqualTo("recurrenceGroupId", groupId).whereGreaterThanOrEqualTo("executionTime", now)
                     .get().addOnSuccessListener(q -> {
                         for (DocumentSnapshot d : q.getDocuments()) {
+                            String tid = d.getId();
+                            String catId = d.getString("categoryId");
+                            if (catId != null) {
+                                db.collection("categories").document(catId)
+                                        .update("taskIds", FieldValue.arrayRemove(tid))
+                                        .addOnFailureListener(e -> Log.w("TaskDetailActivity", "Failed to remove taskId from category during bulk delete", e));
+                            }
                             d.getReference().delete();
                         }
                         Toast.makeText(this, "Future occurrences deleted", Toast.LENGTH_SHORT).show();
                         finish();
                     }).addOnFailureListener(e -> Toast.makeText(this, "Failed to delete occurrences", Toast.LENGTH_SHORT).show());
         } else {
-            taskRef.delete().addOnSuccessListener(aVoid -> {
-                Toast.makeText(this, "Task deleted", Toast.LENGTH_SHORT).show();
-                finish();
+            // For single task delete, attempt to remove taskId from its category (if any) before deleting
+            taskRef.get().addOnSuccessListener(doc -> {
+                if (!doc.exists()) {
+                    Toast.makeText(this, "Task not found", Toast.LENGTH_SHORT).show();
+                    finish();
+                    return;
+                }
+                String catId = doc.getString("categoryId");
+                if (catId != null) {
+                    db.collection("categories").document(catId)
+                            .update("taskIds", FieldValue.arrayRemove(taskId))
+                            .addOnFailureListener(e -> Log.w("TaskDetailActivity", "Failed to remove taskId from category during delete", e));
+                }
+
+                taskRef.delete().addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Task deleted", Toast.LENGTH_SHORT).show();
+                    finish();
+                }).addOnFailureListener(e -> Toast.makeText(this, "Failed to delete task", Toast.LENGTH_SHORT).show());
+
             }).addOnFailureListener(e -> Toast.makeText(this, "Failed to delete task", Toast.LENGTH_SHORT).show());
         }
     }

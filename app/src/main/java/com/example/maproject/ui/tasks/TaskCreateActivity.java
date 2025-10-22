@@ -7,81 +7,47 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
-import android.widget.Toast;
-
+import android.widget.*;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.example.maproject.R;
 import com.example.maproject.model.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.DocumentSnapshot;
-
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import com.google.firebase.firestore.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class TaskCreateActivity extends AppCompatActivity {
 
     private static final String TAG = "TaskCreateActivity";
 
-    private Spinner categorySpinner;
-    private Spinner frequencySpinner;
-    private Spinner difficultySpinner;
-    private Spinner importanceSpinner;
-    private EditText titleInput;
-    private EditText descriptionInput;
-    private EditText executionTimeInput;
+    private Spinner categorySpinner, frequencySpinner, difficultySpinner, importanceSpinner;
+    private EditText titleInput, descriptionInput, executionTimeInput, durationIntervalInput;
+    private Spinner durationUnitSpinner;
     private LinearLayout recurrenceContainer;
-    private EditText recurrenceIntervalInput;
+    private EditText recurrenceIntervalInput, recurrenceStartInput, recurrenceEndInput;
     private Spinner recurrenceUnitSpinner;
-    private EditText recurrenceStartInput;
-    private EditText recurrenceEndInput;
     private Button saveButton;
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirebaseAuth auth;
-
     private String editingTaskId = null;
     private DocumentSnapshot editingDoc = null;
+
+    private final ArrayList<String> categoryNames = new ArrayList<>();
+    private final ArrayList<String> categoryIds = new ArrayList<>();
+
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Use direct layout reference
         setContentView(R.layout.activity_task_create);
 
         auth = FirebaseAuth.getInstance();
+        ensureUser();
 
-        // If no user is signed in and app is debuggable, sign in anonymously to allow testing writes
-        if (auth.getCurrentUser() == null) {
-            boolean isDebuggable = (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-            if (isDebuggable) {
-                Log.i(TAG, "No user signed in and app is debuggable - attempting anonymous sign-in for testing");
-                auth.signInAnonymously().addOnSuccessListener(result -> {
-                    if (auth.getCurrentUser() != null) {
-                        Log.i(TAG, "Anonymous sign-in successful: " + auth.getCurrentUser().getUid());
-                        Toast.makeText(this, "[DEBUG] Signed in anonymously for testing", Toast.LENGTH_SHORT).show();
-                    }
-                }).addOnFailureListener(e -> {
-                    Log.w(TAG, "Anonymous sign-in failed", e);
-                    Toast.makeText(this, "[DEBUG] Anonymous sign-in failed: " + (e.getMessage() != null ? e.getMessage() : ""), Toast.LENGTH_LONG).show();
-                });
-            }
-        }
-
-        // Use generated R.id references
+        // ==== Bind views ====
         categorySpinner = findViewById(R.id.spinner_category);
         frequencySpinner = findViewById(R.id.spinner_frequency);
         difficultySpinner = findViewById(R.id.spinner_difficulty);
@@ -89,6 +55,8 @@ public class TaskCreateActivity extends AppCompatActivity {
         titleInput = findViewById(R.id.input_title);
         descriptionInput = findViewById(R.id.input_description);
         executionTimeInput = findViewById(R.id.input_execution_time);
+        durationIntervalInput = findViewById(R.id.input_duration_interval);
+        durationUnitSpinner = findViewById(R.id.spinner_duration_unit);
         recurrenceContainer = findViewById(R.id.container_recurrence);
         recurrenceIntervalInput = findViewById(R.id.input_recurrence_interval);
         recurrenceUnitSpinner = findViewById(R.id.spinner_recurrence_unit);
@@ -98,31 +66,20 @@ public class TaskCreateActivity extends AppCompatActivity {
 
         setupSpinners();
         setupDateTimePickers();
-
-        if (frequencySpinner != null) {
-            frequencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                    String freq = (String) parent.getItemAtPosition(position);
-                    if ("Recurring".equals(freq)) {
-                        if (recurrenceContainer != null) recurrenceContainer.setVisibility(View.VISIBLE);
-                    } else {
-                        if (recurrenceContainer != null) recurrenceContainer.setVisibility(View.GONE);
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {
-
-                }
-            });
-        }
-
-        if (saveButton != null) saveButton.setOnClickListener(v -> onSaveTask());
-
         loadCategoriesIntoSpinner();
 
-        // Check for edit mode
+        frequencySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                recurrenceContainer.setVisibility(
+                        "Recurring".equals(parent.getItemAtPosition(pos)) ? View.VISIBLE : View.GONE
+                );
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
+        saveButton.setOnClickListener(v -> onSaveTask());
+
+        // Edit existing
         String taskId = getIntent().getStringExtra("taskId");
         if (!TextUtils.isEmpty(taskId)) {
             editingTaskId = taskId;
@@ -130,183 +87,118 @@ public class TaskCreateActivity extends AppCompatActivity {
         }
     }
 
+    private void ensureUser() {
+        if (auth.getCurrentUser() == null) {
+            boolean isDebuggable = (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+            if (isDebuggable) {
+                Log.i(TAG, "No user signed in - signing in anonymously for debug");
+                auth.signInAnonymously()
+                        .addOnSuccessListener(r -> Toast.makeText(this, "[DEBUG] Signed in anonymously", Toast.LENGTH_SHORT).show());
+            }
+        }
+    }
+
     private void setupSpinners() {
-        ArrayAdapter<String> freqAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new String[]{"One-time", "Recurring"});
-        freqAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        if (frequencySpinner != null) frequencySpinner.setAdapter(freqAdapter);
+        frequencySpinner.setAdapter(makeAdapter("One-time", "Recurring"));
+        difficultySpinner.setAdapter(makeAdapter("Very Easy", "Easy", "Hard", "Extremely Hard"));
+        importanceSpinner.setAdapter(makeAdapter("Normal", "Important", "Extremely Important", "Special"));
+        durationUnitSpinner.setAdapter(makeAdapter("HOUR", "DAY", "WEEK", "MONTH"));
+        recurrenceUnitSpinner.setAdapter(makeAdapter("HOUR", "DAY", "WEEK", "MONTH"));
+    }
 
-        ArrayAdapter<String> difficultyAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,
-                new String[]{"Very Easy", "Easy", "Hard", "Extremely Hard"});
-        difficultyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        if (difficultySpinner != null) difficultySpinner.setAdapter(difficultyAdapter);
-
-        ArrayAdapter<String> importanceAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item,
-                new String[]{"Normal", "Important", "Extremely Important", "Special"});
-        importanceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        if (importanceSpinner != null) importanceSpinner.setAdapter(importanceAdapter);
-
-        ArrayAdapter<String> unitAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, new String[]{"DAY", "WEEK"});
-        unitAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        if (recurrenceUnitSpinner != null) recurrenceUnitSpinner.setAdapter(unitAdapter);
+    private ArrayAdapter<String> makeAdapter(String... items) {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, items);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        return adapter;
     }
 
     private void setupDateTimePickers() {
-        if (executionTimeInput != null) executionTimeInput.setOnClickListener(v -> pickDateTime(executionTimeInput));
-        if (recurrenceStartInput != null) recurrenceStartInput.setOnClickListener(v -> pickDateTime(recurrenceStartInput));
-        if (recurrenceEndInput != null) recurrenceEndInput.setOnClickListener(v -> pickDateTime(recurrenceEndInput));
+        executionTimeInput.setOnClickListener(v -> pickDateTime(executionTimeInput));
+        recurrenceStartInput.setOnClickListener(v -> pickDateTime(recurrenceStartInput));
+        recurrenceEndInput.setOnClickListener(v -> pickDateTime(recurrenceEndInput));
     }
 
     private void pickDateTime(EditText target) {
         final Calendar c = Calendar.getInstance();
-        DatePickerDialog dp = new DatePickerDialog(this, (view, year, month, dayOfMonth) -> {
-            c.set(Calendar.YEAR, year);
-            c.set(Calendar.MONTH, month);
-            c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-            TimePickerDialog tp = new TimePickerDialog(TaskCreateActivity.this, (timeView, hourOfDay, minute) -> {
-                c.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                c.set(Calendar.MINUTE, minute);
-                if (target != null) target.setText(String.valueOf(c.getTimeInMillis()));
-            }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true);
-            tp.show();
+        DatePickerDialog dp = new DatePickerDialog(this, (v, y, m, d) -> {
+            c.set(y, m, d);
+            new TimePickerDialog(this, (t, h, min) -> {
+                c.set(Calendar.HOUR_OF_DAY, h);
+                c.set(Calendar.MINUTE, min);
+                target.setText(sdf.format(c.getTime())); // human-readable
+                target.setTag(c.getTimeInMillis());      // store real millis
+            }, c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), true).show();
         }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
         dp.show();
     }
 
     private void loadCategoriesIntoSpinner() {
-        // Load categories from Firestore; show category name in spinner
-        db.collection("categories").get().addOnSuccessListener(query -> {
-            List<String> names = new java.util.ArrayList<>();
-            names.add("Default");
-            for (com.google.firebase.firestore.DocumentSnapshot ds : query.getDocuments()) {
+        db.collection("categories").get().addOnSuccessListener(q -> {
+            categoryNames.clear();
+            categoryIds.clear();
+            categoryNames.add("Default");
+            categoryIds.add(null);
+            for (DocumentSnapshot ds : q.getDocuments()) {
                 String name = ds.getString("name");
-                if (!TextUtils.isEmpty(name)) names.add(name);
-            }
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, names);
-            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            if (categorySpinner != null) categorySpinner.setAdapter(adapter);
-
-            // If editing, ensure we set the category selection after categories loaded
-            if (editingDoc != null) {
-                String catName = editingDoc.getString("categoryName");
-                if (catName != null) {
-                    int pos = names.indexOf(catName);
-                    if (pos >= 0 && categorySpinner != null) categorySpinner.setSelection(pos);
+                if (!TextUtils.isEmpty(name)) {
+                    categoryNames.add(name);
+                    categoryIds.add(ds.getId());
                 }
             }
-        }).addOnFailureListener(e -> Toast.makeText(this, "Failed to load categories", Toast.LENGTH_SHORT).show());
+            categorySpinner.setAdapter(makeAdapter(categoryNames.toArray(new String[0])));
+        });
     }
 
     private void loadTaskForEdit(String taskId) {
-        DocumentReference ref = db.collection("tasks").document(taskId);
-        ref.get().addOnSuccessListener(doc -> {
-            if (!doc.exists()) {
-                Toast.makeText(this, "Task not found", Toast.LENGTH_SHORT).show();
-                finish();
-                return;
-            }
+        db.collection("tasks").document(taskId).get().addOnSuccessListener(doc -> {
+            if (!doc.exists()) { Toast.makeText(this, "Task not found", Toast.LENGTH_SHORT).show(); finish(); return; }
             editingDoc = doc;
 
-            String status = doc.getString("status");
-            Long exec = doc.getLong("executionTime");
-            Boolean isRecurring = doc.getBoolean("isRecurring");
+            titleInput.setText(doc.getString("title"));
+            descriptionInput.setText(doc.getString("description"));
 
-            // Disallow editing if status is COMPLETED/NOT_DONE/CANCELLED
-            if ("COMPLETED".equals(status) || "NOT_DONE".equals(status) || "CANCELLED".equals(status)) {
-                Toast.makeText(this, "This task cannot be edited", Toast.LENGTH_SHORT).show();
-                finish();
-                return;
+            Long start = doc.getLong("startDate");
+            if (start != null) {
+                executionTimeInput.setText(sdf.format(new Date(start)));
+                executionTimeInput.setTag(start);
             }
 
-            long now = System.currentTimeMillis();
-            long threeDaysMs = 3L * 24L * 60L * 60L * 1000L;
-            if (exec != null && now > exec + threeDaysMs) {
-                // expired more than 3 days
-                Toast.makeText(this, "This task expired and cannot be edited", Toast.LENGTH_SHORT).show();
-                finish();
-                return;
-            }
+            Long durInt = doc.getLong("durationInterval");
+            if (durInt != null) durationIntervalInput.setText(String.valueOf(durInt));
+            String durUnit = doc.getString("durationUnit");
+            setSpinnerSelection(durationUnitSpinner, durUnit);
 
-            // For recurring tasks only future instances can be modified: disallow if executionTime < now
-            if (isRecurring != null && isRecurring && exec != null && exec < now) {
-                Toast.makeText(this, "Past occurrence cannot be edited. Only future instances can be modified.", Toast.LENGTH_SHORT).show();
-                finish();
-                return;
-            }
-
-            // populate fields
-            if (titleInput != null) titleInput.setText(doc.getString("title"));
-            if (descriptionInput != null) descriptionInput.setText(doc.getString("description"));
-            if (exec != null && executionTimeInput != null) executionTimeInput.setText(String.valueOf(exec));
-
-            String diff = doc.getString("difficulty");
-            if (diff != null && difficultySpinner != null) {
-                switch (diff) {
-                    case "VERY_EASY": difficultySpinner.setSelection(0); break;
-                    case "EASY": difficultySpinner.setSelection(1); break;
-                    case "HARD": difficultySpinner.setSelection(2); break;
-                    case "EXTREMELY_HARD": difficultySpinner.setSelection(3); break;
+            Boolean isRec = doc.getBoolean("isRecurring");
+            if (Boolean.TRUE.equals(isRec)) {
+                frequencySpinner.setSelection(1);
+                recurrenceContainer.setVisibility(View.VISIBLE);
+                setSpinnerSelection(recurrenceUnitSpinner, doc.getString("recurrenceUnit"));
+                Long recStart = doc.getLong("recurrenceStart");
+                if (recStart != null) {
+                    recurrenceStartInput.setText(sdf.format(new Date(recStart)));
+                    recurrenceStartInput.setTag(recStart);
                 }
+                long recEnd = extractMillis(recurrenceEndInput);
+                if (recEnd <= 0) recEnd = recStart + 90L * 24 * 60 * 60 * 1000;
             }
-
-            String imp = doc.getString("importance");
-            if (imp != null && importanceSpinner != null) {
-                switch (imp) {
-                    case "NORMAL": importanceSpinner.setSelection(0); break;
-                    case "IMPORTANT": importanceSpinner.setSelection(1); break;
-                    case "EXTREMELY_IMPORTANT": importanceSpinner.setSelection(2); break;
-                    case "SPECIAL": importanceSpinner.setSelection(3); break;
-                }
-            }
-
-            if (isRecurring != null && isRecurring) {
-                if (frequencySpinner != null) frequencySpinner.setSelection(1);
-                if (recurrenceContainer != null) recurrenceContainer.setVisibility(View.VISIBLE);
-                Long interval = doc.getLong("recurrenceInterval");
-                if (interval != null && recurrenceIntervalInput != null) recurrenceIntervalInput.setText(String.valueOf(interval));
-                String unit = doc.getString("recurrenceUnit");
-                if (unit != null && unit.equals("WEEK") && recurrenceUnitSpinner != null) recurrenceUnitSpinner.setSelection(1);
-                Long start = doc.getLong("recurrenceStart");
-                if (start != null && recurrenceStartInput != null) recurrenceStartInput.setText(String.valueOf(start));
-                Long end = doc.getLong("recurrenceEnd");
-                if (end != null && recurrenceEndInput != null) recurrenceEndInput.setText(String.valueOf(end));
-            } else {
-                if (frequencySpinner != null) frequencySpinner.setSelection(0);
-                if (recurrenceContainer != null) recurrenceContainer.setVisibility(View.GONE);
-            }
-
-            // ensure category spinner set after categories loaded (we handle in loadCategories)
-            loadCategoriesIntoSpinner();
-
-        }).addOnFailureListener(e -> {
-            Toast.makeText(this, "Failed to load task", Toast.LENGTH_SHORT).show();
-            finish();
         });
+    }
+
+    private void setSpinnerSelection(Spinner spinner, String value) {
+        if (value == null) return;
+        for (int i = 0; i < spinner.getCount(); i++) {
+            if (value.equalsIgnoreCase(spinner.getItemAtPosition(i).toString())) {
+                spinner.setSelection(i);
+                break;
+            }
+        }
     }
 
     private void onSaveTask() {
         try {
-            // Prefer authenticated UID, but allow a debug fallback when running locally in debug builds
-            String creatorUid;
-            if (auth.getCurrentUser() != null) {
-                creatorUid = auth.getCurrentUser().getUid();
-            } else {
-                boolean isDebuggable = (getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-                if (isDebuggable) {
-                    creatorUid = "__DEBUG_USER__";
-                    Log.w(TAG, "No authenticated user - using debug fallback UID for testing: " + creatorUid);
-                    Toast.makeText(this, "[DEBUG] No user signed in - saving task with debug UID", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "You must be signed in to create a task", Toast.LENGTH_SHORT).show();
-                    Log.w(TAG, "User not signed in, aborting task creation");
-                    return;
-                }
-            }
-
-            if (titleInput == null) {
-                Toast.makeText(this, "Internal error: title input missing", Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "titleInput is null");
-                return;
-            }
+            String uid = (auth.getCurrentUser() != null)
+                    ? auth.getCurrentUser().getUid()
+                    : "__DEBUG_USER__";
 
             String title = titleInput.getText().toString().trim();
             if (TextUtils.isEmpty(title)) {
@@ -314,192 +206,99 @@ public class TaskCreateActivity extends AppCompatActivity {
                 return;
             }
 
-            String selectedCategory;
-            try {
-                Object sel = categorySpinner != null ? categorySpinner.getSelectedItem() : null;
-                selectedCategory = sel != null ? sel.toString() : "Default";
-            } catch (Exception e) {
-                Log.w(TAG, "Could not read category spinner selection", e);
-                selectedCategory = "Default";
-            }
+            String catId = categoryIds.get(categorySpinner.getSelectedItemPosition());
+            String catName = categoryNames.get(categorySpinner.getSelectedItemPosition());
+            boolean isRecurring = "Recurring".equals(frequencySpinner.getSelectedItem());
 
-            String frequency = (String) (frequencySpinner != null ? frequencySpinner.getSelectedItem() : "One-time");
-            String difficulty = (String) (difficultySpinner != null ? difficultySpinner.getSelectedItem() : "Very Easy");
-            String importance = (String) (importanceSpinner != null ? importanceSpinner.getSelectedItem() : "Normal");
-            String executionMsStr = executionTimeInput != null ? executionTimeInput.getText().toString().trim() : "";
+            // Difficulty & importance
+            Task.Difficulty diffEnum = Task.Difficulty.fromString(
+                    difficultySpinner.getSelectedItem().toString().replace(" ", "_"));
+            Task.Importance impEnum = Task.Importance.fromString(
+                    importanceSpinner.getSelectedItem().toString().replace(" ", "_"));
 
-            if (TextUtils.isEmpty(executionMsStr)) {
-                // In debug builds, auto-fill execution time to help testing when user forgets to pick a date
-                boolean isDebuggable = (getApplicationInfo().flags & android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-                if (isDebuggable) {
-                    long nowPlus1Min = System.currentTimeMillis() + 60_000L;
-                    executionMsStr = String.valueOf(nowPlus1Min);
-                    if (executionTimeInput != null) executionTimeInput.setText(executionMsStr);
-                    Log.i(TAG, "[DEBUG] Auto-filled execution time for testing: " + executionMsStr);
-                } else {
-                    if (executionTimeInput != null) executionTimeInput.setError("Execution time required");
-                    return;
-                }
-            }
-
-            long executionMs;
-            try {
-                executionMs = Long.parseLong(executionMsStr);
-            } catch (NumberFormatException ex) {
-                if (executionTimeInput != null) executionTimeInput.setError("Invalid date/time");
-                Toast.makeText(this, "Invalid execution time format", Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "Invalid execution time: " + executionMsStr, ex);
-                return;
-            }
-
+            // Build map for Firestore
             Map<String, Object> data = new HashMap<>();
+            data.put("userId", uid);
             data.put("title", title);
-            data.put("description", descriptionInput != null ? descriptionInput.getText().toString().trim() : "");
-            data.put("categoryName", selectedCategory);
-            data.put("executionTime", executionMs);
-            // store canonical userId field
-            data.put("userId", creatorUid);
-
-            // difficulty & importance mapping to enums
-            Task.Difficulty diffEnum = null;
-            switch (difficulty) {
-                case "Very Easy": diffEnum = Task.Difficulty.VERY_EASY; break;
-                case "Easy": diffEnum = Task.Difficulty.EASY; break;
-                case "Hard": diffEnum = Task.Difficulty.HARD; break;
-                case "Extremely Hard": diffEnum = Task.Difficulty.EXTREMELY_HARD; break;
-            }
-            if (diffEnum == null) diffEnum = Task.Difficulty.VERY_EASY;
+            data.put("description", descriptionInput.getText().toString().trim());
+            data.put("categoryId", catId);
+            data.put("categoryName", catName);
             data.put("difficulty", diffEnum.name());
-
-            Task.Importance impEnum = null;
-            switch (importance) {
-                case "Normal": impEnum = Task.Importance.NORMAL; break;
-                case "Important": impEnum = Task.Importance.IMPORTANT; break;
-                case "Extremely Important": impEnum = Task.Importance.EXTREMELY_IMPORTANT; break;
-                case "Special": impEnum = Task.Importance.SPECIAL; break;
-            }
-            if (impEnum == null) impEnum = Task.Importance.NORMAL;
             data.put("importance", impEnum.name());
-
-            // disable button while saving
-            if (saveButton != null) saveButton.setEnabled(false);
-
-            // set default status and createdTime; taskId will be set on the document before saving
             data.put("status", Task.Status.ACTIVE.name());
             data.put("createdTime", System.currentTimeMillis());
+            data.put("isRecurring", isRecurring);
 
-            if ("Recurring".equals(frequency)) {
-                String intervalStr = recurrenceIntervalInput != null ? recurrenceIntervalInput.getText().toString().trim() : "";
-                if (TextUtils.isEmpty(intervalStr)) {
-                    if (recurrenceIntervalInput != null) recurrenceIntervalInput.setError("Interval required");
-                    if (saveButton != null) saveButton.setEnabled(true);
-                    return;
-                }
-                int interval;
-                try {
-                    interval = Integer.parseInt(intervalStr);
-                } catch (NumberFormatException nfe) {
-                    if (recurrenceIntervalInput != null) recurrenceIntervalInput.setError("Invalid interval");
-                    Toast.makeText(this, "Invalid recurrence interval", Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "Invalid recurrence interval: " + intervalStr, nfe);
-                    if (saveButton != null) saveButton.setEnabled(true);
-                    return;
-                }
+            long startMillis = extractMillis(executionTimeInput);
+            data.put("startDate", startMillis);
 
-                data.put("isRecurring", true);
-                data.put("recurrenceInterval", interval);
-                data.put("recurrenceUnit", recurrenceUnitSpinner != null ? recurrenceUnitSpinner.getSelectedItem().toString() : "DAY");
-                // Safe-parse recurrence start/end to avoid NumberFormatException crashes
-                Long recStart = null;
-                if (recurrenceStartInput != null) {
-                    String s = recurrenceStartInput.getText().toString().trim();
-                    if (!TextUtils.isEmpty(s)) {
-                        try { recStart = Long.parseLong(s); } catch (NumberFormatException nfe) {
-                            recurrenceStartInput.setError("Invalid date");
-                            Log.w(TAG, "Invalid recurrenceStart value: " + s, nfe);
-                        }
-                    }
-                }
-                Long recEnd = null;
-                if (recurrenceEndInput != null) {
-                    String s = recurrenceEndInput.getText().toString().trim();
-                    if (!TextUtils.isEmpty(s)) {
-                        try { recEnd = Long.parseLong(s); } catch (NumberFormatException nfe) {
-                            recurrenceEndInput.setError("Invalid date");
-                            Log.w(TAG, "Invalid recurrenceEnd value: " + s, nfe);
-                        }
-                    }
-                }
+            int durInt = parseIntSafe(durationIntervalInput.getText().toString(), 1);
+            String durUnit = durationUnitSpinner.getSelectedItem().toString();
+            data.put("durationInterval", durInt);
+            data.put("durationUnit", durUnit);
+
+            if (isRecurring) {
+                int recInt = parseIntSafe(recurrenceIntervalInput.getText().toString(), 1);
+                String recUnit = recurrenceUnitSpinner.getSelectedItem().toString();
+                long recStart = extractMillis(recurrenceStartInput);
+                long recEnd = extractMillis(recurrenceEndInput);
+                data.put("recurrenceInterval", recInt);
+                data.put("recurrenceUnit", recUnit);
                 data.put("recurrenceStart", recStart);
                 data.put("recurrenceEnd", recEnd);
-
-                if (editingTaskId == null) {
-                    // New recurring: generate a recurrenceGroupId and set taskId + userId + timestamps
-                    String groupId = UUID.randomUUID().toString();
-                    data.put("recurrenceGroupId", groupId);
-
-                    DocumentReference newDoc = db.collection("tasks").document();
-                    // set taskId on the stored document so future reads have it
-                    data.put("taskId", newDoc.getId());
-                    data.put("userId", creatorUid);
-
-                    Log.d(TAG, "Creating recurring task with data: " + data);
-                    newDoc.set(data).addOnSuccessListener(aVoid -> {
-                        Toast.makeText(this, "Recurring task created", Toast.LENGTH_SHORT).show();
-                        finish();
-                    }).addOnFailureListener(e -> {
-                        Log.e(TAG, "Failed to create recurring task", e);
-                        Toast.makeText(this, "Failed to create recurring task: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
-                        if (saveButton != null) saveButton.setEnabled(true);
-                    });
-                } else {
-                    // existing recurring task: update only this doc (we ensured it's future instance)
-                    Log.d(TAG, "Updating recurring task " + editingTaskId + " with data: " + data);
-                    db.collection("tasks").document(editingTaskId).update(data).addOnSuccessListener(aVoid -> {
-                        Toast.makeText(this, "Task updated", Toast.LENGTH_SHORT).show();
-                        finish();
-                    }).addOnFailureListener(e -> {
-                        Log.e(TAG, "Failed to update recurring task", e);
-                        Toast.makeText(this, "Failed to update task: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
-                        if (saveButton != null) saveButton.setEnabled(true);
-                    });
-                }
-
-            } else {
-                data.put("isRecurring", false);
-
-                if (editingTaskId == null) {
-                    // Create one-time task using a document reference so we can store taskId atomically
-                    DocumentReference newDoc = db.collection("tasks").document();
-                    data.put("taskId", newDoc.getId());
-                    data.put("userId", creatorUid);
-                    Log.d(TAG, "Creating one-time task with data: " + data);
-                    newDoc.set(data).addOnSuccessListener(aVoid -> {
-                        Toast.makeText(this, "Task created (id=" + newDoc.getId() + ")", Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "Task created: " + newDoc.getId());
-                        finish();
-                    }).addOnFailureListener(e -> {
-                        Log.e(TAG, "Failed to create task", e);
-                        Toast.makeText(this, "Failed to create task: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
-                        if (saveButton != null) saveButton.setEnabled(true);
-                    });
-                } else {
-                    Log.d(TAG, "Updating task " + editingTaskId + " with data: " + data);
-                    db.collection("tasks").document(editingTaskId).update(data).addOnSuccessListener(aVoid -> {
-                        Toast.makeText(this, "Task updated", Toast.LENGTH_SHORT).show();
-                        finish();
-                    }).addOnFailureListener(e -> {
-                        Log.e(TAG, "Failed to update task", e);
-                        Toast.makeText(this, "Failed to update task: " + (e.getMessage() != null ? e.getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
-                        if (saveButton != null) saveButton.setEnabled(true);
-                    });
-                }
             }
+
+            saveButton.setEnabled(false);
+
+            if (editingTaskId == null) {
+                DocumentReference newDoc = db.collection("tasks").document();
+                data.put("taskId", newDoc.getId());
+                newDoc.set(data)
+                        .addOnSuccessListener(aVoid -> {
+                            Log.d(TAG, "✅ Task saved: " + title);
+                            if (catId != null)
+                                db.collection("categories").document(catId)
+                                        .update("taskIds", FieldValue.arrayUnion(newDoc.getId()));
+                            Toast.makeText(this, "Task saved", Toast.LENGTH_SHORT).show();
+                            finish();
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "❌ Failed to save task", e);
+                            Toast.makeText(this, "Save failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            saveButton.setEnabled(true);
+                        });
+            } else {
+                db.collection("tasks").document(editingTaskId)
+                        .update(data)
+                        .addOnSuccessListener(aVoid -> {
+                            Toast.makeText(this, "Task updated", Toast.LENGTH_SHORT).show();
+                            finish();
+                        })
+                        .addOnFailureListener(e -> {
+                            Log.e(TAG, "❌ Failed to update task", e);
+                            Toast.makeText(this, "Update failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            saveButton.setEnabled(true);
+                        });
+            }
+
         } catch (Exception e) {
-            // Catch any unexpected runtime error to avoid crashing the app and report useful diagnostics
-            Log.e(TAG, "Unhandled error saving task", e);
-            Toast.makeText(this, "An unexpected error occurred: " + (e.getMessage() != null ? e.getMessage() : ""), Toast.LENGTH_LONG).show();
-            if (saveButton != null) saveButton.setEnabled(true);
+            Log.e(TAG, "Unexpected error saving task", e);
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            saveButton.setEnabled(true);
+        }
+    }
+
+    private int parseIntSafe(String text, int def) {
+        try { return Integer.parseInt(text.trim()); } catch (Exception e) { return def; }
+    }
+
+    private long extractMillis(EditText field) {
+        Object tag = field.getTag();
+        if (tag instanceof Long) return (Long) tag;
+        try {
+            return sdf.parse(field.getText().toString()).getTime();
+        } catch (Exception e) {
+            return System.currentTimeMillis();
         }
     }
 }
