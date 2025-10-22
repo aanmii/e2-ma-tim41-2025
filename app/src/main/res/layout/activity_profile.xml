@@ -135,13 +135,111 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Power Points i Experience Points Card -->
+        <!-- Experience Points i Badges Card - PRVI RED -->
         <LinearLayout
+            android:id="@+id/experienceBadgesRow"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:weightSum="2"
             android:layout_marginBottom="16dp">
+
+            <!-- Experience Points -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="8dp"
+                app:cardBackgroundColor="@color/cardBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:gravity="center">
+
+                    <ImageView
+                        android:layout_width="65dp"
+                        android:layout_height="61dp"
+                        android:layout_marginBottom="4dp"
+                        android:contentDescription="Experience Points Icon"
+                        android:src="@drawable/experience_points" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="EXPERIENCE POINTS"
+                        android:textSize="11sp"
+                        android:textColor="@color/textSecondary"
+                        android:textStyle="bold"
+                        android:layout_marginBottom="4dp"/>
+
+                    <TextView
+                        android:id="@+id/experiencePointsTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="24sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/xp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Badges -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="8dp"
+                app:cardBackgroundColor="@color/cardBackground">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="151dp"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <ImageView
+                        android:layout_width="106dp"
+                        android:layout_height="43dp"
+                        android:layout_marginBottom="4dp"
+                        android:src="@drawable/bedge" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="4dp"
+                        android:text="BADGES"
+                        android:textColor="@color/textSecondary"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/badgesTextView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textColor="@color/chartPastelPurple"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- Power Points i Coins Card - DRUGI RED (za sakrivanje) -->
+        <LinearLayout
+            android:id="@+id/powerPointsCoinsRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="2"
+            android:layout_marginBottom="24dp">
 
             <!-- Power Points -->
             <com.google.android.material.card.MaterialCardView
@@ -187,7 +285,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Experience Points -->
+            <!-- Coins -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -199,60 +297,7 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:layout_width="65dp"
-                        android:layout_height="61dp"
-                        android:layout_marginBottom="4dp"
-                        android:contentDescription="Experience Points Icon"
-                        android:src="@drawable/experience_points" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="EXPERIENCE POINTS"
-                        android:textSize="11sp"
-                        android:textColor="@color/textSecondary"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="4dp"/>
-
-                    <TextView
-                        android:id="@+id/experiencePointsTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textSize="24sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/xp"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
-
-        <!-- Coins i Badges Card -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:weightSum="2"
-            android:layout_marginBottom="24dp">
-
-            <!-- Coins -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="8dp"
-                app:cardBackgroundColor="@color/cardBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="131dp"
+                    android:layout_height="155dp"
                     android:gravity="center"
                     android:orientation="vertical"
                     android:padding="16dp">
@@ -283,50 +328,39 @@
                         android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
-            <!-- Badges -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="0dp"
+        <!-- Active Equipment Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="@color/cardBackground">
+
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="8dp"
-                app:cardBackgroundColor="@color/cardBackground">
+                android:orientation="vertical"
+                android:padding="20dp">
 
-                <LinearLayout
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Active Equipment"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/textPrimary"
+                    android:layout_marginBottom="16dp"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/active_equipment_recycler"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp"
-                    android:gravity="center">
-
-                    <ImageView
-                        android:layout_width="106dp"
-                        android:layout_height="43dp"
-                        android:layout_marginBottom="4dp"
-                        android:src="@drawable/bedge" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="BADGES"
-                        android:textSize="11sp"
-                        android:textColor="@color/textSecondary"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="4dp"/>
-
-                    <TextView
-                        android:id="@+id/badgesTextView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="0"
-                        android:textSize="24sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/chartPastelPurple"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-        </LinearLayout>
+                    android:orientation="horizontal"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- QR kod Card -->
         <com.google.android.material.card.MaterialCardView
@@ -357,7 +391,6 @@
                         android:layout_marginEnd="8dp"
                         android:src="@drawable/ic_qr"
                         app:iconTint="@null"
-
                         android:contentDescription="QR icon"/>
 
                     <TextView
@@ -392,7 +425,6 @@
             android:textColor="@color/textWhite"
             app:icon="@drawable/ic_analytics"
             app:iconTint="@null"
-
             android:layout_marginBottom="12dp"/>
 
         <com.google.android.material.button.MaterialButton
@@ -405,10 +437,8 @@
             app:cornerRadius="30dp"
             android:backgroundTint="@color/accent"
             android:textColor="@color/textWhite"
-
             android:layout_marginBottom="12dp"/>
 
-        <!-- NEW: View Tasks button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/viewTasksButton"
             android:layout_width="match_parent"
@@ -419,7 +449,6 @@
             app:cornerRadius="30dp"
             android:backgroundTint="@color/accent"
             android:textColor="@color/textWhite"
-
             android:layout_marginBottom="12dp"/>
 
         <com.google.android.material.button.MaterialButton
@@ -434,7 +463,6 @@
             android:textColor="@color/textWhite"
             app:icon="@drawable/ic_lock"
             app:iconTint="@null"
-
             android:layout_marginBottom="12dp"/>
 
         <com.google.android.material.button.MaterialButton
