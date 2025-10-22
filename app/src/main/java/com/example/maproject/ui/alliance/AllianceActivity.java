@@ -15,6 +15,7 @@ import com.example.maproject.data.AllianceRepository;
 import com.example.maproject.model.Alliance;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.example.maproject.ui.model.SpecialMissionActivity;
 
 import java.util.Map;
 
@@ -109,6 +110,17 @@ public class AllianceActivity extends AppCompatActivity {
         });
 
         chatButton.setOnClickListener(v -> openChat(alliance.getAllianceId(), alliance.getName()));
+
+        // Allow the leader to open the Special Mission screen
+        startMissionButton.setOnClickListener(v -> {
+            if (isLeader) {
+                Intent intent = new Intent(AllianceActivity.this, SpecialMissionActivity.class);
+                intent.putExtra("ALLIANCE_ID", alliance.getAllianceId());
+                startActivity(intent);
+            } else {
+                Toast.makeText(AllianceActivity.this, "Only the leader can start a mission", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void deleteAlliance(String allianceId) {

@@ -1,75 +1,166 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@drawable/gradient_background"
+    android:padding="56dp">
 
-    <Button
-        android:id="@+id/button_add_category"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Add Category" />
 
-    <!-- Inline form for adding categories (hidden by default) -->
     <LinearLayout
-        android:id="@+id/category_form"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:visibility="gone"
-        android:layout_marginTop="8dp"
-        android:padding="12dp"
-        android:background="@color/cardBackground">
+        android:orientation="vertical">
 
-        <EditText
-            android:id="@+id/input_category_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Category name" />
-
-        <EditText
-            android:id="@+id/input_category_color"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Color hex (e.g. #FF4081)"
-            android:layout_marginTop="8dp" />
-
+        <!-- Title + Add Button Row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="8dp">
+            android:gravity="center_vertical"
+            android:layout_marginBottom="20dp">
 
-            <Button
-                android:id="@+id/button_save_category"
+            <TextView
+                android:id="@+id/categories_title"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:text="Save" />
+                android:text="Categories"
+                android:textStyle="bold"
+                android:textSize="22sp"
+                android:textColor="@color/textPrimary" />
 
-            <Button
-                android:id="@+id/button_cancel_category"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:text="Cancel"
-                android:layout_marginStart="8dp" />
+            <ImageButton
+                android:id="@+id/button_add_category"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:src="@drawable/ic_add_pink"
+                app:tint="@color/accent"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="Add category"
+                android:padding="8dp" />
         </LinearLayout>
 
-    </LinearLayout>
+        <!-- Add Category Form -->
+        <LinearLayout
+            android:id="@+id/category_form"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:padding="30dp"
+            android:layout_marginBottom="24dp"
+            android:elevation="16dp"
+            android:background="@drawable/rounded_color_box"
+            >
 
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="12dp">
+            <EditText
+                android:id="@+id/input_category_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Category name"
+                android:inputType="text"
+                android:padding="10dp" />
 
+            <Button
+                android:id="@+id/input_category_color"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Pick color"
+                android:backgroundTint="@color/accent"
+                android:textColor="@android:color/white"
+                android:padding="10dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp">
+
+                <Button
+                    android:id="@+id/button_save_category"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Save"
+                    android:backgroundTint="@color/accent"
+                    android:textColor="@android:color/white" />
+
+                <Button
+                    android:id="@+id/button_cancel_category"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Cancel"
+                    android:layout_marginStart="10dp"
+                    android:backgroundTint="@color/accent"
+                    android:textColor="@android:color/white" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Category List -->
         <LinearLayout
             android:id="@+id/container_categories"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical" />
+            android:orientation="vertical">
 
-    </ScrollView>
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
+                app:cardUseCompatPadding="true"
+                app:cardElevation="6dp"
+                app:cardCornerRadius="14dp"
+                app:cardBackgroundColor="#FFFFFF">
 
-</LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="14dp"
+                    android:gravity="center_vertical">
+
+                    <View
+                        android:id="@+id/category_color_box"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginEnd="12dp"
+                        android:background="#FFB3D9" />
+
+                    <TextView
+                        android:id="@+id/text_category_name"
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:text="Example Category"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/white" />
+
+                    <ImageButton
+                        android:id="@+id/button_edit_category"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        app:tint="@color/accent"
+                        android:src="@drawable/ic_edit_pink"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Edit category"
+                        android:padding="4dp" />
+
+                    <ImageButton
+                        android:id="@+id/button_delete_category"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        app:tint="@color/accent"
+                        android:src="@drawable/ic_delete_pink"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:contentDescription="Delete category"
+                        android:padding="4dp" />
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

@@ -22,8 +22,8 @@ public class TaskService {
 
     public boolean canBeMarkedDone(Task task, long nowMillis) {
         if (task.getStatus() != Task.Status.ACTIVE) return false;
-        if (nowMillis < task.getExecutionTime()) return false;
-        return nowMillis <= task.getExecutionTime() + THREE_DAYS_MILLIS;
+        if (nowMillis < task.getStartDate()) return false;
+        return nowMillis <= task.getStartDate() + THREE_DAYS_MILLIS;
     }
 
     public boolean markDone(Task task, long nowMillis, String userId, StatisticsManagerService statsManager) {
@@ -63,7 +63,7 @@ public class TaskService {
 
     public boolean expireIfPastUpdateWindow(Task task, long nowMillis) {
         if (task.getStatus() != Task.Status.ACTIVE) return false;
-        if (nowMillis > task.getExecutionTime() + THREE_DAYS_MILLIS) {
+        if (nowMillis > task.getStartDate() + THREE_DAYS_MILLIS) {
             task.setStatus(Task.Status.NOT_DONE);
             return true;
         }
